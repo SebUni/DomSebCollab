@@ -12,6 +12,26 @@ globals
   grid-size-y              ;; Number of grids of streets in y direction
   grid-x-inc               ;; the amount of patches in between two roads in the x direction
   grid-y-inc               ;; the amount of patches in between two roads in the y direction
+
+  ;; Destination definitions
+  D_NOWHERE
+  D_HOME
+  D_WORK
+  D_ACTIVITY
+  D_CHARGER
+
+  ;; Chariging State definition
+  CS_NOT_CHARGING
+  CS_CHARGING
+
+  ;; Movement definition
+  M_HOME_WORK_ACTIVICTY_HOME
+  M_HOME_WORK_HOME
+
+  ;; Errand definition
+  E_NOT_PLANNED
+  E_TODO
+  E_COMPLETED
 ]
 
 breed [houses house]
@@ -37,7 +57,7 @@ BEVs-own
   flag
   nav
   activity-choice
-  goal
+  destination
   max-capacity
   capacity
   desired-capacity
@@ -54,7 +74,7 @@ BEVs-own
   nav-SOC
   parent
   child
-  previous_goal
+  previous_destination
   prox-charger
   closest-charger
   ;
@@ -95,6 +115,22 @@ to setup-globals
   set grid-x-inc world-width / grid-size-x
   set grid-y-inc world-height / grid-size-y
   set land 0
+
+  set D_NOWHERE 0
+  set D_HOME 1
+  set D_WORK 2
+  set D_ACTIVITY 3
+  set D_CHARGER 4
+
+  set CS_NOT_CHARGING 0
+  set CS_CHARGING 1
+
+  set M_HOME_WORK_ACTIVICTY_HOME 0
+  set M_HOME_WORK_HOME 1
+
+  set E_NOT_PLANNED 0
+  set E_TODO 1
+  set E_COMPLETED 2
 end
 
 to setup-patches
@@ -226,7 +262,7 @@ to setup-BEVs
     set my-house houses-here
     set workpatch one-of work ;Randomly allocates a workplace, persistent
     set flag 0 ;Flag used for navigation of intersections
-    set goal 0 ; goal 1 = return home | 2 = go to work | 3 = go to an activity | 4 = go to nearest charger
+    set destination D_NOWHERE
     set max-capacity 40000   ;;kWh;; *** ;24kWh (1st Gen Nissan Leaf lack the range in some fringe cases)
     set capacity (max-capacity - (random (0.2 * max-capacity))) ;;kWh;; initialised randomly between 80-100%
     set SOC (capacity / max-capacity) ;; % ;;
@@ -236,25 +272,25 @@ to setup-BEVs
     set trip 0 ;;km;;
     set max-charge-rate 6600 ;;kW;;
     set charge-rate 0 ;;BEV will take on the charge-rate of the patch its on
-    set charge-state 0 ;; charge-state 0 = not charging | charge-state 1 = charging
+    set charge-state CS_NOT_CHARGING
     set desired-capacity max-capacity ;;Desired charge is 100% by default, can be changed at a public station for calculated trip requirements
     set energy-use 0
     set activity-choice one-of activity
     ;; *** = static values
 
     ;; Setup for transitions
-    set chosen 0 ;;Defines movement: 1 = Home -> Work -> Home | 0 =  Home -> Work -> Activity -> Home
+    set chosen M_HOME_WORK_ACTIVICTY_HOME
     set leave-home (360 + random 120)
     set leave-work (960 + random 120)
     set leave-activity (1080 + random 90)
-    set errand 0
+    set errand E_NOT_PLANNED
     set counter (30 + random 60)
   ]
 
 
 
-  ;ask n-of floor((num-land * 0.9) / 2) BEVs [set chosen 1] ;;Set 50% of BEV fleet to be chosen
-  ;ask n-of (num-land * 0.9) BEVs [set chosen 1]
+  ;ask n-of floor((num-land * 0.9) / 2) BEVs [set chosen M_HOME_WORK_HOME] ;;Set 50% of BEV fleet to be chosen
+  ;ask n-of (num-land * 0.9) BEVs [set chosen M_HOME_WORK_HOME]
 end
 
 to setup-chargers
@@ -279,9 +315,9 @@ to go
     if ((ticks > leave-home) and (ticks < leave-work))
     [
       (ifelse
-      ((errand = 0) or (errand = 2))
+      ((errand = E_NOT_PLANNED) or (errand = E_COMPLETED))
         [move-to-work]
-      (errand = 1)
+      (errand = E_TODO)
         [
           move-to-activity
           if(patch-here = activity-choice)
@@ -291,20 +327,20 @@ to go
             [
               if(random 100 <= 50)
               [
-                set errand 2
+                set errand E_COMPLETED
                 set activity-choice one-of activity
               ]
             ]
           ]
         ])
 
-      if ((random 100 <= 10) and (errand < 1) and (patch-here = workpatch) and (ticks mod 3 = 0))
-      [set errand 1]
+      if ((random 100 <= 10) and (errand = E_NOT_PLANNED) and (patch-here = workpatch) and (ticks mod 3 = 0))
+      [set errand E_TODO]
     ]
 
     if ((ticks > leave-work) and (ticks < leave-activity))
     [
-      ifelse(chosen = 1)
+      ifelse(chosen = M_HOME_WORK_HOME)
       [
         if ((random 100 <= 30) and ((ticks mod 3 = 0)))
         [move-to-home]
@@ -340,17 +376,17 @@ to go
 end
 
 to move-to-home
-  if ((goal = 2) or (goal = 3)) ;Checks if previous goal was reached or if interrupted mid-journey
+  if ((destination = D_WORK) or (destination = D_ACTIVITY)) ;Checks if previous destination was reached or if interrupted mid-journey
   [set flag 0]                  ;Resets navigation flag
-  if (goal = 4)
+  if (destination = D_CHARGER)
   [move-to-charger]
-  if((patch-here != homepatch) and (goal != 4))
-  [set goal 1]
+  if((patch-here != homepatch) and (destination != D_CHARGER))
+  [set destination D_HOME]
   if (nav != 1)
   [if(not member? patch-here roads)[navigate]]
-  if (goal != 4)
+  if (destination != D_CHARGER)
   [
-  set goal 1
+  set destination D_HOME
   (ifelse (patch-here != homepatch)
   [
     face next-patch
@@ -360,21 +396,21 @@ to move-to-home
     [face homepatch move-to homepatch]
   ]
   (patch-here = homepatch)
-      [set flag 0 set goal 0 charge])
+      [set flag 0 set destination D_NOWHERE charge])
   ]
 end
 
 to move-to-work
-  if ((goal = 1) or (goal = 3))
+  if ((destination = D_HOME) or (destination = D_ACTIVITY))
   [set flag 0]
-  if (goal = 4)
+  if (destination = D_CHARGER)
   [move-to-charger]
-  set goal 2
+  set destination D_WORK
   if (nav != 1)
   [if(not member? patch-here roads)[navigate]]
-  if (goal != 4)
+  if (destination != D_CHARGER)
   [
-  set goal 2
+  set destination D_WORK
   (ifelse (patch-here != workpatch)
   [
     face next-patch
@@ -384,22 +420,22 @@ to move-to-work
     [face workpatch move-to workpatch]
   ]
   (patch-here = workpatch)
-  [set flag 0 set goal 0])
+  [set flag 0 set destination D_NOWHERE])
   ]
 end
 
 to move-to-activity
-  if ((goal = 1) or (goal = 2))
+  if ((destination = D_HOME) or (destination = D_WORK))
   [set flag 0]
-  if (goal = 4)
+  if (destination = D_CHARGER)
   [move-to-charger]
-  set goal 3
+  set destination D_ACTIVITY
   if (nav != 1)
   [if(not member? patch-here roads)[navigate]]
-  if (goal != 4)
+  if (destination != D_CHARGER)
   [
-;  if (goal != 3)
-;  [set activity-choice one-of activity set goal 3]
+;  if (destination != D_ACTIVITY)
+;  [set activity-choice one-of activity set destination D_ACTIVITY]
   (ifelse (patch-here != activity-choice)
   [
     face next-patch
@@ -409,15 +445,15 @@ to move-to-activity
     [face activity-choice move-to activity-choice]
   ]
   (patch-here = activity-choice)
-  [set flag 0 set goal 0])
+  [set flag 0 set destination D_NOWHERE])
   ;[set flag 0])
   ]
 end
 
 to move-to-charger
-;  if ((previous_goal = 1) or (previous_goal = 2) or (previous_goal = 3))
+;  if ((previous_destination = D_HOME) or (previous_destination = D_WORK) or (previous_destination = D_ACTIVITY))
 ;  [set flag 0]
-  set goal 4
+  set destination D_CHARGER
 
   if (prox-charger != 1)
   [
@@ -441,9 +477,9 @@ to move-to-charger
       if (charge-state = 0)
       [
         set prox-charger 0
-        ifelse(previous_goal != 4)
-        [set goal previous_goal]
-        [set goal 0]
+        ifelse(previous_destination != D_CHARGER)
+        [set destination previous_destination]
+        [set destination D_NOWHERE]
         enter-road
       ]
     ]
@@ -461,7 +497,7 @@ to-report next-patch
   let choices neighbors4 with [pcolor = white]
   let choice min-one-of choices [distance [workpatch] of myself]
 
-  (ifelse (goal = 1)
+  (ifelse (destination = D_HOME)
     [
       let choices-inter1 intersections in-radius (grid-size-x + 2)
       let closest-inter-home min-one-of choices-inter1 [distance [homepatch] of myself]
@@ -472,7 +508,7 @@ to-report next-patch
       [report choice1])
     ]
 
-  (goal = 2)
+  (destination = D_WORK)
     [
       let choices-inter2 intersections in-radius (grid-size-x + 2)
       let closest-inter-work min-one-of choices-inter2 [distance [workpatch] of myself]
@@ -483,7 +519,7 @@ to-report next-patch
       [report choice2])
     ]
 
-  (goal = 3)
+  (destination = D_ACTIVITY)
     [
       let choices-inter3 intersections in-radius (grid-size-x + 2)
       let closest-inter-activity min-one-of choices-inter3 [distance [activity-choice] of myself]
@@ -494,7 +530,7 @@ to-report next-patch
       [report choice3])
     ]
 
-    (goal = 4)
+    (destination = D_CHARGER)
     [
       let choices-inter4 intersections in-radius (grid-size-x + 2)
       let closest-inter-charger min-one-of choices-inter4 [distance [closest-charger] of myself]
@@ -563,8 +599,8 @@ to-report charger-here?
 end
 
 to navigate
-  if (((goal = 1) and (patch-here != homepatch)) or ((goal = 2) and (patch-here != workpatch)) or ((goal = 3) and (patch-here != activity-choice)) or
-    ((goal = 4) and ((patch-here != homepatch) or (patch-here != workpatch) or (patch-here != activity-choice))))
+  if (((destination = D_HOME) and (patch-here != homepatch)) or ((destination = D_WORK) and (patch-here != workpatch)) or ((destination = D_ACTIVITY) and (patch-here != activity-choice)) or
+    ((destination = D_CHARGER) and ((patch-here != homepatch) or (patch-here != workpatch) or (patch-here != activity-choice))))
   [
   hatch 1
   [
@@ -573,15 +609,15 @@ to navigate
     set nav 1
     set trip 0
     (ifelse  ;;Repeat action no. of times which scales with the world/distance
-    (goal = 1)
+    (destination = D_HOME)
       [
         repeat (2 * (max-pxcor + max-pycor)) [move-to-home]
       ]
-    (goal = 2)
+    (destination = D_WORK)
       [
         repeat (2 * (max-pxcor + max-pycor)) [move-to-work]
       ]
-    (goal = 3)
+    (destination = D_ACTIVITY)
       [
         repeat (2 * (max-pxcor + max-pycor)) [move-to-activity]
       ])
@@ -594,8 +630,8 @@ to navigate
   ask child [die]
   if((required-range * 1.5) > current-range) ;;built in 50% threshold
     [
-      set previous_goal goal
-      set goal 4
+      set previous_destination destination
+      set destination D_CHARGER
       set desired-capacity ((required-range * 1.6) * efficiency) ;;extra 10% to account for any pathfinding mishaps
       ;set desired-capacity max-capacity
     ]
@@ -619,7 +655,7 @@ end
 ;      [report choice]
 ;end
 ;; show [who] of BEVs with [SOC < 0]
-;; show count BEVs with [patch-here = homepatch and goal = 0]
+;; show count BEVs with [patch-here = homepatch and destination = D_NOWHERE]
 
 ;;Temporal Dimension
 ;; If 1 tick = 1 minute, travelling 1 patch and incrementing at a tick rate of 1 equates to roughly 60km/h
@@ -703,7 +739,7 @@ BUTTON
 76
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
