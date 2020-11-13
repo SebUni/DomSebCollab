@@ -11,7 +11,6 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 
 import networkx as nx
-import numpy as np
 
 from locationManagerPkg import LocationManager
 

@@ -66,7 +66,6 @@ class LocationManager():
         """
         Reads information on suburb connection from connections.csv.
         """
-        self.loa
         self.connections = {}
         with open('connections.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -135,10 +134,10 @@ class LocationManager():
         """
         rnd = random.randint(0, self.total_population - 1)
         last_pop_step = 0
-        for uniqueId in self.acc_poplation.keys:
-            if last_pop_step <= rnd and rnd < self.acc_poplation[uniqueId]:
+        for uniqueId in self.acc_population.keys():
+            if last_pop_step <= rnd and rnd < self.acc_population[uniqueId]:
                 return uniqueId
-            last_pop_step = self.acc_poplation[uniqueId]
+            last_pop_step = self.acc_population[uniqueId]
     
     def draw_location_of_employment(self, loc_of_residency_id):
         """
