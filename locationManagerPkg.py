@@ -44,8 +44,6 @@ class LocationManager():
         self.locations = {}
         self.connections = {}
         
-        self.load_locations()
-        
     def load_locations(self):
         """
         Reads information on individual suburbs from locations.csv.
@@ -63,7 +61,7 @@ class LocationManager():
                 self.locations[loc.uniqueId] = loc
         
     def load_connections(self):
-        """
+        """l_m.
         Reads information on suburb connection from connections.csv.
         """
         self.connections = {}
