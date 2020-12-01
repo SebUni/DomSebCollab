@@ -52,13 +52,13 @@ class LocationManager():
         with open('locations.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                uniqueId, name, population = row[0], row[1], row[2]
+                unique_id, name, population = row[0], row[1], row[2]
                 latitude, longitude = row[3], row[4]
                 commute_mean, commute_std_dev = row[5], row[6]
                 # data validity is checked in Location-constructor 
-                loc = Location(uniqueId, name, population, latitude,
+                loc = Location(unique_id, name, population, latitude,
                                longitude, commute_mean, commute_std_dev)
-                self.locations[loc.uniqueId] = loc
+                self.locations[loc.unique_id] = loc
         
     def load_connections(self):
         """l_m.
@@ -101,7 +101,7 @@ class LocationManager():
                 self.max_lon = loc.longitude
             
             self.total_population += loc.population
-            self.acc_population[loc.uniqueId] = self.total_population
+            self.acc_population[loc.unique_id] = self.total_population
         
         self.north_south_spread = self.max_lat - self.min_lat
         self.east_west_spread = self.max_lon - self.min_lon
@@ -114,28 +114,28 @@ class LocationManager():
         self.load_connections()
         self.process_location_data()
         
-    def calc_distance_from_suburbs(self, uniqueId_loc_1, uniqueId_loc_2):
+    def calc_distance_from_suburbs(self, unique_id_loc_1, unique_id_loc_2):
         """
         Returns the distance between two locations in kilometers.
         """
-        lat_1 = self.locations[uniqueId_loc_1].latitude
-        lon_1 = self.locations[uniqueId_loc_1].longitude
-        lat_2 = self.locations[uniqueId_loc_2].latitude
-        lon_2 = self.locations[uniqueId_loc_2].longitude
+        lat_1 = self.locations[unique_id_loc_1].latitude
+        lon_1 = self.locations[unique_id_loc_1].longitude
+        lat_2 = self.locations[unique_id_loc_2].latitude
+        lon_2 = self.locations[unique_id_loc_2].longitude
         return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
         
     def draw_location_of_residency(self):
         """
-        Returns the uniqueId of a location which was drawn at random with
+        Returns the unique_id of a location which was drawn at random with
         suburbs exhibiting a higher population having higher chances to be
         drawn.
         """
         rnd = random.randint(0, self.total_population - 1)
         last_pop_step = 0
-        for uniqueId in self.acc_population.keys():
-            if last_pop_step <= rnd and rnd < self.acc_population[uniqueId]:
-                return uniqueId
-            last_pop_step = self.acc_population[uniqueId]
+        for unique_id in self.acc_population.keys():
+            if last_pop_step <= rnd and rnd < self.acc_population[unique_id]:
+                return unique_id
+            last_pop_step = self.acc_population[unique_id]
     
     def draw_location_of_employment(self, loc_of_residency_id):
         """
@@ -158,55 +158,57 @@ class LocationManager():
                 min_diff_id = unique_id
         return min_diff_id
     
-    def relative_position(self, uniqueId):
+    def relative_position(self, unique_id):
         """
         Returns the locations position relative to the minimum latitude and
         longitude between all loaded location.
         """
-        x = self.locations[uniqueId].longitude - self.min_lon
-        y = self.locations[uniqueId].latitude - self.min_lat
+        x = self.locations[unique_id].longitude - self.min_lon
+        y = self.locations[unique_id].latitude - self.min_lat
         return np.array((x, y))
         
     def print_locations(self):
         """
         Prints all loaded locations in a readable format.
         """
-        strUniqueId, strName, strPopulation, strLatitude, strLongitude = \
+        str_unique_id, str_name, str_population, str_latitude, str_longitude =\
             "Id", "Name", "Population", "Latitude", "Longitude"
-        strCommuteMean, strCommuteStdDev = "Commute mean", "Commute std dev"
-        lenUniqueId, lenName, lenPopulation, lenLatitude, lenLongitude = \
-            len(strUniqueId), len(strName), len(strPopulation), \
-                len(strLatitude), len(strLongitude)
-        lenCommuteMean, lenCommuteStdDev = len(strCommuteMean), \
-            len(strCommuteStdDev)
+        str_commute_mean, str_commute_std_dev = \
+            "Commute mean", "Commute std dev"
+        len_unique_id, len_name, len_population, len_latitude, len_longitude =\
+            len(str_unique_id), len(str_name), len(str_population), \
+                len(str_latitude), len(str_longitude)
+        len_commute_mean, len_commute_std_dev = len(str_commute_mean), \
+            len(str_commute_std_dev)
         for loc in self.locations.values():
-            lenUniqueId = max(lenUniqueId, len(str(loc.uniqueId)))
-            lenName = max(lenName, len(loc.name))
-            lenPopulation = max(lenPopulation, len(str(loc.population)))
-            lenLatitude = max(lenLatitude, len(str(loc.latitude)))
-            lenLongitude = max(lenLongitude, len(str(loc.longitude)))
-            lenCommuteMean = max(lenCommuteMean, len(str(loc.commute_mean)))
-            lenCommuteStdDev = max(lenCommuteStdDev,
+            len_unique_id = max(len_unique_id, len(str(loc.unique_id)))
+            len_name = max(len_name, len(loc.name))
+            len_population = max(len_population, len(str(loc.population)))
+            len_latitude = max(len_latitude, len(str(loc.latitude)))
+            len_longitude = max(len_longitude, len(str(loc.longitude)))
+            len_commute_mean = max(len_commute_mean,
+                                   len(str(loc.commute_mean)))
+            len_commute_std_dev = max(len_commute_std_dev,
                                    len(str(loc.commute_std_dev)))
         
         separator = " | "
         
-        print(strUniqueId.rjust(lenUniqueId), end=separator)
-        print(strName.rjust(lenName), end=separator)
-        print(strPopulation.rjust(lenPopulation), end=separator)
-        print(strLatitude.rjust(lenLatitude), end=separator)
-        print(strLongitude.rjust(lenLongitude), end=separator)
-        print(strCommuteMean.rjust(lenCommuteMean), end=separator)
-        print(strCommuteStdDev.rjust(lenCommuteStdDev))
+        print(str_unique_id.rjust(len_unique_id), end=separator)
+        print(str_name.rjust(len_name), end=separator)
+        print(str_population.rjust(len_population), end=separator)
+        print(str_latitude.rjust(len_latitude), end=separator)
+        print(str_longitude.rjust(len_longitude), end=separator)
+        print(str_commute_mean.rjust(len_commute_mean), end=separator)
+        print(str_commute_std_dev.rjust(len_commute_std_dev))
         
         for loc in self.locations.values():
-            print(str(loc.uniqueId).rjust(lenUniqueId), end=separator)
-            print(loc.name.rjust(lenName), end=separator)
-            print(str(loc.population).rjust(lenPopulation), end=separator)
-            print(str(loc.latitude).rjust(lenLatitude), end=separator)
-            print(str(loc.longitude).rjust(lenLongitude), end=separator)
-            print(str(loc.commute_mean).rjust(lenCommuteMean), end=separator)
-            print(str(loc.commute_std_dev).rjust(lenCommuteStdDev))
+            print(str(loc.unique_id).rjust(len_unique_id), end=separator)
+            print(loc.name.rjust(len_name), end=separator)
+            print(str(loc.population).rjust(len_population), end=separator)
+            print(str(loc.latitude).rjust(len_latitude), end=separator)
+            print(str(loc.longitude).rjust(len_longitude), end=separator)
+            print(str(loc.commute_mean).rjust(len_commute_mean), end=separator)
+            print(str(loc.commute_std_dev).rjust(len_commute_std_dev))
             
     def __repr__(self):
         msg = ""

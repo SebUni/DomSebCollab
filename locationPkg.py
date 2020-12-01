@@ -9,9 +9,9 @@ import sys
 
 class Location():
     """Object storing information on individual regions or suburbs."""
-    def __init__(self, uniqueId, loc_name, population, latitude, longitude,
+    def __init__(self, unique_id, loc_name, population, latitude, longitude,
                  commute_mean, commute_std_dev):
-        self.uniqueId = -1
+        self.unique_id = -1
         self.name = str(loc_name).strip(" ").strip('"')
         self.population = 0
         self.latitude = 0.0   # north-south-coordinate
@@ -20,10 +20,10 @@ class Location():
         self.commute_std_dev = 0.0
         
         try:
-            self.uniqueId = int(uniqueId)
+            self.unique_id = int(unique_id)
         except ValueError:
             sys.exit("ID of " + self.name + " is ill defined!")
-        if self.uniqueId < 0:
+        if self.unique_id < 0:
             sys.exit("ID of " + self.name + " is ill defined!")
             
         try:
@@ -63,7 +63,7 @@ class Location():
                      " is ill defined!")
         
     def __repr__(self):
-        msg = "Id: " + str(self.uniqueId) + ", "
+        msg = "Id: " + str(self.unique_id) + ", "
         msg += "Name: " + str(self.name) + ", "
         msg += "Pop: " + str(self.population) + ", "
         msg += "Coord: " + str(self.latitude) + " " + str(self.longitude) +", "
