@@ -15,8 +15,8 @@ import networkx as nx
 from locationManagerPkg import LocationManager
 
 def load_traffic_network(location_manager):
-    tn = nx.Graph
-    for location in location_manager.locations:
+    tn = nx.Graph()
+    for location in location_manager.locations.values():
         tn.add_node(location.unique_id)
     for start_node in location_manager.connections.keys():
         for end_node in location_manager.connections[start_node]:
