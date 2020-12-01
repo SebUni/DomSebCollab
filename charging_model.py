@@ -14,9 +14,14 @@ import networkx as nx
 
 from locationManagerPkg import LocationManager
 
-def load_traffic_network(locations):
+def load_traffic_network(location_manager):
     tn = nx.Graph
-    pass
+    for location in location_manager.locations:
+        tn.add_node(location.unique_id)
+    for start_node in location_manager.connections.keys():
+        for end_node in location_manager.connections[start_node]:
+            if start_node < end_node:
+                tn.add_edge(start_node, end_node)
     return tn
 
 class CarAgent(Agent):
@@ -28,6 +33,7 @@ class ChargingModel(Model):
         self.num_agents = N
         self.lm = LocationManager()
         self.lm.load_all()
+        self.tn = load_traffic_network(self.lm);
         self.schedule = RandomActivation(self)
         self.space = ContinuousSpace(self.lm.east_west_spread,
                                      self.lm.north_south_spread,
