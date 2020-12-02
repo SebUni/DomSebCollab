@@ -12,7 +12,7 @@ from mesa.datacollection import DataCollector
 
 import networkx as nx
 
-from locationManagerPkg import LocationManager
+from location_manager import LocationManager
 
 def load_traffic_network(location_manager):
     tn = nx.Graph()
