@@ -17,7 +17,7 @@ from location_manager import LocationManager
 def load_traffic_network(location_manager):
     tn = nx.Graph()
     for location in location_manager.locations.values():
-        tn.add_node(location.unique_id)
+        tn.add_node(location.uid)
     for start_node in location_manager.connections.keys():
         for end_node in location_manager.connections[start_node]:
             if start_node < end_node:
