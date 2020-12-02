@@ -40,12 +40,12 @@ class ChargingModel(Model):
                                      False, grid_width=10, grid_height=10)
         # create agents
         for i in range (self.num_agents):
-            residency_location_id = self.lm.draw_location_of_residency()
-            employment_location_id = \
-                self.lm.draw_location_of_employment(residency_location_id)
-            pos = self.lm.relative_position(residency_location_id)
-            a = CarAgent(i, self, pos, residency_location_id,
-                         employment_location_id)
+            residency_location_uid = self.lm.draw_location_of_residency()
+            employment_location_uid = \
+                self.lm.draw_location_of_employment(residency_location_uid)
+            pos = self.lm.relative_position(residency_location_uid)
+            a = CarAgent(i, self, pos, residency_location_uid,
+                         employment_location_uid)
             self.space.place_agent(a, pos)
             self.schedule.add(a)
             

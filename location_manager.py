@@ -137,26 +137,26 @@ class LocationManager():
                 return uid
             last_pop_step = self.acc_population[uid]
     
-    def draw_location_of_employment(self, loc_of_residency_id):
+    def draw_location_of_employment(self, loc_of_residency_uid):
         """
         Returns the unique Id of a location which was drawn at random based on
         the location of residency and the average commute from this suburb.
         """
-        mean = self.locations[loc_of_residency_id].commute_mean
-        std_dev = self.locations[loc_of_residency_id].commute_std_dev
+        mean = self.locations[loc_of_residency_uid].commute_mean
+        std_dev = self.locations[loc_of_residency_uid].commute_std_dev
         distance_work_residency = -1
         while distance_work_residency < 0: 
             distance_work_residency = np.random.normal(mean, std_dev)
         
-        min_diff, min_diff_id = -1, -1
+        min_diff, min_diff_uid = -1, -1
         for uid in self.locations.keys():
             diff = abs(distance_work_residency - \
-                       self.calc_distance_from_suburbs(loc_of_residency_id,
+                       self.calc_distance_from_suburbs(loc_of_residency_uid,
                                                        uid))
-            if min_diff_id == -1 or min_diff > diff:
+            if min_diff_uid == -1 or min_diff > diff:
                 min_diff = diff
-                min_diff_id = uid
-        return min_diff_id
+                min_diff_uid = uid
+        return min_diff_uid
     
     def relative_position(self, uid):
         """
