@@ -14,7 +14,6 @@ from location_manager import LocationManager
 
 import networkx as nx
 
-
 class CarAgent(Agent):
     pass
 
@@ -22,9 +21,9 @@ class ChargingModel(Model):
     """The charging model with N agents."""
     def __init__(self, N):
         self.num_agents = N
+        self.tick_duration = 1/60 # reciprical of ticks-per-hour
         self.lm = LocationManager()
         self.lm.load_all()
-        self.tn = self.lm.traffic_network;
         self.schedule = RandomActivation(self)
         self.space = ContinuousSpace(self.lm.east_west_spread,
                                      self.lm.north_south_spread,

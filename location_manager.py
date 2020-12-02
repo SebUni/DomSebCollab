@@ -84,6 +84,9 @@ class LocationManager():
                 self.traffic_network.add_edge(start_location_uid,
                                               end_location_uid,
                                               distance=flt_distance)
+                self.traffic_network.add_edge(end_location_uid,
+                                              start_location_uid,
+                                              distance=flt_distance)
     
     def process_location_data(self):
         """
