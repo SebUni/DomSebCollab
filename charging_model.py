@@ -10,19 +10,10 @@ from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 
-import networkx as nx
-
 from location_manager import LocationManager
 
-def load_traffic_network(location_manager):
-    tn = nx.Graph()
-    for location in location_manager.locations.values():
-        tn.add_node(location.uid)
-    for start_node in location_manager.connections.keys():
-        for end_node in location_manager.connections[start_node]:
-            if start_node < end_node:
-                tn.add_edge(start_node, end_node)
-    return tn
+import networkx as nx
+
 
 class CarAgent(Agent):
     pass
@@ -33,7 +24,7 @@ class ChargingModel(Model):
         self.num_agents = N
         self.lm = LocationManager()
         self.lm.load_all()
-        self.tn = load_traffic_network(self.lm);
+        self.tn = self.lm.traffic_network;
         self.schedule = RandomActivation(self)
         self.space = ContinuousSpace(self.lm.east_west_spread,
                                      self.lm.north_south_spread,

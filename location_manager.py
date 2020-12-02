@@ -10,6 +10,7 @@ import random
 import sys
 import numpy as np
 import math
+import networkx as nx
 
 from location import Location
 
@@ -42,7 +43,7 @@ class LocationManager():
         self.total_population = 0
         self.acc_population = {}
         self.locations = {}
-        self.connections = {}
+        self.traffic_network = nx.Graph()
         
     def load_locations(self):
         """
@@ -61,29 +62,28 @@ class LocationManager():
                 self.locations[loc.uid] = loc
         
     def load_connections(self):
-        """l_m.
+        """
         Reads information on suburb connection from connections.csv.
         """
-        self.connections = {}
+        self.traffic_network = nx.Graph()
+        # add locations
+        for location in self.locations.values():
+            self.traffic_network.add_node(location.uid)
+        # add edges
         with open('connections.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
                 try:
-                    startId = int(row[0])
-                    endId = int(row[1])
+                    start_location_uid = int(row[0])
+                    end_location_uid = int(row[1])
+                    distance = float(row[2])
                 except ValueError:
                     sys.exit("Connection not well defined for " + row[0] + \
                              " - " + row[1] + ".")
-                if startId in self.connections.keys():
-                    self.connections[startId] = self.connections[startId] | \
-                        {endId}
-                else:
-                    self.connections[startId] = {endId}
-                if endId in self.connections.keys():
-                    self.connections[endId] = self.connections[endId] | \
-                        {startId}
-                else:
-                    self.connections[endId] = {startId}
+                
+                self.traffic_network.add_edge(start_location_uid,
+                                              end_location_uid,
+                                              weight=distance)
     
     def process_location_data(self):
         """
