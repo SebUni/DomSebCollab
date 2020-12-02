@@ -44,7 +44,14 @@ class LocationManager():
         self.acc_population = {}
         self.locations = {}
         self.traffic_network = nx.Graph()
-        
+    
+    def distance_between_locations(self, location_1, location_2):
+        lat_1 = self.locations[location_1].latitude
+        lon_1 = self.locations[location_1].longitude
+        lat_2 = self.locations[location_2].latitude
+        lon_2 = self.locations[location_2].longitude
+        return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
+    
     def load_locations(self):
         """
         Reads information on individual suburbs from locations.csv.
@@ -76,17 +83,18 @@ class LocationManager():
                 try:
                     start_location_uid = int(row[0])
                     end_location_uid = int(row[1])
-                    flt_distance = float(row[2])
                 except ValueError:
                     sys.exit("Connection not well defined for " + row[0] + \
                              " - " + row[1] + ".")
+                flt_dist = self.distance_between_locations(start_location_uid,
+                                                           end_location_uid)
                 
                 self.traffic_network.add_edge(start_location_uid,
                                               end_location_uid,
-                                              distance=flt_distance)
+                                              distance=flt_dist)
                 self.traffic_network.add_edge(end_location_uid,
                                               start_location_uid,
-                                              distance=flt_distance)
+                                              distance=flt_dist)
     
     def process_location_data(self):
         """
