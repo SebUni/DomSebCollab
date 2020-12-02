@@ -76,14 +76,14 @@ class LocationManager():
                 try:
                     start_location_uid = int(row[0])
                     end_location_uid = int(row[1])
-                    distance = float(row[2])
+                    flt_distance = float(row[2])
                 except ValueError:
                     sys.exit("Connection not well defined for " + row[0] + \
                              " - " + row[1] + ".")
                 
                 self.traffic_network.add_edge(start_location_uid,
                                               end_location_uid,
-                                              weight=distance)
+                                              distance=flt_distance)
     
     def process_location_data(self):
         """
