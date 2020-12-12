@@ -23,7 +23,7 @@ class ChargerManager():
     
     def load_charger_models(self):
         """
-        Reads information on individual suburbs from locations.csv.
+        Reads information on individual charger models from charger_models.csv.
         """
         self.charger_models = dict()
         with open('charger_models.csv', newline='') as csvfile:
