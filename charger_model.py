@@ -19,7 +19,7 @@ class ChargerModel():
         uid : int
             Unique Id of the charger model.
         classification : string
-            Can either be "res"isdential, "com"mercial or "pub"lic.
+            Can either be "res"isdential or "com"mercial.
         power : int
             Charging power of the charger in Watt.
 
@@ -32,7 +32,7 @@ class ChargerModel():
             self.uid = int(uid)
         except ValueError:
             sys.exit("Uid of charger model is ill defined!")
-        if not str(classification) in ["res", "com", "pub"]:
+        if not str(classification) in ["res", "com"]:
             msg = "Error creating charger model: '" + str(classification)
             msg += "' is not a valid charger model"
             sys.exit(msg)
