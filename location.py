@@ -80,4 +80,4 @@ class Location():
         -------
         (float, float).
         """
-        return (self.longitude, self.latitude)
+        return [self.longitude, self.latitude]

@@ -68,6 +68,7 @@ class CompanyManager():
                               self.charger_manager, charger_cost_per_kWh,
                               charger_model, employees_per_charger)
             self.companies.append(company)
+            location.companies[company.uid] = company
         else:
             company = random.choice(self.companies)
             

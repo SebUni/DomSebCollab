@@ -14,35 +14,32 @@ class Whereabouts():
     This class calculates the progress of travels and feeds information on the
     geographic whereabouts of the agent to the charging model.
     """
-    def __init__(self, start_location_uid, location_manager, tick_duration):
-        self.cur_location_uid = start_location_uid
-        self.cur_edge = (start_location_uid, start_location_uid)
-        self.tick_duration = tick_duration
-        self.lm = location_manager
-        self.tn = self.lm.traffic_network
-        self.cur_location_coordinates \
-            = self.coordinates_from_location_uid(self.cur_location_uid)
+    def __init__(self, agent_uid, start_location, location_road_manager,
+                 time_step):
+        
+        self.agent_uid
+        self.lrm = location_road_manager
+        self.time_step = time_step
+        self.cur_location = start_location
+        self.cur_edge = (start_location.uid, start_location.uid)
+        self.cur_location_coordinates = self.cur_location.coordinates()
         self.is_travelling = False
         self.distance_travelled = 0
         self.route = []
         
-    def coordinates_from_location_uid(self, location_uid):
-        x = self.lm.locations[location_uid].longitude
-        y = self.lm.locations[location_uid].latitude
-        return [x,y]
-        
-    def set_destination(self, destination_location_uid):
+    def set_destination(self, destination_location):
         """
         Sets a new destination and calculates route to get there.
         """
-        self.route = nx.shortest_path(self.tn, self.cur_location_uid,
-                                      destination_location_uid, 'distance')
+        self.route = nx.shortest_path(self.lrm.traffic_network,
+                                      self.cur_location.uid,
+                                      destination_location.uid, 'distance')
         self.is_travelling = True
     
-    def elapse_one_time_step(self, velocity):
+    def elapse_one_tick(self, velocity):
         if self.is_travelling == True:
             # adapt travel parameter
-            self.distance_travelled += velocity * self.tick_duration
+            self.distance_travelled += velocity * self.time_step / 60
             # determine current road
             sum_dist_to_prev_node = 0.0
             sum_dist_to_cur_node = 0.0
@@ -51,7 +48,8 @@ class Whereabouts():
             for cn in self.route:
                 cur_node = cn
                 if cur_node == prev_node: continue
-                sum_dist_to_cur_node += self.tn[prev_node][cur_node]['distance']
+                sum_dist_to_cur_node \
+                    += self.lrm.traffic_network[prev_node][cur_node]['distance']
                 if sum_dist_to_cur_node > self.distance_travelled:
                     break
                 prev_node = cur_node;
@@ -62,13 +60,12 @@ class Whereabouts():
                 self.route = []            # agent arrived at its destionation
                 self.distance_travelled = 0
                 self.is_travelling = False
-                self.cur_location_uid = cur_node
-                self.cur_location_coordinates \
-                    = self.coordinates_from_location_uid(cur_node)
+                self.cur_location = self.lrm.locations[cur_node]
+                self.cur_location_coordinates = self.cur_location.coordinates()
             else:
-                self.cur_location_uid = prev_node
-                coord_prev_node = self.coordinates_from_location_uid(prev_node)
-                coord_cur_node = self.coordinates_from_location_uid(cur_node)
+                self.cur_location = self.lrm.locations[prev_node]
+                coord_prev_node = self.lrm.locations[prev_node].cooridnates()
+                coord_cur_node = self.lrm.locations[cur_node].cooridnates()
                 dist_trvld_on_cur_edge \
                     = self.distance_travelled - sum_dist_to_prev_node
                 ratio_trvld_on_cur_edge = dist_trvld_on_cur_edge \
@@ -82,7 +79,7 @@ class Whereabouts():
     def __repr__(self):
         msg = "Current location Uid: " + str(self.cur_location_uid) + "\n"
         msg += "Current edge: " + str(self.cur_edge) + "\n"
-        msg += "Tick duration: " + str(self.tick_duration) + "\n"
+        msg += "Time step duration: " + str(self.time_step_duration) + "\n"
         msg += "Current coordinates: "
         msg += str(self.cur_location_coordinates[0]) + " "
         msg += str(self.cur_location_coordinates[1]) + "\n"
