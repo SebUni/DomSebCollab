@@ -11,7 +11,7 @@ class ElectricityPlan():
     """
     Container for data of an individual electricity plan.
     """
-    def __init__(self, uid, is_commerical_plan, base, tariff, time_step):
+    def __init__(self, uid, is_commercial_plan, base, tariff, time_step):
         """
         Parameters
         ----------
@@ -34,12 +34,13 @@ class ElectricityPlan():
 
         """
         self.uid = uid
-        self.is_commerical_plan = bool(is_commerical_plan)
+        self.is_commercial_plan = bool(is_commercial_plan)
         try:
             self.base = base
         except ValueError:
             sys.exit("Base of electricity plan " + str(uid) \
                      + " is ill-defined!")
+        self.tariff = dict()
         # check that time_step is adequatly chosen
         if (24*60) % time_step != 0:
             sys.exit("time_step is not adequatly chosen!")
@@ -86,3 +87,10 @@ class ElectricityPlan():
         float.
         """
         return self.tariff[time_of_use]*used_kWh
+    
+    def __repr__(self):
+        msg = "Uid: " + str(self.uid) + "; "
+        msg += "Is commerical plan: " + str(self.is_commercial_plan) + "; "
+        msg += "Base fee: " + str(self.base)
+        
+        return msg

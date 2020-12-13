@@ -49,7 +49,7 @@ class ElectricityPlanManager():
         with open('electricity_plans.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                uid_str, is_commercial_plan, base = row[0], row[1], row[2]
+                uid_str, classification, base = row[0], row[1], row[2]
                 tariff_str = row[3]
                 # here only uid is checked for key of dict
                 # data validity of rest is checked in ChargerModel-constructor
@@ -57,9 +57,14 @@ class ElectricityPlanManager():
                     uid = int(uid_str)
                 except ValueError:
                     sys.exit("Uid of charger model is ill defined!")
-                # 
+                if not classification in ["res","com"]:
+                    sys.exit("Classification of electricity plan " + str(uid) \
+                             + " is ill-defined!")
+                is_commercial_plan = classification == "com"
+                # create tariff structure
                 tariff = self.extract_tariffs_from_string(tariff_str)
-                ep = ElectricityPlan(uid, is_commercial_plan, base, tariff)
+                ep = ElectricityPlan(uid, is_commercial_plan, base, tariff,
+                                     time_step)
                 self.electricity_plans[uid] = ep
                 if ep.is_commercial_plan:
                     self.commercial_plan_uids.append(ep.uid)
@@ -91,13 +96,13 @@ class ElectricityPlanManager():
         err_msg = "tariff_string '" + input_str + "' is ill-defined. \n\n"
         err_msg += "Use syntax 'start_time1:price1;...;start_timeN:priceN'!"
         for tariff_str in tariffs_str:
-            tariff_str.split(':')
+            tariff_str_split = tariff_str.split(':')
             try:
-                tariff_start_time = int(tariff_str[0])
+                tariff_start_time = int(tariff_str_split[0])
             except ValueError:
                 sys.exit(err_msg)
             try:
-                tariff_price = float(tariff_str[1])
+                tariff_price = float(tariff_str_split[1])
             except:
                 sys.exit(err_msg)
             tariffs[tariff_start_time] = tariff_price
@@ -125,3 +130,12 @@ class ElectricityPlanManager():
         else:
             uid = random.choice(self.residential_plans_uids)
         return self.electricity_plans[uid]
+    
+    def __repr__(self):
+        msg = "Currently the following electricity plans are stored:"
+        if len(self.electricity_plans) == 0:
+            msg += "\n   No electricity plans stored!"
+        for electricity_plan in self.electricity_plans.values():
+            msg += "\n" + str(electricity_plan)
+            
+        return msg
