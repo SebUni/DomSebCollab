@@ -9,15 +9,16 @@ import sys
 
 class Location():
     """Object storing information on individual regions or suburbs."""
-    def __init__(self, uid, loc_name, population, latitude, longitude,
+    def __init__(self, uid, name, population, latitude, longitude,
                  commute_mean, commute_std_dev):
         self.uid = -1
-        self.name = str(loc_name).strip(" ").strip('"')
+        self.name = str(name).strip(" ").strip('"')
         self.population = 0
         self.latitude = 0.0   # north-south-coordinate
         self.longitude = 0.0  # east-west-coordinate
         self.commute_mean = 0.0
         self.commute_std_dev = 0.0
+        self.companies = dict()
         
         try:
             self.uid = int(uid)
@@ -70,3 +71,13 @@ class Location():
         msg += "Commute: " + str(self.commute_mean) + " +/- " + \
                str(self.commute_std_dev)
         return msg
+    
+    def coordinates(self):
+        """
+        Returns the coordinates of the location.
+
+        Returns
+        -------
+        (float, float).
+        """
+        return (self.longitude, self.latitude)
