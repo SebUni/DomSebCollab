@@ -28,7 +28,7 @@ def calc_distance_from_coordinates(lat_1_deg, lon_1_deg, lat_2_deg, lon_2_deg):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a)); 
     return earth_radius * c
 
-class LocationManager():
+class LocationRoadManager():
     """
     Holds information on locations and how they interact.
     """

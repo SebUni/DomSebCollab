@@ -18,8 +18,10 @@ class ChargerManager():
     """
     def __init__(self):
         self.charger_models = dict()
-        self.load_charger_models()
         self.chargers = []
+        self.commercial_model_uids = []
+        self.residential_model_uids = []
+        self.load_charger_models()
     
     def load_charger_models(self):
         """
@@ -38,13 +40,14 @@ class ChargerManager():
                     sys.exit("Uid of charger model is ill defined!")
                 cm = ChargerModel(uid, classification, power)
                 self.charger_models[uid] = cm
+                if cm.classification == "com":
+                    self.commercial_model_uids.append(cm.uid)
+                else:
+                    self.residential_model_uids.append(cm.uid)
     
-    def add_charger(self, charger_model_uid):
-        newUid = len(self.chargers)
-        if not charger_model_uid in list(self.charger_models.keys()):
-            sys.exit("No charger model with uid = " + str(charger_model_uid) \
-                     + " exists!")
-        charger = Charger(newUid, self.charger_models[charger_model_uid])
+    def add_charger(self, charger_model):
+        new_charger_uid = len(self.chargers)
+        charger = Charger(new_charger_uid, charger_model)
         self.chargers.append(charger)
         
         return charger
