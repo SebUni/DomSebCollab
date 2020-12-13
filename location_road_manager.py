@@ -33,7 +33,6 @@ class LocationRoadManager():
     Holds information on locations and how they interact.
     """
     def __init__(self):
-        self.is_defined = False
         self.min_lat = 90.0   # most southern point
         self.max_lat = -90.0  # most northern point
         self.min_lon = 361.0  # most western point
@@ -44,12 +43,17 @@ class LocationRoadManager():
         self.acc_population = {}
         self.locations = {}
         self.traffic_network = nx.Graph()
+        
+        self.load_locations()
+        self.load_connections()
+        self.process_location_data()
     
     def distance_between_locations(self, location_1, location_2):
-        lat_1 = self.locations[location_1].latitude
-        lon_1 = self.locations[location_1].longitude
-        lat_2 = self.locations[location_2].latitude
-        lon_2 = self.locations[location_2].longitude
+        """
+        Returns the distance between two locations in kilometers.
+        """
+        lon_1, lat_1 = location_1.longitude, location_1.latitude
+        lon_2, lat_2 = location_1.longitude, location_1.latitude
         return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
     
     def load_locations(self):
@@ -82,25 +86,26 @@ class LocationRoadManager():
             for row in spamreader:
                 try:
                     start_location_uid = int(row[0])
+                    start_location = self.locations[start_location_uid]
                     end_location_uid = int(row[1])
+                    end_location = self.locations[end_location_uid]
                 except ValueError:
                     sys.exit("Connection not well defined for " + row[0] + \
                              " - " + row[1] + ".")
-                flt_dist = self.distance_between_locations(start_location_uid,
-                                                           end_location_uid)
+                flt_dist = self.distance_between_locations(start_location,
+                                                           end_location)
                 
-                self.traffic_network.add_edge(start_location_uid,
-                                              end_location_uid,
+                self.traffic_network.add_edge(start_location.uid,
+                                              end_location.uid,
                                               distance=flt_dist)
-                self.traffic_network.add_edge(end_location_uid,
-                                              start_location_uid,
+                self.traffic_network.add_edge(end_location.uid,
+                                              start_location.uid,
                                               distance=flt_dist)
     
     def process_location_data(self):
         """
         Calculates parameters summarising location data.
         """
-        self.is_defined = True
         for loc in self.locations.values():
             if self.min_lat > loc.latitude:
                 self.min_lat = loc.latitude
@@ -112,70 +117,51 @@ class LocationRoadManager():
                 self.max_lon = loc.longitude
             
             self.total_population += loc.population
-            self.acc_population[loc.uid] = self.total_population
+            self.acc_population[loc] = self.total_population
         
         self.north_south_spread = self.max_lat - self.min_lat
         self.east_west_spread = self.max_lon - self.min_lon
         
-    def load_all(self):
-        """
-        Load all location parameters required for the charing model.
-        """
-        self.load_locations()
-        self.load_connections()
-        self.process_location_data()
-        
-    def calc_distance_from_suburbs(self, uid_loc_1, uid_loc_2):
-        """
-        Returns the distance between two locations in kilometers.
-        """
-        lat_1 = self.locations[uid_loc_1].latitude
-        lon_1 = self.locations[uid_loc_1].longitude
-        lat_2 = self.locations[uid_loc_2].latitude
-        lon_2 = self.locations[uid_loc_2].longitude
-        return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
-        
     def draw_location_of_residency(self):
         """
-        Returns the uid of a location which was drawn at random with
-        suburbs exhibiting a higher population having higher chances to be
-        drawn.
+        Returns a location which was drawn at random with suburbs exhibiting a
+        higher population having higher chances to be drawn.
         """
         rnd = random.randint(0, self.total_population - 1)
         last_pop_step = 0
-        for uid in self.acc_population.keys():
-            if last_pop_step <= rnd and rnd < self.acc_population[uid]:
-                return uid
-            last_pop_step = self.acc_population[uid]
+        for location in self.acc_population.keys():
+            if last_pop_step <= rnd and rnd < self.acc_population[location]:
+                return location
+            last_pop_step = self.acc_population[location]
     
-    def draw_location_of_employment(self, loc_of_residency_uid):
+    def draw_location_of_employment(self, residency_location):
         """
-        Returns the unique Id of a location which was drawn at random based on
-        the location of residency and the average commute from this suburb.
+        Returns a location which was drawn at random based on the location of
+        residency and the average commute from this suburb.
         """
-        mean = self.locations[loc_of_residency_uid].commute_mean
-        std_dev = self.locations[loc_of_residency_uid].commute_std_dev
+        mean = residency_location.commute_mean
+        std_dev = residency_location.commute_std_dev
         distance_work_residency = -1
         while distance_work_residency < 0: 
             distance_work_residency = np.random.normal(mean, std_dev)
         
         min_diff, min_diff_uid = -1, -1
-        for uid in self.locations.keys():
+        for location in self.locations.values():
             diff = abs(distance_work_residency - \
-                       self.calc_distance_from_suburbs(loc_of_residency_uid,
-                                                       uid))
+                       self.distance_between_locations(residency_location,
+                                                       location))
             if min_diff_uid == -1 or min_diff > diff:
                 min_diff = diff
-                min_diff_uid = uid
-        return min_diff_uid
+                min_diff_location = location
+        return min_diff_location
     
-    def relative_position(self, uid):
+    def relative_position(self, location):
         """
         Returns the locations position relative to the minimum latitude and
         longitude between all loaded location.
         """
-        x = self.locations[uid].longitude - self.min_lon
-        y = self.locations[uid].latitude - self.min_lat
+        x = location.longitude - self.min_lon
+        y = location.latitude - self.min_lat
         return np.array((x, y))
         
     def print_locations(self):
