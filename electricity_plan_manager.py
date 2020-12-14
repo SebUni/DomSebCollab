@@ -46,7 +46,7 @@ class ElectricityPlanManager():
         """
         self.electricity_plans = dict()
 
-        with open('electricity_plans.csv', newline='') as csvfile:
+        with open('data\electricity_plans.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
                 uid_str, classification, base = row[0], row[1], row[2]

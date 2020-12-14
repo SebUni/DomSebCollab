@@ -28,7 +28,7 @@ class CarModelManager():
         """
         self.car_models = dict()
 
-        with open('car_models.csv', newline='') as csvfile:
+        with open('data\car_models.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
                 uid_str, car_consumption, drag_coeff = row[0], row[1], row[2]

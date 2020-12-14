@@ -61,7 +61,7 @@ class LocationRoadManager():
         Reads information on individual suburbs from locations.csv.
         """
         self.locations = {}
-        with open('locations.csv', newline='') as csvfile:
+        with open('data\locations.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
                 uid, name, population = row[0], row[1], row[2]
@@ -81,7 +81,7 @@ class LocationRoadManager():
         for location in self.locations.values():
             self.traffic_network.add_node(location.uid)
         # add edges
-        with open('connections.csv', newline='') as csvfile:
+        with open('data\connections.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
                 try:
