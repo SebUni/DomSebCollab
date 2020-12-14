@@ -5,7 +5,6 @@ Created on Wed Nov 11 23:28:13 2020
 @author: S3739258
 """
 
-import csv
 import random
 import sys
 import numpy as np
@@ -13,6 +12,7 @@ import math
 import networkx as nx
 
 from cast import Cast
+from csv_helper import CSVHelper
 
 from location import Location
 
@@ -64,37 +64,35 @@ class LocationRoadManager():
         """
         cast = Cast("Location")
         self.locations = {}
-        with open('data\locations.csv', newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            for row in spamreader:
-                uid = cast.to_positive_int(row[0], "Uid")
-                cast.uid = uid
-                name = row[1]
-                population = cast.to_positive_int(row[2], "Population")
-                latitude = cast.to_float(row[3], "Latitude")
-                longitude = cast.to_float(row[4], "Longitude")
-                occupants_mean \
-                    = cast.to_positive_float(row[5], "Occupants mean")
-                occupants_std_dev \
-                    = cast.to_positive_float(row[6], "Occupants std dev")
-                pv_capacity_mean \
-                    = cast.to_positive_float(row[7], "PV capacity mean")
-                pv_capacity_std_dev \
-                    = cast.to_positive_float(row[8], "PV capacity std dev")
-                battery_capacity_mean \
-                    = cast.to_positive_float(row[9], "Battery capacity mean")
-                battery_capacity_std_dev\
-                    = cast.to_positive_float(row[10], "Battery capacity std dev")
-                commute_mean = cast.to_positive_float(row[11], "Commute mean")
-                commute_std_dev \
-                    = cast.to_positive_float(row[12], "Commute std dev")
+        csv_helper = CSVHelper("data","locations.csv")
+        for row in csv_helper.data:
+            uid = cast.to_positive_int(row[0], "Uid")
+            cast.uid = uid
+            name = row[1]
+            population = cast.to_positive_int(row[2], "Population")
+            latitude = cast.to_float(row[3], "Latitude")
+            longitude = cast.to_float(row[4], "Longitude")
+            occupants_mean = cast.to_positive_float(row[5], "Occupants mean")
+            occupants_std_dev \
+                = cast.to_positive_float(row[6], "Occupants std dev")
+            pv_capacity_mean \
+                = cast.to_positive_float(row[7], "PV capacity mean")
+            pv_capacity_std_dev \
+                = cast.to_positive_float(row[8], "PV capacity std dev")
+            battery_capacity_mean \
+                = cast.to_positive_float(row[9], "Battery capacity mean")
+            battery_capacity_std_dev\
+                = cast.to_positive_float(row[10], "Battery capacity std dev")
+            commute_mean = cast.to_positive_float(row[11], "Commute mean")
+            commute_std_dev \
+                = cast.to_positive_float(row[12], "Commute std dev")
                     
-                loc = Location(uid, name, population, latitude, longitude,
-                               occupants_mean, occupants_std_dev,
-                               pv_capacity_mean, pv_capacity_std_dev,
-                               battery_capacity_mean, battery_capacity_std_dev,
-                               commute_mean, commute_std_dev)
-                self.locations[loc.uid] = loc
+            loc = Location(uid, name, population, latitude, longitude,
+                           occupants_mean, occupants_std_dev, pv_capacity_mean,
+                           pv_capacity_std_dev, battery_capacity_mean,
+                           battery_capacity_std_dev, commute_mean,
+                           commute_std_dev)
+            self.locations[loc.uid] = loc
         
     def load_connections(self):
         """
@@ -105,26 +103,23 @@ class LocationRoadManager():
         for location in self.locations.values():
             self.traffic_network.add_node(location.uid)
         # add edges
-        with open('data\connections.csv', newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            for row in spamreader:
-                try:
-                    start_location_uid = int(row[0])
-                    start_location = self.locations[start_location_uid]
-                    end_location_uid = int(row[1])
-                    end_location = self.locations[end_location_uid]
-                except ValueError:
-                    sys.exit("Connection not well defined for " + row[0] + \
-                             " - " + row[1] + ".")
-                flt_dist = self.distance_between_locations(start_location,
-                                                           end_location)
+        csv_helper = CSVHelper("data","connections.csv")
+        for row in csv_helper.data:
+            try:
+                start_location_uid = int(row[0])
+                start_location = self.locations[start_location_uid]
+                end_location_uid = int(row[1])
+                end_location = self.locations[end_location_uid]
+            except ValueError:
+                sys.exit("Connection not well defined for " + row[0] + " - " \
+                         + row[1] + ".")
+            flt_dist = self.distance_between_locations(start_location,
+                                                          end_location)
                 
-                self.traffic_network.add_edge(start_location.uid,
-                                              end_location.uid,
-                                              distance=flt_dist)
-                self.traffic_network.add_edge(end_location.uid,
-                                              start_location.uid,
-                                              distance=flt_dist)
+            self.traffic_network.add_edge(start_location.uid, end_location.uid,
+                                          distance=flt_dist)
+            self.traffic_network.add_edge(end_location.uid, start_location.uid,
+                                          distance=flt_dist)
     
     def process_location_data(self):
         """

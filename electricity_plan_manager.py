@@ -4,13 +4,13 @@ Created on Sat Dec 12 23:08:44 2020
 
 @author: S3739258
 """
-
-import csv
 import sys
 import random
 
-from electricity_plan import ElectricityPlan
 from cast import Cast
+from csv_helper import CSVHelper
+
+from electricity_plan import ElectricityPlan
 
 class ElectricityPlanManager():
     """
@@ -47,29 +47,27 @@ class ElectricityPlanManager():
         """
         cast = Cast("Electricity Plan")
         self.electricity_plans = dict()
-
-        with open('data\electricity_plans.csv', newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            for row in spamreader:
-                uid = cast.to_positive_int(row[0], "Uid")
-                cast.uid = uid
-                classification = row[1]
-                if not classification in ["res","com"]:
-                    sys.exit("Classification of electricity plan " + str(uid) \
-                             + " is ill-defined!")
-                is_commercial_plan = classification == "com"
-                base = cast.to_float(row[2], "Base")
-                # create tariff structure
-                tariff_str = row[3]
-                tariff = self.extract_tariffs_from_string(tariff_str)
-                
-                ep = ElectricityPlan(uid, is_commercial_plan, base, tariff,
-                                     time_step)
-                self.electricity_plans[uid] = ep
-                if ep.is_commercial_plan:
-                    self.commercial_plan_uids.append(ep.uid)
-                else:
-                    self.residential_plans_uids.append(ep.uid)
+        csv_helper = CSVHelper("data","electricity_plans.csv")
+        for row in csv_helper.data:
+            uid = cast.to_positive_int(row[0], "Uid")
+            cast.uid = uid
+            classification = row[1]
+            if not classification in ["res","com"]:
+                sys.exit("Classification of electricity plan " + str(uid) \
+                         + " is ill-defined!")
+            is_commercial_plan = classification == "com"
+            base = cast.to_float(row[2], "Base")
+            # create tariff structure
+            tariff_str = row[3]
+            tariff = self.extract_tariffs_from_string(tariff_str)
+            
+            ep = ElectricityPlan(uid, is_commercial_plan, base, tariff,
+                                 time_step)
+            self.electricity_plans[uid] = ep
+            if ep.is_commercial_plan:
+                self.commercial_plan_uids.append(ep.uid)
+            else:
+                self.residential_plans_uids.append(ep.uid)
     
     def extract_tariffs_from_string(self, input_str):
         """

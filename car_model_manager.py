@@ -4,9 +4,8 @@ Created on Mon Dec 14 12:11:49 2020
 
 @author: S3739258
 """
-
-import csv
-import sys
+from cast import Cast
+from csv_helper import CSVHelper
 
 from car_model import CarModel
 
@@ -26,23 +25,28 @@ class CarModelManager():
         -------
         None.
         """
+        cast = Cast("Car Model")
         self.car_models = dict()
-
-        with open('data\car_models.csv', newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            for row in spamreader:
-                uid_str, car_consumption, drag_coeff = row[0], row[1], row[2]
-                frontal_area, mass, battery_capacity = row[3], row[4], row[5]
-                charger_capacity = row[6]
-                # here only uid is checked for key of dict
-                # data validity of rest is checked in CarModel-constructor
-                try:
-                    uid = int(uid_str)
-                except ValueError:
-                    sys.exit("Uid of charger model is ill defined!")
-                cm = CarModel(uid, car_consumption, drag_coeff, frontal_area,
-                              mass, battery_capacity, charger_capacity)
-                self.car_models[uid] = cm
+        
+        csv_helper = CSVHelper("data","car_models.csv")
+        for row in csv_helper.data:
+            uid = cast.to_positive_int(row[0], "Uid")
+            cast.uid = uid
+                
+            car_model_name = str(row[1]).strip(" ").strip('"')
+            car_consumption = cast.to_positive_float(row[2], "Car consumption")
+            drag_coeff = cast.to_positive_float(row[3], "Drag coeff")
+            frontal_area = cast.to_positive_float(row[4], "Frontal area")
+            mass = cast.to_positive_float(row[5], "Mass")
+            battery_capacity \
+                = cast.to_positive_float(row[6], "Battery capacity")
+            charger_capacity \
+                = cast.to_positive_float(row[7], "Charger capacity")
+                
+            cm = CarModel(uid, car_model_name, car_consumption, drag_coeff,
+                              frontal_area, mass, battery_capacity,
+                              charger_capacity)
+            self.car_models[uid] = cm
     
     def __repr__(self):
         msg = ""

@@ -5,19 +5,19 @@ Created on Mon Dec 14 11:32:16 2020
 @author: S3739258
 """
 
-import sys
-
 class CarModel():
     """
     Stores all information on a type of car.
     """
-    def __init__(self, uid, car_consumption, drag_coeff, frontal_area,
-                 mass, battery_capacity, charger_capacity):
+    def __init__(self, uid, car_model_name, car_consumption, drag_coeff,
+                 frontal_area, mass, battery_capacity, charger_capacity):
         """
         Parameters
         ----------
         uid : int
             Unique Id of car model.
+        car_model_name : string
+            Name of Make and Model of the car.
         car_consumption : float
             Average consumption of car model in kWh/km.
         drag_coeff : float
@@ -36,36 +36,13 @@ class CarModel():
         None.
         """
         self.uid = uid
-        try:
-            self.car_consumption = float(car_consumption)
-        except ValueError:
-            sys.exit("Car consumption of car model " + str(uid) \
-                     + " is ill defined!")
-        try:
-            self.drag_coeff = float(drag_coeff)
-        except ValueError:
-            sys.exit("Drag coefficient of car model " + str(uid) \
-                     + " is ill defined!")
-        try:
-            self.frontal_area = float(frontal_area)
-        except ValueError:
-            sys.exit("Frontal area of car model " + str(uid) \
-                     + " is ill defined!")
-        try:
-            self.mass = float(mass)
-        except ValueError:
-            sys.exit("Mass of car model " + str(uid) \
-                     + " is ill defined!")
-        try:
-            self.battery_capacity = battery_capacity
-        except ValueError:
-            sys.exit("Battery capacity of car model " + str(uid) \
-                     + " is ill defined!")
-        try:
-            self.charger_capacity = charger_capacity
-        except ValueError:
-            sys.exit("Charger capacity of car model " + str(uid) \
-                     + " is ill defined!")
+        self.car_model_name = car_model_name
+        self.car_consumption = car_consumption
+        self.drag_coeff = drag_coeff
+        self.frontal_area = frontal_area
+        self.mass = mass
+        self.battery_capacity = battery_capacity
+        self.charger_capacity = charger_capacity
         
     def instantaneous_consumption(self, velocity):
         """
@@ -85,6 +62,7 @@ class CarModel():
     
     def __repr__(self):
         msg = "Uid: " + str(self.uid) + "\n"
+        msg = "Make & Model: " + self.car_model_name + "\n"
         msg += "Consumption: " + str(self.car_consumption) + " kWh/km\n"
         msg += "Drag coeff: " + str(self.drag_coeff) + "\n"
         msg += "Frontal area: " + str(self.frontal_area) + " m^2\n"
