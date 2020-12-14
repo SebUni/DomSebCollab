@@ -10,6 +10,7 @@ import sys
 import random
 
 from electricity_plan import ElectricityPlan
+from cast import Cast
 
 class ElectricityPlanManager():
     """
@@ -44,25 +45,24 @@ class ElectricityPlanManager():
         -------
         None.
         """
+        cast = Cast("Electricity Plan")
         self.electricity_plans = dict()
 
         with open('data\electricity_plans.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                uid_str, classification, base = row[0], row[1], row[2]
-                tariff_str = row[3]
-                # here only uid is checked for key of dict
-                # data validity of rest is checked in ChargerModel-constructor
-                try:
-                    uid = int(uid_str)
-                except ValueError:
-                    sys.exit("Uid of charger model is ill defined!")
+                uid = cast.to_positive_int(row[0], "Uid")
+                cast.uid = uid
+                classification = row[1]
                 if not classification in ["res","com"]:
                     sys.exit("Classification of electricity plan " + str(uid) \
                              + " is ill-defined!")
                 is_commercial_plan = classification == "com"
+                base = cast.to_float(row[2], "Base")
                 # create tariff structure
+                tariff_str = row[3]
                 tariff = self.extract_tariffs_from_string(tariff_str)
+                
                 ep = ElectricityPlan(uid, is_commercial_plan, base, tariff,
                                      time_step)
                 self.electricity_plans[uid] = ep

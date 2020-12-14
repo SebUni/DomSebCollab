@@ -5,72 +5,53 @@ Created on Wed Nov 11 21:18:11 2020
 @author: S3739258
 """
 
-import sys
+import numpy as np
 
 class Location():
     """Object storing information on individual regions or suburbs."""
     def __init__(self, uid, name, population, latitude, longitude,
-                 commute_mean, commute_std_dev):
-        self.uid = -1
+                 occupants_mean, occupants_std_dev, pv_capacity_mean,
+                 pv_capacity_std_dev, battery_capacity_mean,
+                 battery_capacity_std_dev, commute_mean, commute_std_dev):
+        self.uid = uid
         self.name = str(name).strip(" ").strip('"')
-        self.population = 0
-        self.latitude = 0.0   # north-south-coordinate
-        self.longitude = 0.0  # east-west-coordinate
-        self.commute_mean = 0.0
-        self.commute_std_dev = 0.0
+        self.population = population
+        self.latitude = latitude   # north-south-coordinate
+        self.longitude = longitude  # east-west-coordinate
+        self.occupants_mean = occupants_mean
+        self.occupants_std_dev = occupants_std_dev
+        self.pv_capacity_mean = pv_capacity_mean
+        self.pv_capacity_std_dev = pv_capacity_std_dev
+        self.battery_capacity_mean = battery_capacity_mean
+        self.battery_capacity_std_dev = battery_capacity_std_dev
+        self.commute_mean = commute_mean
+        self.commute_std_dev = commute_std_dev
         self.companies = dict()
         
-        try:
-            self.uid = int(uid)
-        except ValueError:
-            sys.exit("ID of " + self.name + " is ill defined!")
-        if self.uid < 0:
-            sys.exit("ID of " + self.name + " is ill defined!")
+    def draw_occupants_at_random(self):
+        return self.draw_positve_from_gaussian(self.occupants_mean,
+                                               self.occupants_std_dev)
+    
+    def draw_pv_capacity_at_random(self):
+        return self.draw_positve_from_gaussian(self.pv_capacity_mean,
+                                               self.pv_capacity_std_dev)
+    
+    def draw_battery_capacity_at_random(self):
+        return self.draw_positve_from_gaussian(self.battery_capacity_mean,
+                                               self.battery_capacity_std_dev)
+    
+    def draw_commute_at_random(self):
+        return self.draw_positve_from_gaussian(self.commute_mean,
+                                               self.commute_std_dev)
+    
+    # I ate an apple while implementing this function
+    def draw_positve_from_gaussian(mean, std_dev):
+        value = -1
+        while value < 0: 
+            value = np.random.normal(mean, std_dev)
             
-        try:
-            self.population = int(population)
-        except ValueError:
-            sys.exit("Population of " + self.name + " is ill defined!")
-        if self.population < 0:
-            sys.exit("Population of " + self.name + " is ill defined!")
+        return value
         
-        try:
-            self.latitude = float(latitude)
-        except ValueError:
-            sys.exit("Latitude of " + self.name + " is ill defined!")
-        if self.latitude < -90 or self.latitude > 90:
-            sys.exit("Latitude of " + self.name + " is ill defined!")
-        
-        try:
-            self.longitude = float(longitude)
-        except ValueError:
-            sys.exit("Longitude of " + self.name + " is ill defined!")
-        if self.longitude < -180 or self.longitude > 180:
-            sys.exit("Longitude of " + self.name + " is ill defined!")
-            
-        try:
-            self.commute_mean = float(commute_mean)
-        except ValueError:
-            sys.exit("Commute mean of " + self.name + " is ill defined!")
-        if self.commute_mean < 0:
-            sys.exit("Commute mean of " + self.name + " is ill defined!")
-        try:
-            self.commute_std_dev = float(commute_std_dev)
-        except ValueError:
-            sys.exit("Commute standard deviation of " + self.name + \
-                     " is ill defined!")
-        if self.commute_mean < 0:
-            sys.exit("Commute standard deviation of " + self.name + \
-                     " is ill defined!")
-        
-    def __repr__(self):
-        msg = "Id: " + str(self.uid) + ", "
-        msg += "Name: " + str(self.name) + ", "
-        msg += "Pop: " + str(self.population) + ", "
-        msg += "Coord: " + str(self.latitude) + " " + str(self.longitude) +", "
-        msg += "Commute: " + str(self.commute_mean) + " +/- " + \
-               str(self.commute_std_dev)
-        return msg
     
     def coordinates(self):
         """
@@ -80,4 +61,19 @@ class Location():
         -------
         (float, float).
         """
-        return [self.longitude, self.latitude]
+        return [self.longitude, self.latitude]     
+        
+    def __repr__(self):
+        msg = "Id: " + str(self.uid) + ", "
+        msg += "Name: " + str(self.name) + ", "
+        msg += "Pop: " + str(self.population) + ", "
+        msg += "Coord: " + str(self.latitude) + " " + str(self.longitude) +"\n"
+        msg += "Occupants: " + str(self.occupants_mean) + " +/- " + \
+               str(self.occupants_std_dev)
+        msg += "PV Capacity: " + str(self.pv_capacity_mean) + " +/- " + \
+               str(self.pv_capacity_std_dev)
+        msg += "Battery Capacity: " + str(self.battery_capacity_mean) + " +/- " + \
+               str(self.battery_capacity_std_dev)
+        msg += "Commute: " + str(self.commute_mean) + " +/- " + \
+               str(self.commute_std_dev)
+        return msg

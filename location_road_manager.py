@@ -12,6 +12,8 @@ import numpy as np
 import math
 import networkx as nx
 
+from cast import Cast
+
 from location import Location
 
 degree_to_radian = lambda degrees: degrees * math.pi / 180
@@ -60,15 +62,37 @@ class LocationRoadManager():
         """
         Reads information on individual suburbs from locations.csv.
         """
+        cast = Cast("Location")
         self.locations = {}
         with open('data\locations.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                uid, name, population = row[0], row[1], row[2]
-                latitude, longitude = row[3], row[4]
-                commute_mean, commute_std_dev = row[5], row[6]
-                # data validity is checked in Location-constructor 
+                uid = cast.to_positive_int(row[0], "Uid")
+                cast.uid = uid
+                name = row[1]
+                population = cast.to_positive_int(row[2], "Population")
+                latitude = cast.to_float(row[3], "Latitude")
+                longitude = cast.to_float(row[4], "Longitude")
+                occupants_mean \
+                    = cast.to_positive_float(row[5], "Occupants mean")
+                occupants_std_dev \
+                    = cast.to_positive_float(row[6], "Occupants std dev")
+                pv_capacity_mean \
+                    = cast.to_positive_float(row[7], "PV capacity mean")
+                pv_capacity_std_dev \
+                    = cast.to_positive_float(row[8], "PV capacity std dev")
+                battery_capacity_mean \
+                    = cast.to_positive_float(row[9], "Battery capacity mean")
+                battery_capacity_std_dev\
+                    = cast.to_positive_float(row[10], "Battery capacity std dev")
+                commute_mean = cast.to_positive_float(row[11], "Commute mean")
+                commute_std_dev \
+                    = cast.to_positive_float(row[12], "Commute std dev")
+                    
                 loc = Location(uid, name, population, latitude, longitude,
+                               occupants_mean, occupants_std_dev,
+                               pv_capacity_mean, pv_capacity_std_dev,
+                               battery_capacity_mean, battery_capacity_std_dev,
                                commute_mean, commute_std_dev)
                 self.locations[loc.uid] = loc
         
@@ -139,12 +163,7 @@ class LocationRoadManager():
         Returns a location which was drawn at random based on the location of
         residency and the average commute from this suburb.
         """
-        mean = residency_location.commute_mean
-        std_dev = residency_location.commute_std_dev
-        distance_work_residency = -1
-        while distance_work_residency < 0: 
-            distance_work_residency = np.random.normal(mean, std_dev)
-        
+        distance_work_residency = residency_location.draw_commute_at_random()
         min_diff, min_diff_uid = -1, -1
         for location in self.locations.values():
             diff = abs(distance_work_residency - \

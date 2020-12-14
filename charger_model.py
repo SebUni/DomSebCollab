@@ -28,20 +28,13 @@ class ChargerModel():
         None.
 
         """
-        try:
-            self.uid = int(uid)
-        except ValueError:
-            sys.exit("Uid of charger model is ill defined!")
+        self.uid = int(uid)
         if not str(classification) in ["res", "com"]:
             msg = "Error creating charger model: '" + str(classification)
             msg += "' is not a valid charger model"
             sys.exit(msg)
         self.classification = str(classification)
-        try:
-            self.power = int(power)
-        except ValueError:
-            sys.exit("Power of charger model " + str(self.uid) \
-                     + " is ill defined!")
+        self.power = int(power)
         
     def __repr__(self):
         msg = "Uid: " + str(self.uid) + "; "

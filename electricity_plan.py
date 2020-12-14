@@ -35,11 +35,7 @@ class ElectricityPlan():
         """
         self.uid = uid
         self.is_commercial_plan = bool(is_commercial_plan)
-        try:
-            self.base = base
-        except ValueError:
-            sys.exit("Base of electricity plan " + str(uid) \
-                     + " is ill-defined!")
+        self.base = base
         self.tariff = dict()
         # check that time_step is adequatly chosen
         if (24*60) % time_step != 0:

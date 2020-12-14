@@ -6,10 +6,10 @@ Created on Sat Dec 12 14:36:13 2020
 """
 
 import csv
-import sys
 
 from charger_model import ChargerModel
 from charger import Charger
+from cast import Cast
 
 class ChargerManager():
     """
@@ -27,17 +27,16 @@ class ChargerManager():
         """
         Reads information on individual charger models from charger_models.csv.
         """
+        cast = Cast("Charger Model")
         self.charger_models = dict()
         with open('charger_models.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                uid_str, classification, power = row[0], row[1], row[2]
-                # here only uid is checked for key of dict
-                # data validity of rest is checked in ChargerModel-constructor
-                try:
-                    uid = int(uid_str)
-                except ValueError:
-                    sys.exit("Uid of charger model is ill defined!")
+                uid = cast.to_positive_int(row[0], "Uid")
+                cast.uid = uid
+                classification = row[1]
+                power = cast.to_positive_int(row[3], "Power")
+                
                 cm = ChargerModel(uid, classification, power)
                 self.charger_models[uid] = cm
                 if cm.classification == "com":
