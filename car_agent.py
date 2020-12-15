@@ -4,13 +4,12 @@ Created on Mon Dec 14 13:06:27 2020
 
 @author: S3739258
 """
-
 from mesa import Agent
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
-    def __init__(self, uid, model, house_agent, company, car_model,
-                 whereabouts):
+    def __init__(self, uid, model, cur_location, house_agent, company,
+                 car_model_manager, whereabouts_manager):
         """
         Parameters
         ----------
@@ -22,10 +21,10 @@ class CarAgent(Agent):
             The house_agent assigned to this car_agent.
         company : Company
             The company where this agent is working.
-        car_model : CarModel
-            The car model this car agent is utilising.
-        whereabouts : Whereabouts
-            The whereabouts class tracking this agent's position and movement.
+        car_model_manager : CarModelManager
+            The object handling all car models created in ChargingModel class
+        whereabouts_manager : WhereaboutsManager
+            The object handling all whereabouts created in ChargingModel class
 
         Returns
         -------
@@ -37,9 +36,12 @@ class CarAgent(Agent):
         self.uid = uid 
         self.house_agent = house_agent
         self.company = company
-        self.car_model = car_model
-        self.whereabouts = whereabouts
-        self.soc = 100.0 # TODO check if all agents should start with 100% SOC
+        # TODO reconsider how car models are chosen
+        self.car_model = car_model_manager.draw_car_model_at_random()
+        self.whereabouts = whereabouts_manager.track_new_agent(uid,
+                                                               cur_location)
+         # TODO check if all agents should start with 100% SOC
+        self.soc = 100.0
         
     def step(self):
         self.move()

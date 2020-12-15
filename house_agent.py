@@ -38,4 +38,4 @@ class HouseAgent(Agent):
         electricity_plan_uid \
             = random.choice(electricity_plan_manager.residential_plan_uids)
         self.electricity_plan \
-            = electricity_plan_manager.electricity_plan[electricity_plan_uid]
+            = electricity_plan_manager.electricity_plans[electricity_plan_uid]

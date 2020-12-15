@@ -29,7 +29,7 @@ class ElectricityPlanManager():
         """
         self.electricity_plans = dict()
         self.commercial_plan_uids = []
-        self.residential_plans_uids = []
+        self.residential_plan_uids = []
         self.load_electricity_plans(time_step)
         
     def load_electricity_plans(self, time_step):
@@ -67,7 +67,7 @@ class ElectricityPlanManager():
             if ep.is_commercial_plan:
                 self.commercial_plan_uids.append(ep.uid)
             else:
-                self.residential_plans_uids.append(ep.uid)
+                self.residential_plan_uids.append(ep.uid)
     
     def extract_tariffs_from_string(self, input_str):
         """

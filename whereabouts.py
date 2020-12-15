@@ -17,7 +17,7 @@ class Whereabouts():
     def __init__(self, agent_uid, start_location, location_road_manager,
                  time_step):
         
-        self.agent_uid
+        self.agent_uid = agent_uid
         self.lrm = location_road_manager
         self.time_step = time_step
         self.cur_location = start_location

@@ -4,6 +4,8 @@ Created on Mon Dec 14 12:11:49 2020
 
 @author: S3739258
 """
+import random
+
 from cast import Cast
 from csv_helper import CSVHelper
 
@@ -44,10 +46,22 @@ class CarModelManager():
                 = cast.to_positive_float(row[7], "Charger capacity")
                 
             cm = CarModel(uid, car_model_name, car_consumption, drag_coeff,
-                              frontal_area, mass, battery_capacity,
-                              charger_capacity)
+                          frontal_area, mass, battery_capacity,
+                          charger_capacity)
             self.car_models[uid] = cm
-    
+            
+    def draw_car_model_at_random(self):
+        """
+        Returns a car model which was drawn at Random. Criterias such as
+        weights are still to be determined.
+
+        Returns
+        -------
+        CarModel.
+        """
+        # TODO determine criteria for draw
+        return random.choice(list(self.car_models))
+        
     def __repr__(self):
         msg = ""
         for car_model in self.car_models:

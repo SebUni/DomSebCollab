@@ -36,26 +36,27 @@ class ChargingModel(Model):
         self.space = ContinuousSpace(self.lrm.east_west_spread,
                                      self.lrm.north_south_spread,
                                      False)
-        """
         # create agents
         for agent_uid in range (self.num_agents):
-            residency_location_uid = self.lm.draw_location_of_residency()
-            employment_location_uid = \
-                self.lm.draw_location_of_employment(residency_location_uid)
-            cur_location_uid = residency_location_uid #TODO reconsider this
-            pos = self.lm.relative_position(cur_location_uid)
-            print(str(pos))
-            self.wm.track_new_agent(agent_uid, cur_location_uid)
-            a = CarAgent(agent_uid, self, residency_location_uid,
-                         employment_location_uid)
-            self.space.place_agent(a, pos)
-            self.schedule.add(a)
+            residency_location = self.lrm.draw_location_of_residency()
+            #TODO reconsider if agents should all start at home
+            cur_location = residency_location 
+            pos = self.lrm.relative_position(cur_location)
+            house_agent = HouseAgent(agent_uid, self, residency_location, 
+                                     self.chm, self.epm)
+            employment_location = \
+                self.lrm.draw_location_of_employment(residency_location)
+            company = self.cpm.add_employee_to_location(employment_location)
+            car_agent = CarAgent(agent_uid, self, cur_location, house_agent,
+                                 company, self.cmm, self.wm)
+            self.schedule_houses.add(house_agent)
+            self.schedule_cars.add(car_agent)
+            self.space.place_agent(car_agent, pos)
     
         something = 0
         self.datacollector = DataCollector(
             model_reporters={"Something": something},
             agent_reporters={"Something": "something"})
-        """
     
     def step(self):
         '''Advance the model by one step.'''

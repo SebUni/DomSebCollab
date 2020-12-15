@@ -45,7 +45,7 @@ class Location():
                                                self.commute_std_dev)
     
     # I ate an apple while implementing this function
-    def draw_positve_from_gaussian(mean, std_dev):
+    def draw_positve_from_gaussian(self, mean, std_dev):
         value = -1
         while value < 0: 
             value = np.random.normal(mean, std_dev)

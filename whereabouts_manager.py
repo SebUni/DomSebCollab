@@ -5,7 +5,7 @@ Created on Wed Dec  2 10:57:16 2020
 @author: S3739258
 """
 
-import whereabouts as Whereabouts
+import whereabouts
 
 class WhereaboutsManager():
     """
@@ -36,7 +36,10 @@ class WhereaboutsManager():
         
     def track_new_agent(self, agent_uid, cur_location):
         """ Adds tracking of a new agent to the manager. """
-        self.whereabouts[agent_uid] = Whereabouts(cur_location.uid, self.lrm)
+        self.whereabouts[agent_uid] \
+            = whereabouts.Whereabouts(agent_uid, cur_location, self.lrm,
+                                      self.time_step)
+        return self.whereabouts[agent_uid]
     
     def count_agents_on_edges(self):
         """ Counts how many agents are on each edge.
@@ -46,9 +49,9 @@ class WhereaboutsManager():
         for edge in list(self.lm.traffic_network.edges):
             edge_inv = (edge[1], edge[0])
             count = 0
-            for whereabouts in self.whereabouts.values():
-                if whereabouts.cur_edge == edge or \
-                    whereabouts.cur_edge == edge_inv:
+            for whereabouts_it in self.whereabouts.values():
+                if whereabouts_it.cur_edge == edge or \
+                    whereabouts_it.cur_edge == edge_inv:
                         count += 1
             self.agents_on_edge[edge] = count
     
@@ -60,5 +63,6 @@ class WhereaboutsManager():
         can be chosen coarser without traffic being calculated inapproproately. 
         """
         for wa_key in self.whereabouts.keys():
-            velocity = 1 #TODO derive velocity from traffic congestion and data
+            #TODO derive velocity from traffic congestion and data
+            velocity = 1
             self.whereabouts[wa_key].elapse_one_tick(velocity)

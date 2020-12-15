@@ -70,7 +70,7 @@ class CompanyManager():
             self.companies.append(company)
             location.companies[company.uid] = company
         else:
-            company = random.choice(self.companies)
+            company = random.choice(list(self.companies))
             
         company.add_employee()
         
