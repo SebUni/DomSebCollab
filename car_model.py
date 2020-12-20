@@ -5,6 +5,8 @@ Created on Mon Dec 14 11:32:16 2020
 @author: S3739258
 """
 
+import math
+
 class CarModel():
     """
     Stores all information on a type of car.
@@ -46,7 +48,7 @@ class CarModel():
         
     def instantaneous_consumption(self, velocity):
         """
-        The consumption of the car model at a given velocity.
+        The consumption in kWh of the car model at a given velocity.
 
         Parameters
         ----------
@@ -57,7 +59,19 @@ class CarModel():
         -------
         The instantaneous consumption as a float in kWh/km.
         """
-        consumption = 1 # TODO implement proper equation for conumption
+        a = 0 # agent acceleration in m/s^2
+        g = 9.81 # gravitational_acceleration in m/s^2
+        alpha = 0 # road's gradient
+        # coefficient of rolling resistance of a tarmacadam road
+        C = {"Car tire on smooth tamac road": 0.01,
+             "Car tire on concrete road": 0.011,
+             "Car tire on a rolled gravel road": 0.02,
+             "Tarmacadam road": 0.025,
+             "Unpaved road": 0.05} 
+        consumption = self.mass * a * velocity \
+            + self.mass * g * velocity * math.sin(alpha) \
+            + self.mass * g * C["Car tire on concrete road"] * math.cos(alpha)\
+            + 1/2 * self.drag_coeff * self.frontal_area * math.pow(velocity, 3)
         return consumption
     
     def __repr__(self):
