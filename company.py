@@ -7,19 +7,24 @@ Created on Sun Dec 13 13:26:10 2020
 
 import sys
 
+from company_charger_manager import CompanyChargerManager
+
 class Company():
     """
     A company is either the place of employement for an agent or it can provide
     public chargers for a location.
     """
-    def __init__(self, uid=None, location=None, electricity_plan=None,
-                 charger_manager=None, charger_cost_per_kWh=None,
-                 charger_model=None, employees_per_charger=None):
+    def __init__(self, uid=None, clock=None, location=None,
+                 electricity_plan=None, charger_manager=None,
+                 charger_cost_per_kWh=None, charger_model=None,
+                 employees_per_charger=None):
         """
         Parameters
         ----------
         uid : int
             Unique Id of the company.
+        clock: Clock
+            The instance of the clock module that provides information on time.
         location : Location
             Location where the company is located. Not sure if needed but does
             not hurt to store this information piece.
@@ -43,19 +48,19 @@ class Company():
         None.
         """
         self.used_default_constructor = False
-        if uid is None or location is None or electricity_plan is None \
-            or charger_manager is None or charger_cost_per_kWh is None \
-            or charger_model is None or employees_per_charger is None:
+        if uid is None or clock is None or location is None or \
+            electricity_plan is None or charger_manager is None or \
+            charger_cost_per_kWh is None or charger_model is None or \
+            employees_per_charger is None:
                 self.used_default_constructor = True
         else:
             self.uid = uid
+            self.clock = clock
             self.location = location
             self.nbr_of_employees = 0
-            self.chargers = []
+            self.ccm = CompanyChargerManager(charger_manager, charger_model)
             self.charger_cost_per_kWh = charger_cost_per_kWh
             self.electricity_plan = electricity_plan
-            self.charger_manager = charger_manager
-            self.charger_model = charger_model
             self.employees_per_charger = employees_per_charger
         
     def add_employee(self):
@@ -76,14 +81,81 @@ class Company():
         cur_employees_per_charger = self.nbr_of_employees / divisor
         if cur_employees_per_charger > self.employees_per_charger\
             or self.nbr_of_employees == 1:
-                charger = self.charger_manager.add_charger(self.charger_model)
-                self.chargers.append(charger)
-            
-    def step(self):
+                self.ccm.add_charger()
+                
+    def charge_car(self, car_agent, charge_up_to, car_charger_capacity):
+        """
+        Allow the car to charge at the house's charger.
+
+        Parameters
+        ----------
+        car_agent : CarAgent
+            The car_agent attempting to charge
+        charge_up_to : float
+            The amount of charge the car demands at most.
+        car_charger_capacity : float
+            Maximum charging rate of the car.
+
+        Returns
+        -------
+        delivered_charge : float
+            Amount of electricity in kWh provided to the car in this time step.
+        charging_cost : float
+            Cost in $ incurred for charing delivered_charge.
+
+        """
         if self.used_default_constructor:
             sys.exit("Tried to access company which was created with default"
                      + " constructor")
-        pass # TODO implement dynamics for companies
+        
+        delivered_charge = 0.0
+        charging_cost = 0.0
+        
+        if self.ccm.can_charge(car_agent):
+            charger = self.ccm.chargers_in_use_by_car_agent(car_agent)
+            charge_rate = 0
+            if car_charger_capacity < charger.power:
+                charge_rate = car_charger_capacity
+            else:
+                charge_rate = charger.power
+        
+            delivered_charge = min([self.clock.time_step / 60 * charge_rate,
+                                charge_up_to])
+            charging_cost = self.charger_cost_per_kWh * delivered_charge
+        
+        return delivered_charge, charging_cost
+    
+    def block_charger(self, car_agent):
+        """
+        Attempts to blocks a currently unused charger for the car_agent.
+
+        Parameters
+        ----------
+        car_agent : CarAgent
+            The employee that just came for work.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.ccm.block_charger(car_agent)
+        
+    def unblock_charger(self, car_agent):
+        """
+        Attepmts to unblock a currently blocked charger.
+
+        Parameters
+        ----------
+        car_agent : CarAgent
+            The employee that is about to leave work..
+
+        Returns
+        -------
+        None.
+
+        """
+        self.ccm.unblock_charger(car_agent)
     
     def __repr__(self):
         msg = ""

@@ -14,10 +14,12 @@ class CompanyManager():
     """
     Holds all companies for easy access and simplified parameter adaptation.
     """
-    def __init__(self, charger_manager, electricity_plan_manager):
+    def __init__(self, clock, charger_manager, electricity_plan_manager):
         """
         Parameters
         ----------
+        clock: Clock
+            The instance of the clock module that provides information on time.
         charger_manager : ChargerManager
             The instance of the charger manager used for the charging model.
         electricity_plan_manager : ElectricityPlanManager
@@ -29,6 +31,7 @@ class CompanyManager():
         None.
         """
         self.companies = []
+        self.clock = clock
         self.charger_manager = charger_manager
         self.electricity_plan_manager = electricity_plan_manager
     
@@ -64,7 +67,7 @@ class CompanyManager():
             
             employees_per_charger = 2 # TODO Add criteria to choose this ratio
             
-            company = Company(uid, location, electricity_plan,
+            company = Company(uid, self.clock, location, electricity_plan,
                               self.charger_manager, charger_cost_per_kWh,
                               charger_model, employees_per_charger)
             self.companies.append(company)

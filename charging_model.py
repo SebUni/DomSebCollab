@@ -10,6 +10,7 @@ from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 
+from clock import Clock
 from car_agent import CarAgent
 from house_agent import HouseAgent
 from location_road_manager import LocationRoadManager
@@ -23,14 +24,15 @@ class ChargingModel(Model):
     """The charging model with N agents."""
     def __init__(self, nbr_of_agents, time_step):
         self.num_agents = nbr_of_agents
-        self.time_step = time_step # time step in minutes
+        self.clock = Clock(time_step) # time step in minutes
+        self.elapsed_time = 0
         
         self.cmm = CarModelManager()
         self.chm = ChargerManager()
-        self.epm = ElectricityPlanManager(self.time_step)
-        self.cpm = CompanyManager(self.chm, self.epm)
+        self.epm = ElectricityPlanManager(time_step)
+        self.cpm = CompanyManager(self.chm, self.epm, self.clock)
         self.lrm = LocationRoadManager()
-        self.wm = WhereaboutsManager(self.lrm, self.time_step)
+        self.wm = WhereaboutsManager(self.lrm, time_step)
         self.schedule_cars = RandomActivation(self)
         self.schedule_houses = RandomActivation(self)
         self.space = ContinuousSpace(self.lrm.east_west_spread,
@@ -42,8 +44,8 @@ class ChargingModel(Model):
             #TODO reconsider if agents should all start at home
             cur_location = residency_location 
             pos = self.lrm.relative_position(cur_location)
-            house_agent = HouseAgent(agent_uid, self, residency_location, 
-                                     self.chm, self.epm)
+            house_agent = HouseAgent(agent_uid, self, self.clock,
+                                     residency_location, self.chm, self.epm)
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
@@ -60,8 +62,8 @@ class ChargingModel(Model):
     
     def step(self):
         '''Advance the model by one step.'''
-        self.wm.elapse_one_time_step()
-        self.datacollector.collect(self)
+        self.wm.prepare_movement()
         self.schedule.step()
+        self.datacollector.collect(self)
         
         

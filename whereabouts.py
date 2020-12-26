@@ -24,7 +24,8 @@ class Whereabouts():
         self.cur_edge = (start_location.uid, start_location.uid)
         self.cur_location_coordinates = self.cur_location.coordinates()
         self.is_travelling = False
-        self.distance_travelled = 0
+        self.cur_velocity = 0 # in km/h
+        self.distance_travelled = 0 # in km
         self.route = []
         
     def set_destination(self, destination_location):
@@ -36,10 +37,10 @@ class Whereabouts():
                                       destination_location.uid, 'distance')
         self.is_travelling = True
     
-    def elapse_one_tick(self, velocity):
+    def elapse_one_tick(self):
         if self.is_travelling == True:
             # adapt travel parameter
-            self.distance_travelled += velocity * self.time_step / 60
+            self.distance_travelled += self.cur_velocity * self.time_step / 60
             # determine current road
             sum_dist_to_prev_node = 0.0
             sum_dist_to_cur_node = 0.0

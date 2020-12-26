@@ -55,14 +55,10 @@ class WhereaboutsManager():
                         count += 1
             self.agents_on_edge[edge] = count
     
-    def elapse_one_time_step(self):
-        """ Lets agents move for one time step.
-        
-        This function calls the elapse_one_tick function for a given number of
-        times as defined in time_step_duration. The idea is that time steps
-        can be chosen coarser without traffic being calculated inapproproately. 
-        """
-        for wa_key in self.whereabouts.keys():
-            #TODO derive velocity from traffic congestion and data
-            velocity = 1
-            self.whereabouts[wa_key].elapse_one_tick(velocity)
+    def prepare_movement(self):
+        """ Determines all parameters, especially the velocity, required by
+        Agents to calculate their next movement. """
+        self.count_agents_on_edges()
+        for wa in self.whereabouts.values():
+            # TODO determine velocity
+            wa.cur_velocity = 50
