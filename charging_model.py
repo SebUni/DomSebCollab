@@ -30,7 +30,7 @@ class ChargingModel(Model):
         self.cmm = CarModelManager()
         self.chm = ChargerManager()
         self.epm = ElectricityPlanManager(time_step)
-        self.cpm = CompanyManager(self.chm, self.epm, self.clock)
+        self.cpm = CompanyManager(self.clock, self.chm, self.epm)
         self.lrm = LocationRoadManager()
         self.wm = WhereaboutsManager(self.lrm, time_step)
         self.schedule_cars = RandomActivation(self)
@@ -62,6 +62,7 @@ class ChargingModel(Model):
     
     def step(self):
         '''Advance the model by one step.'''
+        self.clock.step()
         self.wm.prepare_movement()
         self.schedule.step()
         self.datacollector.collect(self)

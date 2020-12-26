@@ -58,6 +58,28 @@ class LocationRoadManager():
         lon_2, lat_2 = location_1.longitude, location_1.latitude
         return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
     
+    def estimated_travel_time_between_locations(self, location_1, location_2):
+        """
+        Returns the time needed to travel between two locations in minutes.
+        """
+        route = nx.shortest_path(self.traffic_network, location_1.uid,
+                                 location_2.uid, 'distance')
+        travel_time = 0
+        start_node = -1
+        start_node_defined = False
+        for end_node in route:
+            if start_node_defined:
+                distance = \
+                    self.traffic_network[start_node][end_node]['distance']
+                avg_speed = \
+                    self.traffic_network[start_node][end_node]['average_speed']
+                travel_time += distance / avg_speed
+                
+            start_node = end_node
+            start_node_defined = True;
+        
+        return travel_time
+    
     def load_locations(self):
         """
         Reads information on individual suburbs from locations.csv.
@@ -98,6 +120,7 @@ class LocationRoadManager():
         """
         Reads information on suburb connection from connections.csv.
         """
+        cast = Cast("Connection")
         self.traffic_network = nx.Graph()
         # add locations
         for location in self.locations.values():
@@ -115,11 +138,14 @@ class LocationRoadManager():
                          + row[1] + ".")
             flt_dist = self.distance_between_locations(start_location,
                                                           end_location)
+            avg_speed = cast.to_positive_float(row[2], "Average speed")
                 
             self.traffic_network.add_edge(start_location.uid, end_location.uid,
-                                          distance=flt_dist)
+                                          distance=flt_dist,
+                                          average_speed=avg_speed)
             self.traffic_network.add_edge(end_location.uid, start_location.uid,
-                                          distance=flt_dist)
+                                          distance=flt_dist,
+                                          average_speed=avg_speed)
     
     def process_location_data(self):
         """

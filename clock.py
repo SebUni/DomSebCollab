@@ -32,6 +32,8 @@ class Clock():
         self.time_step = time_step
         self.time_of_day = self.calc_time_of_day()
         
+        # TODO check if time step is chosen appropriately
+        
     def calc_time_of_day(self):
         """ Calculates how many minutes have elapsed since the most recent
         mid-night. """

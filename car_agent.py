@@ -9,7 +9,7 @@ from collections import deque
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
-    def __init__(self, uid, model, cur_location, house_agent, company,
+    def __init__(self, uid, model, clock, cur_location, house_agent, company,
                  car_model_manager, whereabouts_manager):
         """
         Parameters
@@ -18,6 +18,8 @@ class CarAgent(Agent):
             Unique of the car agent.
         model : ChargingModel
             The base charging model defined as base for the simulation.
+        clock : Clock
+            The Handle to the global clock object.
         house_agent : HouseAgent
             The house_agent assigned to this car_agent.
         company : Company
@@ -35,6 +37,7 @@ class CarAgent(Agent):
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
         self.uid = uid 
+        self.clock = clock
         self.house_agent = house_agent
         self.company = company
         # TODO reconsider how car models are chosen
