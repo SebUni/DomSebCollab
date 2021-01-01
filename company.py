@@ -137,6 +137,23 @@ class Company():
         """
         return len(self.ccm.chargers_not_in_use) != 0
     
+    def can_charge(self, car_agent):
+        """
+        Checks if a car_agent is connected to one of the company's chargers.
+
+        Parameters
+        ----------
+        car_agent : CarAgent
+            The car agent to check for charger connectivity.
+
+        Returns
+        -------
+        is_connected : bool.
+            Feedback if the charger is connected.
+
+        """
+        return self.ccm.can_charge(car_agent)
+    
     def block_charger(self, car_agent, queuing):
         """
         Attempts to blocks a currently unused charger for the car_agent.

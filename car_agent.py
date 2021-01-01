@@ -261,29 +261,62 @@ class CarAgent(Agent):
         """ Charges the EV. """
         if not self.whereabouts.is_traveling \
             and self.soc < self.car_model.battery_capacity:
+            cur_location = self.whereabouts.current_location
             missing_charge =  self.car_model.battery_capacity - self.soc
             received_charge = 0.0
             charging_cost = 0.0
-            charge_up_to = 0.0
-            if self.charge_at_home != 0.0 and \
-                self.whereabouts.current_location == self.house_agent.location:
-                if self.charge_at_home < missing_charge:
-                    charge_up_to = self.charge_at_home
-                else:
-                    charge_up_to = missing_charge
-                received_charge, charging_cost \
-                    = self.house_agent.charge_car(charge_up_to,
+            # In case of non-emergency charging
+            if self.emergency_charging == 0.0:
+                # If car agent is at home
+                if cur_location == self.house_agent.location \
+                    and self.charge_at_home != 0.0:
+                    charge_up_to = min(self.charge_at_home, missing_charge)
+                    received_charge, charging_cost \
+                        = self.house_agent.charge_car(charge_up_to,
                                             self.car_model.charger_capacity)
-            if self.charge_at_work != 0.0 and \
-                self.whereabouts.current_location == self.company.location:
-                if self.charge_at_work < missing_charge:
-                    charge_up_to = self.charge_at_work
-                else:
-                    charge_up_to = missing_charge
-                received_charge, charging_cost \
-                    = self.company.charge_car(self, charge_up_to,
+                    self.charge_at_home -= received_charge
+                # if car agent is at work
+                if cur_location == self.company.location \
+                    and self.charge_at_work != 0.0 \
+                    and self.company.can_charge(self):
+                    charge_up_to = min(self.charge_at_work, missing_charge)
+                    received_charge, charging_cost \
+                        = self.company.charge_car(self, charge_up_to,
                                             self.car_model.charger_capacity)
-            
+                    self.charge_at_work -= received_charge
+                    if self.charge_at_work == 0:
+                        self.company.unblock_charger(self)
+            # In case of emergency charging
+            else:
+                # if car agent is at home
+                if cur_location == self.house_agent.location:
+                    received_charge, charging_cost \
+                        = self.house_agent.charge_car(self.emergency_charging,
+                                            self.car_model.charger_capacity)
+                    self.emergency_charging -= received_charge
+                # if car agent is at work
+                elif cur_location == self.company.location:
+                    if self.company.can_charge(self):
+                        received_charge, charging_cost \
+                            = self.company.charge_car(self,
+                                            self.emergency_charging,
+                                            self.car_model.charger_capacity)
+                        self.emergency_charging -= received_charge
+                        if self.emergency_charging == 0:
+                            self.company.unblock_charger(self)
+                # if car agent has to use public charger whilst in between home
+                # and work
+                else:
+                    pub_company = cur_location.companies[0]
+                    if pub_company.can_charge(self):
+                        received_charge, charging_cost \
+                            = pub_company.charge_car(self,
+                                            self.emergency_charging,
+                                            self.car_model.charger_capacity)
+                        self.emergency_charging -= received_charge
+                        if self.emergency_charging == 0:
+                            pub_company.unblock_charger(self)
+                    
             self.soc += received_charge
             self.electricity_cost += charging_cost
             
@@ -302,18 +335,24 @@ class CarAgent(Agent):
         None.
 
         """
-        
-        if self.house_agent.location == self.whereabouts.cur_location:
-            # well nothting much needs to be done at home as there is one
-            # charger per car
-            pass
-        elif self.company.location == self.whereabouts.location:
-            # charge at place of employment
-            self.company.block_charger(self, True)
+        # check if charging needs can be satisfied
+        if self.soc+emergency_charge_volume <= self.car_model.battery_capacity:
+            # prepare for charging
+            if self.house_agent.location == self.whereabouts.cur_location:
+                # well nothting much needs to be done at home as there is one
+                # charger per car
+                pass
+            elif self.company.location == self.whereabouts.location:
+                # charge at place of employment
+                self.company.block_charger(self, True)
+            else:
+                # charge at public charger
+                self.location.companies[0].block_charger(self, True)
+            self.emergency_charging = emergency_charge_volume
         else:
-            # charge at public charger
-            self.location.companies[0].block_charger(self, True)
-        self.emergency_charging = emergency_charge_volume
+            # TODO figure out what to do with cars that can not satisfy their
+            # departure criterion in like ... you know .. ever
+            pass
     
     def find_next_location(self):
         """
