@@ -19,6 +19,7 @@ from car_model_manager import CarModelManager
 from charger_manager import ChargerManager
 from electricity_plan_manager import ElectricityPlanManager
 from company_manager import CompanyManager
+from calendar_planner import CalendarPlanner
 
 class ChargingModel(Model):
     """The charging model with N agents."""
@@ -33,6 +34,7 @@ class ChargingModel(Model):
         self.cpm = CompanyManager(self.clock, self.chm, self.epm)
         self.lrm = LocationRoadManager()
         self.wm = WhereaboutsManager(self.lrm, time_step)
+        self.cp = CalendarPlanner(self.clock, self.lrm)
         self.schedule_cars = RandomActivation(self)
         self.schedule_houses = RandomActivation(self)
         self.space = ContinuousSpace(self.lrm.east_west_spread,
@@ -49,8 +51,16 @@ class ChargingModel(Model):
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
-            car_agent = CarAgent(agent_uid, self, cur_location, house_agent,
-                                 company, self.cmm, self.wm)
+            calendar = self.cp.create_calendar(residency_location,
+                                               employment_location)
+            # the following three conditions are explained in car_agent.py
+            departure_condition = "ONE_WAY_TRIP"
+            reserve_range = 10
+            queuing_condition = "WHEN_NEEDED"
+            car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
+                                 house_agent, company, self.lrm, self.cmm,
+                                 self.wm, calendar, departure_condition,
+                                 reserve_range, queuing_condition)
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)

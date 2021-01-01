@@ -59,6 +59,8 @@ class WhereaboutsManager():
         """ Determines all parameters, especially the velocity, required by
         Agents to calculate their next movement. """
         self.count_agents_on_edges()
+        # TODO this now changes 'velocity' edge-attribute of
+        # self.lrm.traffic_network
         for wa in self.whereabouts.values():
             # TODO determine velocity
             wa.cur_velocity = 50
