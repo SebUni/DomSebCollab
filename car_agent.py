@@ -100,12 +100,18 @@ class CarAgent(Agent):
         
     def plan(self):
         """ This function determines if the agent should start a new journey
-        in this time step. """
+        in this time step and when to charge. """
+        # Decide on new destination
         scheduled_loc = self.calendar[self.clock.time_of_week]
         if self.whereabouts.cur_location != scheduled_loc:
             if self.emergency_charging == 0.0:
                 if not self.whereabouts.is_traveling:
                     self.whereabouts.set_destination(scheduled_loc)
+        # Decide on when to charge
+        # TODO implement this properly
+        self.charge_at_home = self.car_model.battery_capacity - self.soc
+        self.charge_at_work = self.car_model.battery_capacity - self.soc
+                    
     
     def move(self):
         """ Process agent's movement, incl. departure- and queuing conditions
@@ -234,7 +240,8 @@ class CarAgent(Agent):
                 distances.append(
                     self.lrm.traffic_network[prev_node][cur_node]['distance'])
                 speed_limits.append(
-                    self.lrm.traffic_network[prev_node][cur_node]['speed_limit'])
+                    self.lrm.traffic_network[prev_node][cur_node]\
+                                                              ['speed_limit'])
             prev_node = cur_node
         
         expected_consumption = []
