@@ -125,7 +125,36 @@ class Company():
         
         return delivered_charge, charging_cost
     
-    def block_charger(self, car_agent):
+    def is_one_charger_available(self):
+        """
+        Checks if there is a charger currently not in use.
+
+        Returns
+        -------
+        Bool
+            As description above.
+
+        """
+        return len(self.ccm.chargers_not_in_use) != 0
+    
+    def can_charge(self, car_agent):
+        """
+        Checks if a car_agent is connected to one of the company's chargers.
+
+        Parameters
+        ----------
+        car_agent : CarAgent
+            The car agent to check for charger connectivity.
+
+        Returns
+        -------
+        is_connected : bool.
+            Feedback if the charger is connected.
+
+        """
+        return self.ccm.can_charge(car_agent)
+    
+    def block_charger(self, car_agent, queuing):
         """
         Attempts to blocks a currently unused charger for the car_agent.
 
@@ -133,13 +162,17 @@ class Company():
         ----------
         car_agent : CarAgent
             The employee that just came for work.
+        queuing: bool
+            Informs the company charger manager that the car agent would like
+            to join the que for charging. That is once a charger becomes
+            available the car agent would like to use the freed up charger.
 
         Returns
         -------
         None.
 
         """
-        self.ccm.block_charger(car_agent)
+        self.ccm.block_charger(car_agent, queuing)
         
     def unblock_charger(self, car_agent):
         """

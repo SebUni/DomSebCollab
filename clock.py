@@ -31,6 +31,7 @@ class Clock():
         self.elapsed_time = - time_step
         self.time_step = time_step
         self.time_of_day = self.calc_time_of_day()
+        self.time_of_week = self.calc_time_of_week()
         
         # TODO check if time step is chosen appropriately
         
@@ -40,12 +41,24 @@ class Clock():
         
         minutes_in_a_day = 60*24
         time_of_day = self.elapsed_time
-        while time_of_day < 0:
+        if time_of_day < 0:
             time_of_day += minutes_in_a_day
-        while time_of_day >= minutes_in_a_day:
-            time_of_day -= minutes_in_a_day
+        time_of_day = time_of_day % minutes_in_a_day
+            
             
         return time_of_day
+    
+    def calc_time_of_week(self):
+        """ Calculates how many minutes have elapsed since the most recent
+        Sunday to Monday mid-night. """
+        
+        minutes_in_a_week = 60*24*7
+        time_of_week = self.elapsed_time
+        if time_of_week < 0:
+            time_of_week += minutes_in_a_week
+        time_of_week = time_of_week % minutes_in_a_week
+            
+        return time_of_week
         
     def step(self):
         """
@@ -57,3 +70,5 @@ class Clock():
 
         """
         self.elapsed_time += self.time_step
+        self.time_of_day = self.calc_time_of_day()
+        self.time_of_week = self.calc_time_of_week()

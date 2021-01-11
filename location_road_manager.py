@@ -50,7 +50,7 @@ class LocationRoadManager():
         self.load_connections()
         self.process_location_data()
     
-    def distance_between_locations(self, location_1, location_2):
+    def direct_distance_between_locations(self, location_1, location_2):
         """
         Returns the distance between two locations in kilometers.
         """
@@ -71,9 +71,9 @@ class LocationRoadManager():
             if start_node_defined:
                 distance = \
                     self.traffic_network[start_node][end_node]['distance']
-                avg_speed = \
-                    self.traffic_network[start_node][end_node]['average_speed']
-                travel_time += distance / avg_speed
+                speed_limit = \
+                    self.traffic_network[start_node][end_node]['speed_limit']
+                travel_time += distance / speed_limit
                 
             start_node = end_node
             start_node_defined = True;
@@ -136,16 +136,18 @@ class LocationRoadManager():
             except ValueError:
                 sys.exit("Connection not well defined for " + row[0] + " - " \
                          + row[1] + ".")
-            flt_dist = self.distance_between_locations(start_location,
-                                                          end_location)
-            avg_speed = cast.to_positive_float(row[2], "Average speed")
+            flt_dist = self.direct_distance_between_locations(start_location,
+                                                              end_location)
+            speed_lmt = cast.to_positive_float(row[2], "Speed limit")
                 
             self.traffic_network.add_edge(start_location.uid, end_location.uid,
                                           distance=flt_dist,
-                                          average_speed=avg_speed)
+                                          speed_limit=speed_lmt,
+                                          current_velocity=speed_lmt)
             self.traffic_network.add_edge(end_location.uid, start_location.uid,
                                           distance=flt_dist,
-                                          average_speed=avg_speed)
+                                          speed_limit=speed_lmt,
+                                          current_velocity=speed_lmt)
     
     def process_location_data(self):
         """
@@ -188,7 +190,7 @@ class LocationRoadManager():
         min_diff, min_diff_uid = -1, -1
         for location in self.locations.values():
             diff = abs(distance_work_residency - \
-                       self.distance_between_locations(residency_location,
+                       self.direct_distance_between_locations(residency_location,
                                                        location))
             if min_diff_uid == -1 or min_diff > diff:
                 min_diff = diff
@@ -203,6 +205,25 @@ class LocationRoadManager():
         x = location.longitude - self.min_lon
         y = location.latitude - self.min_lat
         return np.array((x, y))
+    
+    def calc_route(self, start, destination):
+        """
+        Returns the shorts route from the start location to the end location.
+
+        Parameters
+        ----------
+        start : Location
+            Start location.
+        destination : Location
+            End location.
+
+        Returns
+        -------
+        route : int[].
+            A list with all location_uids to travel along.
+        """
+        return nx.shortest_path(self.traffic_network, start.uid,
+                                destination.uid, 'distance')
         
     def print_locations(self):
         """

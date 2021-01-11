@@ -9,7 +9,7 @@ class CalendarPlanner():
     """
     Creates the work schedules of all agents.
     """
-    def __init__(self, clock, location_road_manager, planning_horizon):
+    def __init__(self, clock, location_road_manager):
         """
         Der Konstruktor.
 
@@ -19,9 +19,6 @@ class CalendarPlanner():
             Needed for clock.time_step which is given in minutes.
         location_road_manager : LocationRoadManager
             Handle to the location road manager.
-        planning_horizon : int
-            Defines how far ahead the agents' scheduldes shall be planned.
-            Given in minutes.
 
         Returns
         -------
@@ -30,9 +27,8 @@ class CalendarPlanner():
         """
         self.clock = clock
         self.lrm = location_road_manager
-        self.planning_horizon = planning_horizon
         
-    def create_calendar(self, car_agent):
+    def create_calendar(self, home_location, work_location):
         """
         Calculates the entries for one agent in self.event_distribution.
         """
@@ -48,9 +44,6 @@ class CalendarPlanner():
         work_hours_per_week = 40*60 # 40 hours a week
         
         work_hours_per_day = work_hours_per_week / len(work_days)
-        
-        home_location = car_agent.house_agent.locations
-        work_location = car_agent.company.location
         
         estimated_travel_time \
             = self.lrm.estimated_travel_time_between_locations(
