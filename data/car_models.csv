@@ -1,21 +1,21 @@
-Uid,Make_and_model,Consumption_kWh/km,Drag_coeff,Front_area_in_m^2,Mass_in_kg,Battery_capacity_in_kWh,Charger_capacity_in_kW
-1,Nissan Leaf,0.187,0.28,2.27,1591,40,6.6
-2,Hyundai Ioniq Electric,0.155,0.24,2.17,1527,38.3,7.2
-3,Hyundai Kona Electric,0.175,0.29,2.29,1685,64,7.2
-4,BMW i3,0.186,0.29,2.33,1345,42.2,11
-5,Renault Zoe,0.178,0.29,2.29,1480,45.6,43
-6,Jaguar I-Pace,0.273,0.29,2.58,2140,90,7
-7,Tesla Model 3 SR+,0.16,0.23,2.19,1611,54,11.5
-8,Tesla Model 3 LR,0.174,0.23,2.19,1847,79.5,11.5
-9,Tesla Model X LR,0.217,0.25,2.74,2554,100,11.5
-10,Tesla Model S LR,0.189,0.24,2.32,2215,100,11.5
-11,Mercedes Benz EQC 400 4MATIC,0.216,0.28,2.51,2495,80,7.4
-12,Audi E-tron 50 quattro,0.224,0.28,2.65,2445,71,11
-13,Audi E-tron 55 quattro,0.237,0.28,2.65,2595,95,11
-14,Mini Cooper SE,0.194,0.3,2.1,1365,32.6,7.4
-15,MG ZS EV,0.186,0.33,2.4,1502,44.5,7.4
-16,Kia e-Niro,0.186,0.29,2.31,1812,64,7.2
-17,VW ID.3 Pure,0.161,0.267,2.32,1625,45,7.2
-18,VW ID.3 Pro S,0.166,0.267,2.32,1794,58,11
-19,VW ID.3 Pro S,0.171,0.267,2.32,1934,77,11
-20,VW ID.4 Pro,0.172,0.28,2.48,2049,77,11
+id,Make_and_model,Consumption_kWh/km,Drag_coeff,Front_area_in_m^2,Mass_in_kg,Battery_capacity_in_kWh,Charger_capacity_AC,Charger_capacity_DC
+1,Nissan Leaf,0.187,0.28,2.27,1591,40,6.6,50
+2,Hyundai Ioniq Electric,0.155,0.24,2.17,1527,38.3,7.2,100
+3,Hyundai Kona Electric,0.175,0.29,2.29,1685,64,7.2,100
+4,BMW i3,0.186,0.29,2.33,1345,42.2,11,50
+5,Renault Zoe,0.178,0.29,2.29,1480,45.6,22,43
+6,Jaguar I-Pace,0.273,0.29,2.58,2140,90,7,100
+7,Tesla Model 3 SR+,0.16,0.23,2.19,1611,54,11.5,120
+8,Tesla Model 3 LR,0.174,0.23,2.19,1847,79.5,11.5,120
+9,Tesla Model X LR,0.217,0.25,2.74,2554,100,11.5,225
+10,Tesla Model S LR,0.189,0.24,2.32,2215,100,11.5,225
+11,Mercedes Benz EQC 400 4MATIC,0.216,0.28,2.51,2495,80,7.4,110
+12,Audi E-tron 50 quattro,0.224,0.28,2.65,2445,71,11,120
+13,Audi E-tron 55 quattro,0.237,0.28,2.65,2595,95,11,150
+14,Mini Cooper SE,0.194,0.3,2.1,1365,32.6,7.4,50
+15,MG ZS EV,0.186,0.33,2.4,1502,44.5,7.4,50
+16,Kia e-Niro,0.186,0.29,2.31,1812,64,7.2,100
+17,VW ID.3 Pure,0.161,0.267,2.32,1625,45,7.2,50
+18,VW ID.3 Pro,0.166,0.267,2.32,1794,58,11,100
+19,VW ID.3 Pro S,0.171,0.267,2.32,1934,77,11,125
+20,VW ID.4 Pro,0.172,0.28,2.48,2049,77,11,125
