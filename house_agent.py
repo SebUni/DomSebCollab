@@ -65,10 +65,10 @@ class HouseAgent(Agent):
         charging_cost = 0.0
         
         charge_rate = 0
-        if car_charger_capacity < self.charger.power:
+        if car_charger_capacity < self.charger.charger_model.power:
             charge_rate = car_charger_capacity
         else:
-            charge_rate = self.charger.power
+            charge_rate = self.charger.charger_model.power
         
         delivered_charge = min([self.clock.time_step / 60 * charge_rate,
                                 charge_up_to])
@@ -77,3 +77,22 @@ class HouseAgent(Agent):
                                                 self.clock.time_of_day)
         
         return delivered_charge, charging_cost
+    
+    def step(self):
+        # TODO 1) Calculate house consumption
+        # TODO 2) Calculate PV geneation
+        # TODO 2.a) Pick solar irradiation and temperature
+        solar_irr = 1 # in kWm^-2
+        temp = 25 # in °C
+        # 2.b) actual output calculation
+        # An x kW PV system refers to a PV system which under Standart Testing
+        # Conditions (solar_irr = 1 kWm^-2, temp = 25°C) outputs x kW.
+        # The equation to calculate PV output is:
+        # P = efficiency * surface * solar_irr *( 1 - 0.05 * (temp - 25K))
+        # Using this you can substitute efficiency * surface = x m^-2
+        pv_output = self.pv_capacity * solar_irr * (1 - 0.05 * (temp - 25))
+        # TODO 3) Determine car charge requirements once car has returned
+        # TODO 4) Determine how much PV generation is consumed and how much is
+        #         stored
+        # TODO 5) Charge battery from grid if needed
+        pass

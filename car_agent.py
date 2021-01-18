@@ -87,8 +87,8 @@ class CarAgent(Agent):
         self.reserve_range = reserve_range
         self.reserve_speed = 100 # in km/h
         self.emergency_charging = 0.0 # in kWh
-        if departure_condition not in {"ALWAYS", "WHEN_NEEDED"}:
-            sys.exit("Queing condition: " + str(queuing_condition) \
+        if queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
+            sys.exit("Queuing condition: " + str(queuing_condition) \
                      + " is ill defined!")
         self.queuing_condition = queuing_condition
         
@@ -105,7 +105,7 @@ class CarAgent(Agent):
         scheduled_loc = self.calendar[self.clock.time_of_week]
         if self.whereabouts.cur_location != scheduled_loc:
             if self.emergency_charging == 0.0:
-                if not self.whereabouts.is_traveling:
+                if not self.whereabouts.is_travelling:
                     self.whereabouts.set_destination(scheduled_loc)
         # Decide on when to charge
         # TODO implement this properly
@@ -120,22 +120,25 @@ class CarAgent(Agent):
         # short hands
         tn = self.lrm.traffic_network
         wa = self.whereabouts
-        # for wa.is_traveling to be True, cur_loc != scheduled_loc and no
+        # for wa.is_travelling to be True, cur_loc != scheduled_loc and no
         # emergency charing is required therefore if clauses are omitted
-        if not wa.is_traveling: return
+        if not wa.is_travelling:
+            return
         # if trip is about to start (that is only directly after route is
         # planned) check departure condition
-        if wa.distance_travelled == 0:
-            charge_needed = self.charge_for_departure_conditiond(wa.route)
+        if wa.cur_location.uid == wa.route[0]:
+            charge_needed = self.charge_for_departure_condition(wa.route)
             if charge_needed > self.soc:
                 self.initiate_emergency_charging(charge_needed - self.soc)
                 wa.terminate_trip()
+                return
         
         # time remaining of step in h
         remaining_time = self.clock.time_step / 60
         while remaining_time > 0:
             # short hand critical parameters
             (start, end) = wa.cur_edge
+            # correct edge 
             cur_velocity = tn[start][end]['current_velocity']
             speed_limit = tn[start][end]['speed_limit']
             edge_distance = tn[start][end]['distance']
@@ -205,17 +208,23 @@ class CarAgent(Agent):
                     += self.clock.time_step / 60 * cur_velocity
                 self.soc -= self.clock.time_step / 60 * cur_consumption
                 # determine current coordinates
-                coord_start = self.lrm.locations[start].cooridnates()
-                coord_end = self.lrm.locations[end].cooridnates()
+                coord_start = self.lrm.locations[start].coordinates()
+                coord_end = self.lrm.locations[end].coordinates()
                 ratio_trvld_on_edge = wa.distance_since_last_location \
                                                                 / edge_distance
                 diff_vct = [coord_end[0] - coord_start[0],
                             coord_end[1] - coord_start[1]]
                 wa.cur_location_coordinates = \
                     [coord_start[0] + ratio_trvld_on_edge * diff_vct[0],
-                     coord_end[1] + ratio_trvld_on_edge * diff_vct[1]]
+                     coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
+                remaining_time = 0
         # update position on grid
-        self.model.grid.move_agent(self, wa.cur_location_coordinates)
+        relative_position \
+            =self.lrm.relative_coordinate_position(wa.cur_location_coordinates)
+        try:
+            self.model.space.move_agent(self, relative_position)
+        except:
+            print("maaeeeh")
         
     def charge_for_departure_condition(self, route):
         """
@@ -249,9 +258,10 @@ class CarAgent(Agent):
             time_on_segment = distance / speed_limits[i]
             instant_consumption \
                 = self.car_model.instantaneous_consumption(speed_limits[i])
-            expected_consumption.append[instant_consumption * time_on_segment]
+            expected_consumption.append(instant_consumption * time_on_segment)
         
-        reserve_power = self.car_model.instant_consumption(self.reserve_speed)
+        reserve_power \
+            = self.car_model.instantaneous_consumption(self.reserve_speed)
         
         power_required = 0
         if self.departure_condition == "ROUND_TRIP":
@@ -266,9 +276,9 @@ class CarAgent(Agent):
         
     def charge(self):
         """ Charges the EV. """
-        if not self.whereabouts.is_traveling \
+        if not self.whereabouts.is_travelling \
             and self.soc < self.car_model.battery_capacity:
-            cur_location = self.whereabouts.current_location
+            cur_location = self.whereabouts.cur_location
             missing_charge =  self.car_model.battery_capacity - self.soc
             received_charge = 0.0
             charging_cost = 0.0

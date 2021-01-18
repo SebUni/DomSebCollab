@@ -46,7 +46,7 @@ class WhereaboutsManager():
         
         Needed to estimate congestions and calculate agents velocity."""
         self.agents_on_edge = dict()
-        for edge in list(self.lm.traffic_network.edges):
+        for edge in list(self.lrm.traffic_network.edges):
             edge_inv = (edge[1], edge[0])
             count = 0
             for whereabouts_it in self.whereabouts.values():

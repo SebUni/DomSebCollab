@@ -60,7 +60,7 @@ class CarModelManager():
         CarModel.
         """
         # TODO determine criteria for draw
-        return random.choice(list(self.car_models))
+        return random.choice(list(self.car_models.values()))
         
     def __repr__(self):
         msg = ""

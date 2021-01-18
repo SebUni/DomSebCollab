@@ -8,7 +8,6 @@ Created on Sun Nov  1 17:46:52 2020
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
-from mesa.datacollection import DataCollector
 
 from clock import Clock
 from car_agent import CarAgent
@@ -37,15 +36,18 @@ class ChargingModel(Model):
         self.cp = CalendarPlanner(self.clock, self.lrm)
         self.schedule_cars = RandomActivation(self)
         self.schedule_houses = RandomActivation(self)
-        self.space = ContinuousSpace(self.lrm.east_west_spread,
-                                     self.lrm.north_south_spread,
+        # extra promil is needed as east_west_spread and north_south_spread
+        # are OPEN interval limits and agents can not be placed on this border
+        # point
+        self.space = ContinuousSpace(self.lrm.east_west_spread * 1.001,
+                                     self.lrm.north_south_spread * 1.001,
                                      False)
         # create agents
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
             #TODO reconsider if agents should all start at home
             cur_location = residency_location 
-            pos = self.lrm.relative_position(cur_location)
+            pos = self.lrm.relative_location_position(cur_location)
             house_agent = HouseAgent(agent_uid, self, self.clock,
                                      residency_location, self.chm, self.epm)
             employment_location = \
@@ -64,17 +66,12 @@ class ChargingModel(Model):
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)
-    
-        something = 0
-        self.datacollector = DataCollector(
-            model_reporters={"Something": something},
-            agent_reporters={"Something": "something"})
-    
+        
     def step(self):
         '''Advance the model by one step.'''
         self.clock.step()
         self.wm.prepare_movement()
-        self.schedule.step()
-        self.datacollector.collect(self)
+        self.schedule_houses.step()
+        self.schedule_cars.step()
         
         

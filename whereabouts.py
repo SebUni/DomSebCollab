@@ -31,6 +31,7 @@ class Whereabouts():
         """
         self.route = self.lrm.calc_route(self.cur_location,
                                          destination_location)
+        self.cur_edge = (self.route[0], self.route[1])
         self.is_travelling = True
         
     def terminate_trip(self):

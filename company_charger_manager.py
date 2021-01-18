@@ -41,7 +41,7 @@ class CompanyChargerManager():
         self.chargers.append(charger)
         # the cat coded again:
         # self.charger_not_in_use.append(charger)cvffffffffffcxxxxx 
-        self.charger_not_in_use.append(charger)
+        self.chargers_not_in_use.append(charger)
         
     def can_charge(self, car_agent):
         """
@@ -79,7 +79,7 @@ class CompanyChargerManager():
 
         """
         if not len(self.chargers_not_in_use) == 0:
-            charger = self.charger_not_in_use.pop()
+            charger = self.chargers_not_in_use.pop()
             self.chargers_in_use_by_car_agent[car_agent] = charger
             self.chargers_in_use_by_charger[charger] = car_agent
         else:

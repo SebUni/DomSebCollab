@@ -55,7 +55,7 @@ class LocationRoadManager():
         Returns the distance between two locations in kilometers.
         """
         lon_1, lat_1 = location_1.longitude, location_1.latitude
-        lon_2, lat_2 = location_1.longitude, location_1.latitude
+        lon_2, lat_2 = location_2.longitude, location_2.latitude
         return calc_distance_from_coordinates(lat_1, lon_1, lat_2, lon_2)
     
     def estimated_travel_time_between_locations(self, location_1, location_2):
@@ -90,30 +90,30 @@ class LocationRoadManager():
         for row in csv_helper.data:
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
-            name = row[1]
-            population = cast.to_positive_int(row[2], "Population")
-            latitude = cast.to_float(row[3], "Latitude")
+            name = row[3]
             longitude = cast.to_float(row[4], "Longitude")
-            occupants_mean = cast.to_positive_float(row[5], "Occupants mean")
-            occupants_std_dev \
-                = cast.to_positive_float(row[6], "Occupants std dev")
+            latitude = cast.to_float(row[5], "Latitude")
+            population = cast.to_positive_int(row[6], "Population")
+            commute_mean = cast.to_positive_float(row[7], "Commute mean")
+            commute_std_dev = cast.to_positive_float(row[8], "Commute std dev")
+            occupant_distribution \
+                = cast.to_positive_int_list(row[9], "Occupant distribution")
+            occupant_values \
+                = cast.to_positive_int_list(row[10], "Occupant values")
             pv_capacity_mean \
-                = cast.to_positive_float(row[7], "PV capacity mean")
+                = cast.to_positive_float(row[11], "PV capacity mean")
             pv_capacity_std_dev \
-                = cast.to_positive_float(row[8], "PV capacity std dev")
+                = cast.to_positive_float(row[12], "PV capacity std dev")
             battery_capacity_mean \
-                = cast.to_positive_float(row[9], "Battery capacity mean")
+                = cast.to_positive_float(row[13], "Battery capacity mean")
             battery_capacity_std_dev\
-                = cast.to_positive_float(row[10], "Battery capacity std dev")
-            commute_mean = cast.to_positive_float(row[11], "Commute mean")
-            commute_std_dev \
-                = cast.to_positive_float(row[12], "Commute std dev")
+                = cast.to_positive_float(row[14], "Battery capacity std dev")
                     
-            loc = Location(uid, name, population, latitude, longitude,
-                           occupants_mean, occupants_std_dev, pv_capacity_mean,
-                           pv_capacity_std_dev, battery_capacity_mean,
-                           battery_capacity_std_dev, commute_mean,
-                           commute_std_dev)
+            loc = Location(uid, name, longitude, latitude, population,
+                           commute_mean, commute_std_dev,
+                           occupant_distribution, occupant_values,
+                           pv_capacity_mean, pv_capacity_std_dev,
+                           battery_capacity_mean, battery_capacity_std_dev)
             self.locations[loc.uid] = loc
         
     def load_connections(self):
@@ -139,6 +139,8 @@ class LocationRoadManager():
             flt_dist = self.direct_distance_between_locations(start_location,
                                                               end_location)
             speed_lmt = cast.to_positive_float(row[2], "Speed limit")
+            # TODO incorperate conversion of Dom's road levels to speed_lmt
+            speed_lmt = 50 # in km/h
                 
             self.traffic_network.add_edge(start_location.uid, end_location.uid,
                                           distance=flt_dist,
@@ -166,8 +168,8 @@ class LocationRoadManager():
             self.total_population += loc.population
             self.acc_population[loc] = self.total_population
         
-        self.north_south_spread = self.max_lat - self.min_lat
-        self.east_west_spread = self.max_lon - self.min_lon
+        self.north_south_spread = round(self.max_lat - self.min_lat, 10)
+        self.east_west_spread = round(self.max_lon - self.min_lon, 10)
         
     def draw_location_of_residency(self):
         """
@@ -187,23 +189,45 @@ class LocationRoadManager():
         residency and the average commute from this suburb.
         """
         distance_work_residency = residency_location.draw_commute_at_random()
-        min_diff, min_diff_uid = -1, -1
-        for location in self.locations.values():
+        min_diff = -1
+        min_diff_location = residency_location
+        for location in self.locations.values():    
             diff = abs(distance_work_residency - \
                        self.direct_distance_between_locations(residency_location,
                                                        location))
-            if min_diff_uid == -1 or min_diff > diff:
+            if min_diff == -1 or min_diff > diff:
                 min_diff = diff
                 min_diff_location = location
         return min_diff_location
     
-    def relative_position(self, location):
+    def relative_location_position(self, location):
         """
-        Returns the locations position relative to the minimum latitude and
+        Returns the location's position relative to the minimum latitude and
         longitude between all loaded location.
+
+        Parameters
+        ----------
+        location : Location
+            Well it's a location type object you wanna chuck in.
+
+        Returns
+        -------
+        np.array
+            The coordinate relative to the lower left-hand corner of the rect-
+            angle enclosing all locations.
+
         """
         x = location.longitude - self.min_lon
         y = location.latitude - self.min_lat
+        return np.array((x, y))
+    
+    def relative_coordinate_position(self, coordinates):
+        """
+        Returns the coordinates relative to the minimum latitude and
+        longitude between all loaded location.
+        """
+        x = coordinates[0] - self.min_lon
+        y = coordinates[1] - self.min_lat
         return np.array((x, y))
     
     def calc_route(self, start, destination):
@@ -270,16 +294,13 @@ class LocationRoadManager():
             
     def __repr__(self):
         msg = ""
-        if self.is_defined:
-            msg = "Number of Locations: " + str(len(self.locations)) + "\n"
-            msg += "Latitude:   [" + str(self.min_lat) + " <-- " + \
-                  str(self.north_south_spread) + " --> " + \
-                  str(self.max_lat) + "]\n" 
-            msg += "Longitude:  [" + str(self.min_lon) + " <-- " + \
-                   str(self.east_west_spread) + " --> " + \
-                   str(self.max_lon) + "]\n"
-            msg += "Population: " + str(self.total_population)
-        else:
-            msg = "Location Manager is not yet defined."
+        msg = "Number of Locations: " + str(len(self.locations)) + "\n"
+        msg += "Latitude:   [" + str(self.min_lat) + " <-- " + \
+                str(self.north_south_spread) + " --> " + \
+                str(self.max_lat) + "]\n" 
+        msg += "Longitude:  [" + str(self.min_lon) + " <-- " + \
+                str(self.east_west_spread) + " --> " + \
+                str(self.max_lon) + "]\n"
+        msg += "Population: " + str(self.total_population)
         
         return msg

@@ -77,7 +77,7 @@ class Company():
             sys.exit("Tried to access company which was created with default"
                      + " constructor")
         self.nbr_of_employees += 1
-        divisor = 1 if len(self.chargers) == 0 else len(self.chargers)
+        divisor = 1 if len(self.ccm.chargers) == 0 else len(self.ccm.chargers)
         cur_employees_per_charger = self.nbr_of_employees / divisor
         if cur_employees_per_charger > self.employees_per_charger\
             or self.nbr_of_employees == 1:
@@ -112,9 +112,9 @@ class Company():
         charging_cost = 0.0
         
         if self.ccm.can_charge(car_agent):
-            charger = self.ccm.chargers_in_use_by_car_agent(car_agent)
+            charger = self.ccm.chargers_in_use_by_car_agent[car_agent]
             charge_rate = 0
-            if car_charger_capacity < charger.power:
+            if car_charger_capacity < charger.charger_model.power:
                 charge_rate = car_charger_capacity
             else:
                 charge_rate = charger.power

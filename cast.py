@@ -45,3 +45,11 @@ class Cast():
                      + str(self.uid) + " is ill defined!")
         
         return output
+    
+    def to_positive_int_list(self, var_input, var_title):
+        var_array = var_input.split(';')
+        output = []
+        for var_str in var_array:
+            output.append(self.to_positive_int(var_str, var_title))
+        
+        return output

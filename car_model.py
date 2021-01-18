@@ -62,6 +62,7 @@ class CarModel():
         a = 0 # agent acceleration in m/s^2
         g = 9.81 # gravitational_acceleration in m/s^2
         alpha = 0 # road's gradient
+        vel_ms = velocity / 3.6 # convert velocity to m/s from km/h
         # coefficient of rolling resistance of a tarmacadam road
         C = {"Car tire on smooth tamac road": 0.01,
              "Car tire on concrete road": 0.011,
@@ -69,9 +70,11 @@ class CarModel():
              "Tarmacadam road": 0.025,
              "Unpaved road": 0.05} 
         consumption = self.mass * a * velocity \
-            + self.mass * g * velocity * math.sin(alpha) \
+            + self.mass * g * vel_ms * math.sin(alpha) \
             + self.mass * g * C["Car tire on concrete road"] * math.cos(alpha)\
-            + 1/2 * self.drag_coeff * self.frontal_area * math.pow(velocity, 3)
+            + 1/2 * self.drag_coeff * self.frontal_area * math.pow(vel_ms, 3)
+        # equation above returns Watt but we need kW so:
+        consumption /= 1000
         return consumption
     
     def __repr__(self):
