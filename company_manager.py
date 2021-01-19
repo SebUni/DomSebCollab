@@ -38,7 +38,7 @@ class CompanyManager():
     def add_employee_to_location(self, location):
         add_to_new_company = False;
         pass # TODO Add criteria when new Company is created
-        if len(self.companies) == 0:
+        if len(location.companies) == 0:
             add_to_new_company = True
         
         company = Company()
@@ -65,7 +65,7 @@ class CompanyManager():
             charger_model \
                 = self.charger_manager.charger_models[charger_model_uid]
             
-            employees_per_charger = 2 # TODO Add criteria to choose this ratio
+            employees_per_charger = 10 # TODO Add criteria to choose this ratio
             
             company = Company(uid, self.clock, location, electricity_plan,
                               self.charger_manager, charger_cost_per_kWh,
@@ -73,7 +73,7 @@ class CompanyManager():
             self.companies.append(company)
             location.companies[company.uid] = company
         else:
-            company = random.choice(list(self.companies))
+            company = random.choice(list(location.companies.values()))
             
         company.add_employee()
         

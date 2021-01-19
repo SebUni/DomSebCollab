@@ -111,4 +111,4 @@ class CompanyChargerManager():
                 # retrieve next car agent to be charged, remove it from que and
                 # block a charger for it
                 car_agent = self.charging_que.popleft()
-                self.block_charger(car_agent)
+                self.block_charger(car_agent, True)

@@ -108,10 +108,7 @@ class CarAgent(Agent):
                 if not self.whereabouts.is_travelling:
                     self.whereabouts.set_destination(scheduled_loc)
         # Decide on when to charge
-        # TODO implement this properly
-        self.charge_at_home = self.car_model.battery_capacity - self.soc
-        self.charge_at_work = self.car_model.battery_capacity - self.soc
-                    
+        self.plan_charging()
     
     def move(self):
         """ Process agent's movement, incl. departure- and queuing conditions
@@ -145,8 +142,8 @@ class CarAgent(Agent):
             possible_distance_on_edge = cur_velocity * remaining_time
             remaining_distance_on_edge \
                 = edge_distance - wa.distance_since_last_location
-            remaining_time_on_edge = edge_distance / cur_velocity
-            cur_consumption \
+            remaining_time_on_edge = remaining_distance_on_edge / cur_velocity
+            inst_consumption \
                 = self.car_model.instantaneous_consumption(cur_velocity)
             # in case of departure from a location check if next location can
             # be reached
@@ -179,13 +176,18 @@ class CarAgent(Agent):
                     break
             # if next location can be reached during this time step
             if possible_distance_on_edge > remaining_distance_on_edge:
+                cur_calendar_item = self.calendar[self.clock.time_of_day].uid
+                cur_end_of_route = wa.route[-1]
+                cur_company_loc = self.company.location.uid
                 wa.cur_location = self.lrm.locations[end]
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
+                self.soc -= remaining_time_on_edge * inst_consumption
                 # if next location is final destination
                 if wa.route[-1] == end:
                     wa.cur_edge = (end, end)
                     wa.terminate_trip()
                     remaining_time = 0
+                    self.plan_charging()
                     # check if agent has arrived at work and intends to charge
                     # at work
                     if self.company.location == wa.cur_location \
@@ -193,7 +195,12 @@ class CarAgent(Agent):
                         # the logic check if a charger is available or if agent
                         # has to que for charging happens in
                         # company_charger_manager
-                        is_queuing = True if self.queuing_condition else False
+                        is_queuing = None
+                        if self.queuing_condition == "ALWAYS":
+                            is_queuing = True
+                        else: # i.e. if self.queuing_condition == "WHEN_NEEDED"
+                            is_queuing \
+                                = self.has_to_charge_prior_to_departure()
                         self.company.block_charger(self, is_queuing)
                 # if next location is not final destination
                 else:
@@ -201,12 +208,10 @@ class CarAgent(Agent):
                     wa.cur_edge = (end, wa.route[index_end + 1])
                     remaining_time -= remaining_time_on_edge
                     wa.distance_since_last_location = 0.0
-                self.soc -= remaining_time_on_edge * cur_consumption
             # if next location can not be reached during this timestep 
             else:
                 wa.distance_since_last_location \
-                    += self.clock.time_step / 60 * cur_velocity
-                self.soc -= self.clock.time_step / 60 * cur_consumption
+                    += remaining_time * cur_velocity
                 # determine current coordinates
                 coord_start = self.lrm.locations[start].coordinates()
                 coord_end = self.lrm.locations[end].coordinates()
@@ -217,14 +222,12 @@ class CarAgent(Agent):
                 wa.cur_location_coordinates = \
                     [coord_start[0] + ratio_trvld_on_edge * diff_vct[0],
                      coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
+                self.soc -= remaining_time * inst_consumption
                 remaining_time = 0
         # update position on grid
         relative_position \
             =self.lrm.relative_coordinate_position(wa.cur_location_coordinates)
-        try:
-            self.model.space.move_agent(self, relative_position)
-        except:
-            print("maaeeeh")
+        self.model.space.move_agent(self, relative_position)
         
     def charge_for_departure_condition(self, route):
         """
@@ -389,3 +392,27 @@ class CarAgent(Agent):
                 checked_ts = checked_ts % 60*24*7
             next_location = self.calendar[checked_ts]
         return next_location
+    
+    def has_to_charge_prior_to_departure(self):
+        """
+        This function is executed after arrival at a final destination to check
+        if the car_agent needs to charge before leaving on the next trip.
+
+        Returns
+        -------
+        BOOL.
+            Returns True or False, that is if the agent needs to charge or not.
+        """
+        next_location = self.find_next_location()
+        next_route = self.lrm.calc_route(self.whereabouts.cur_location,
+                                         next_location)
+        charge_needed = self.charge_for_departure_condition(next_route)
+        if charge_needed < self.soc:
+            return True
+        else:
+            return False
+    
+    def plan_charging(self):
+        # TODO implement this properly
+        self.charge_at_home = self.car_model.battery_capacity - self.soc
+        self.charge_at_work = self.car_model.battery_capacity - self.soc

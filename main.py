@@ -21,9 +21,16 @@ def draw_car_agents(model, it):
     title = str(it) + ".png"
     fig.savefig(title)
 
-cm = charging_model.ChargingModel(100,2)
+cm = charging_model.ChargingModel(50,4)
 for i in range(6*24*5):
     cm.step()
-    draw_car_agents(cm, i)
+    if 130 < i < 170:
+        x = list(range(i+1))
+        x = x[-(i-130):]
+        for j, it in enumerate(cm.extracted_soc):
+            y = it
+            y = y[-(i-130):]
+            plt.plot(x, y, label = "line " + str(j) )
+        plt.show()
 
-
+    # draw_car_agents(cm, i)

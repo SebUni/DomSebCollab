@@ -42,6 +42,9 @@ class ChargingModel(Model):
         self.space = ContinuousSpace(self.lrm.east_west_spread * 1.001,
                                      self.lrm.north_south_spread * 1.001,
                                      False)
+        
+        self.extracted_soc = []
+        
         # create agents
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
@@ -58,7 +61,7 @@ class ChargingModel(Model):
             # the following three conditions are explained in car_agent.py
             departure_condition = "ONE_WAY_TRIP"
             reserve_range = 10
-            queuing_condition = "WHEN_NEEDED"
+            queuing_condition = "ALWAYS"
             car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
                                  house_agent, company, self.lrm, self.cmm,
                                  self.wm, calendar, departure_condition,
@@ -66,6 +69,8 @@ class ChargingModel(Model):
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)
+            self.extracted_soc.append([])
+            
         
     def step(self):
         '''Advance the model by one step.'''
@@ -74,4 +79,7 @@ class ChargingModel(Model):
         self.schedule_houses.step()
         self.schedule_cars.step()
         
-        
+        for i, car_agent in enumerate(self.schedule_cars.agents):
+            cur_soc = car_agent.soc / car_agent.car_model.battery_capacity
+            self.extracted_soc[i].append(cur_soc)
+            
