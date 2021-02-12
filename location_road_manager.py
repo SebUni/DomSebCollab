@@ -90,24 +90,24 @@ class LocationRoadManager():
         for row in csv_helper.data:
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
-            name = row[3]
-            longitude = cast.to_float(row[4], "Longitude")
-            latitude = cast.to_float(row[5], "Latitude")
-            population = cast.to_positive_int(row[6], "Population")
-            commute_mean = cast.to_positive_float(row[7], "Commute mean")
-            commute_std_dev = cast.to_positive_float(row[8], "Commute std dev")
+            name = row[2]
+            longitude = cast.to_float(row[3], "Longitude")
+            latitude = cast.to_float(row[4], "Latitude")
+            population = cast.to_positive_int(row[5], "Population")
+            commute_mean = cast.to_positive_float(row[6], "Commute mean")
+            commute_std_dev = cast.to_positive_float(row[7], "Commute std dev")
             occupant_distribution \
-                = cast.to_positive_int_list(row[9], "Occupant distribution")
+                = cast.to_positive_int_list(row[8], "Occupant distribution")
             occupant_values \
-                = cast.to_positive_int_list(row[10], "Occupant values")
+                = cast.to_positive_int_list(row[9], "Occupant values")
             pv_capacity_mean \
-                = cast.to_positive_float(row[11], "PV capacity mean")
+                = cast.to_positive_float(row[10], "PV capacity mean")
             pv_capacity_std_dev \
-                = cast.to_positive_float(row[12], "PV capacity std dev")
+                = cast.to_positive_float(row[11], "PV capacity std dev")
             battery_capacity_mean \
-                = cast.to_positive_float(row[13], "Battery capacity mean")
+                = cast.to_positive_float(row[12], "Battery capacity mean")
             battery_capacity_std_dev\
-                = cast.to_positive_float(row[14], "Battery capacity std dev")
+                = cast.to_positive_float(row[13], "Battery capacity std dev")
                     
             loc = Location(uid, name, longitude, latitude, population,
                            commute_mean, commute_std_dev,

@@ -28,6 +28,8 @@ class CSVHelper():
 
         """
         path_and_file = str(relative_path) + "\\" + str(filename)
+        if str(relative_path) == "":
+            path_and_file = str(filename)
         # acquire data
         self.data = []
         with open(path_and_file, newline='') as csvfile:

@@ -19,12 +19,14 @@ from charger_manager import ChargerManager
 from electricity_plan_manager import ElectricityPlanManager
 from company_manager import CompanyManager
 from calendar_planner import CalendarPlanner
+from house_consumption_manager import HouseConsumptionManager
+from house_generation_manager import HouseGenerationManager
 
 class ChargingModel(Model):
     """The charging model with N agents."""
-    def __init__(self, nbr_of_agents, time_step):
+    def __init__(self, nbr_of_agents, time_step, season):
         self.num_agents = nbr_of_agents
-        self.clock = Clock(time_step) # time step in minutes
+        self.clock = Clock(time_step, season) # time step in minutes
         self.elapsed_time = 0
         
         self.cmm = CarModelManager()
@@ -34,6 +36,8 @@ class ChargingModel(Model):
         self.lrm = LocationRoadManager()
         self.wm = WhereaboutsManager(self.lrm, time_step)
         self.cp = CalendarPlanner(self.clock, self.lrm)
+        self.hcm = HouseConsumptionManager(self.clock)
+        self.hgm = HouseGenerationManager(self.clock)
         self.schedule_cars = RandomActivation(self)
         self.schedule_houses = RandomActivation(self)
         # extra promil is needed as east_west_spread and north_south_spread
@@ -52,7 +56,8 @@ class ChargingModel(Model):
             cur_location = residency_location 
             pos = self.lrm.relative_location_position(cur_location)
             house_agent = HouseAgent(agent_uid, self, self.clock,
-                                     residency_location, self.chm, self.epm)
+                                     residency_location, self.chm, self.epm,
+                                     self.hcm, self.hgm)
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
@@ -75,6 +80,7 @@ class ChargingModel(Model):
     def step(self):
         '''Advance the model by one step.'''
         self.clock.step()
+        self.hgm.step()
         self.wm.prepare_movement()
         self.schedule_houses.step()
         self.schedule_cars.step()

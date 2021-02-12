@@ -14,7 +14,8 @@ class HouseAgent(Agent):
     An agent which represents the house assgined to a car agent.
     """
     def __init__(self, uid, model, clock, residency_location,
-                 charger_manager, electricity_plan_manager):
+                 charger_manager, electricity_plan_manager,
+                 house_consumption_manager, house_generation_manager):
         super().__init__(uid, model)
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
@@ -41,6 +42,8 @@ class HouseAgent(Agent):
         self.electricity_plan \
             = electricity_plan_manager.electricity_plans[electricity_plan_uid]
         self.battery_soc = 0.0
+        self.hcm = house_consumption_manager
+        self.hgm = house_generation_manager
             
     def charge_car(self, charge_up_to, car_charger_capacity):
         """
@@ -80,17 +83,12 @@ class HouseAgent(Agent):
     
     def step(self):
         # TODO 1) Calculate house consumption
+        inst_consumption \
+            = self.hcm.instantaneous_consumption(self.location, self.occupants)
+        cur_consumption = inst_consumption * self.clock.time_step / 60
         # TODO 2) Calculate PV geneation
-        # TODO 2.a) Pick solar irradiation and temperature
-        solar_irr = 1 # in kWm^-2
-        temp = 25 # in °C
-        # 2.b) actual output calculation
-        # An x kW PV system refers to a PV system which under Standart Testing
-        # Conditions (solar_irr = 1 kWm^-2, temp = 25°C) outputs x kW.
-        # The equation to calculate PV output is:
-        # P = efficiency * surface * solar_irr *( 1 - 0.05 * (temp - 25K))
-        # Using this you can substitute efficiency * surface = x m^-2
-        pv_output = self.pv_capacity * solar_irr * (1 - 0.05 * (temp - 25))
+        inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
+        cur_generation = inst_generation * self.clock.time_step / 60
         # TODO 3) Determine car charge requirements once car has returned
         # TODO 4) Determine how much PV generation is consumed and how much is
         #         stored
