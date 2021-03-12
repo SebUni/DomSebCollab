@@ -83,7 +83,7 @@ class Company():
             or self.nbr_of_employees == 1:
                 self.ccm.add_charger()
                 
-    def charge_car(self, car_agent, charge_up_to, car_charger_capacity):
+    def charge_car(self, car_agent, charge_up_to):
         """
         Allow the car to charge at the house's charger.
 
@@ -112,12 +112,11 @@ class Company():
         charging_cost = 0.0
         
         if self.ccm.can_charge(car_agent):
-            charger = self.ccm.chargers_in_use_by_car_agent[car_agent]
-            charge_rate = 0
-            if car_charger_capacity < charger.charger_model.power:
-                charge_rate = car_charger_capacity
-            else:
-                charge_rate = charger.power
+            company_charger = self.ccm.chargers_in_use_by_car_agent[car_agent]
+            charge_rate = max(min(car_agent.charger.charger_model.ac_power,
+                                  company_charger.charger_model.ac_power),
+                              min(car_agent.charger.charger_model.dc_power,
+                                  company_charger.charger_model.dc_power))
         
             delivered_charge = min([self.clock.time_step / 60 * charge_rate,
                                 charge_up_to])
@@ -195,10 +194,8 @@ class Company():
         if not self.used_default_constructor:
             msg = "Uid: " + str(self.uid) + "\n"
             msg += "Location: " + str(self.location) + "\n"
-            msg += "Chargers: " + str(self.chargers) + "\n"
             msg += "Cost per kWh: " + str(self.charger_cost_per_kWh) + "\n"
             msg += "Electricity plan: " + str(self.electricity_plan) + "\n"
-            msg += "Charger Model: " + str(self.charger_model) + "\n"
             msg += "Nbr of employees: " + str(self.nbr_of_employees) + "\n"
             msg += "Employees per charger: " + str(self.employees_per_charger)
         else:

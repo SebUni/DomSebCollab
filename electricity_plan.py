@@ -11,7 +11,8 @@ class ElectricityPlan():
     """
     Container for data of an individual electricity plan.
     """
-    def __init__(self, uid, is_commercial_plan, base, tariff, time_step):
+    def __init__(self, uid, is_commercial_plan, base, feed_in_tariff, tariff,
+                 time_step):
         """
         Parameters
         ----------
@@ -21,6 +22,8 @@ class ElectricityPlan():
             Plans can either be residential or commercial.
         base : float
             Monthly base rate for a plan.
+        feed_in_tariff : float
+            Feed in tariff for feeding electricity into the grid.
         tariff : {start_time, cost_per_kWh}
             start_time given as int and noted in hours.
             cost_per_kWh is given in Dolars.
@@ -37,6 +40,7 @@ class ElectricityPlan():
         self.is_commercial_plan = bool(is_commercial_plan)
         self.base = base
         self.tariff = dict()
+        self.feed_in_tariff = feed_in_tariff
         # check that time_step is adequatly chosen
         if (24*60) % time_step != 0:
             sys.exit("time_step is not adequatly chosen!")

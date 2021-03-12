@@ -12,7 +12,7 @@ class ChargerModel():
     Information container for Charger Models, that is different types of
     Chargers.
     """
-    def __init__(self, uid, classification, power):
+    def __init__(self, uid, classification, ac_power, dc_power):
         """
         Parameters
         ----------
@@ -20,8 +20,10 @@ class ChargerModel():
             Unique Id of the charger model.
         classification : string
             Can either be "res"isdential or "com"mercial.
-        power : int
-            Charging power of the charger in Watt.
+        power_ac : int
+            AC charging power of the charger in Watt.
+        power_dc : int
+            DC charging power of the charger in Watt.
 
         Returns
         -------
@@ -34,11 +36,13 @@ class ChargerModel():
             msg += "' is not a valid charger model"
             sys.exit(msg)
         self.classification = str(classification)
-        self.power = int(power)
+        self.ac_power = int(ac_power)
+        self.dc_power = int(dc_power)
         
     def __repr__(self):
         msg = "Uid: " + str(self.uid) + "; "
         msg += "Classification: " + self.classification + "; "
-        msg += "Power: " + str(self.power / 1000) + " kW"
+        msg += "AC Power: " + str(self.ac_power / 1000) + " kW; "
+        msg += "DC Power: " + str(self.dc_power / 1000) + " kW"
         
         return msg

@@ -34,7 +34,7 @@ class LocationRoadManager():
     """
     Holds information on locations and how they interact.
     """
-    def __init__(self):
+    def __init__(self, company_manager):
         self.min_lat = 90.0   # most southern point
         self.max_lat = -90.0  # most northern point
         self.min_lon = 361.0  # most western point
@@ -45,6 +45,7 @@ class LocationRoadManager():
         self.acc_population = {}
         self.locations = {}
         self.traffic_network = nx.Graph()
+        self.cpm = company_manager
         
         self.load_locations()
         self.load_connections()
@@ -114,7 +115,11 @@ class LocationRoadManager():
                            occupant_distribution, occupant_values,
                            pv_capacity_mean, pv_capacity_std_dev,
                            battery_capacity_mean, battery_capacity_std_dev)
+            # add public charger
+            self.cpm.add_company(loc)
+            
             self.locations[loc.uid] = loc
+            
         
     def load_connections(self):
         """
@@ -248,6 +253,19 @@ class LocationRoadManager():
         """
         return nx.shortest_path(self.traffic_network, start.uid,
                                 destination.uid, 'distance')
+    
+    def calc_route_length(self, route):
+        distance = 0
+        start_node, start_node_defined = -1, False
+        for end_node in route:
+            if start_node_defined:
+                distance = distance + \
+                    self.traffic_network[start_node][end_node]['distance']
+                
+            start_node, start_node_defined = end_node, True
+        
+        return distance
+            
         
     def print_locations(self):
         """

@@ -45,7 +45,7 @@ class HouseAgent(Agent):
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
             
-    def charge_car(self, charge_up_to, car_charger_capacity):
+    def charge_car(self, charge_up_to, car_charger):
         """
         Allow the car to charge at the house's charger.
 
@@ -53,8 +53,8 @@ class HouseAgent(Agent):
         ----------
         charge_up_to : float
             The amount of charge the car demands at most.
-        car_charger_capacity : float
-            Maximum charging rate of the car.
+        car_charger : Charger
+            Charger object of the car_agent.
 
         Returns
         -------
@@ -67,13 +67,8 @@ class HouseAgent(Agent):
         delivered_charge = 0.0
         charging_cost = 0.0
         
-        charge_rate = 0
-        if car_charger_capacity < self.charger.charger_model.power:
-            charge_rate = car_charger_capacity
-        else:
-            charge_rate = self.charger.charger_model.power
-        
-        delivered_charge = min([self.clock.time_step / 60 * charge_rate,
+        max_charge_rate = self.max_charge_rate(car_charger)
+        delivered_charge = min([self.clock.time_step / 60 * max_charge_rate,
                                 charge_up_to])
         charging_cost \
             = self.electricity_plan.cost_of_use(delivered_charge,
@@ -81,12 +76,18 @@ class HouseAgent(Agent):
         
         return delivered_charge, charging_cost
     
+    def max_charge_rate(self, car_model):
+        return max(min(car_model.charger_capacity_ac,
+                       self.charger.charger_model.ac_power),
+                   min(car_model.charger_capacity_dc,
+                       self.charger.charger_model.dc_power))
+        
     def step(self):
-        # TODO 1) Calculate house consumption
+        # 1) Calculate house consumption
         inst_consumption \
             = self.hcm.instantaneous_consumption(self.location, self.occupants)
         cur_consumption = inst_consumption * self.clock.time_step / 60
-        # TODO 2) Calculate PV geneation
+        # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
         # TODO 3) Determine car charge requirements once car has returned

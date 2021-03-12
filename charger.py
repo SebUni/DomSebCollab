@@ -5,8 +5,6 @@ Created on Sat Dec 12 14:24:22 2020
 @author: S3739258
 """
 
-from charger_model import ChargerModel
-
 class Charger():
     """
     Individual charger used to recharge EV.

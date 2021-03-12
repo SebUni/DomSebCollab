@@ -53,3 +53,12 @@ class Cast():
             output.append(self.to_positive_int(var_str, var_title))
         
         return output
+    
+    def to_boolean(self, var_input, var_title):
+        if var_input == "True":
+            return True
+        elif var_input == "False":
+            return False
+        else:
+            sys.exit(var_title + " of " + self.object_name + " " 
+                     + str(self.uid) + " is ill defined!")

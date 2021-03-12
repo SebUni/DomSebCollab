@@ -12,7 +12,8 @@ class CarModel():
     Stores all information on a type of car.
     """
     def __init__(self, uid, car_model_name, car_consumption, drag_coeff,
-                 frontal_area, mass, battery_capacity, charger_capacity):
+                 frontal_area, mass, battery_capacity, charger_capacity_ac,
+                 charger_capacity_dc):
         """
         Parameters
         ----------
@@ -30,7 +31,9 @@ class CarModel():
             Mass of the car in kg.
         battery_capacity : float
             Battery capacity of the car model in kWh.
-        charger_capacity : float
+        charger_capacity_ac : float
+            Capacity of the on-board charger of the car model in kW.
+        charger_capacity_dc : float
             Capacity of the on-board charger of the car model in kW.
 
         Returns
@@ -44,7 +47,8 @@ class CarModel():
         self.frontal_area = frontal_area
         self.mass = mass
         self.battery_capacity = battery_capacity
-        self.charger_capacity = charger_capacity
+        self.charger_capacity_ac = charger_capacity_ac
+        self.charger_capacity_dc = charger_capacity_dc
         
     def instantaneous_consumption(self, velocity):
         """
@@ -85,6 +89,7 @@ class CarModel():
         msg += "Frontal area: " + str(self.frontal_area) + " m^2\n"
         msg += "Mass: " + str(self.mass) + " kg\n"
         msg += "Battery Capcity: " + str(self.battery_capacity) + " kWh\n"
-        msg += "Charger Capacity: " + str(self.charger_capacity) + " kW"
+        msg += "Charger Capacity (AC/DV): " + str(self.charger_capacity_ac) \
+                                + " / " + str(self.charger_capacity_dc) +" kW"
         
         return msg

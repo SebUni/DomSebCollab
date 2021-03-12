@@ -16,12 +16,14 @@ class ElectricityPlanManager():
     """
     Loads and holds all electricity plans for easy access.
     """
-    def __init__(self, time_step):
+    def __init__(self, parameters, clock):
         """
         Parameters
         ----------
-        time_step : int
-            time_step given in minutes
+        clock : Clock
+            The Handle to the global clock object.
+        parameters: Parameters
+            Provides external parameters.
 
         Returns
         -------
@@ -30,16 +32,16 @@ class ElectricityPlanManager():
         self.electricity_plans = dict()
         self.commercial_plan_uids = []
         self.residential_plan_uids = []
-        self.load_electricity_plans(time_step)
+        self.load_electricity_plans(parameters, clock)
         
-    def load_electricity_plans(self, time_step):
+    def load_electricity_plans(self, parameters, clock):
         """
         Loads all electricity plans from electricity_plans.csv.
 
         Parameters
         ----------
-        time_step : int
-            time_step given in minutes
+        clock : Clock
+            required for time_step parameter
 
         Returns
         -------
@@ -57,12 +59,13 @@ class ElectricityPlanManager():
                          + " is ill-defined!")
             is_commercial_plan = classification == "com"
             base = cast.to_float(row[2], "Base")
+            feed_in_tariff = parameters.get_parameter("feed_in_tariff","float")
             # create tariff structure
             tariff_str = row[3]
             tariff = self.extract_tariffs_from_string(tariff_str)
             
-            ep = ElectricityPlan(uid, is_commercial_plan, base, tariff,
-                                 time_step)
+            ep = ElectricityPlan(uid, is_commercial_plan, base, feed_in_tariff,
+                                 tariff, clock.time_step)
             self.electricity_plans[uid] = ep
             if ep.is_commercial_plan:
                 self.commercial_plan_uids.append(ep.uid)

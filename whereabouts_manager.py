@@ -14,7 +14,7 @@ class WhereaboutsManager():
     This class is implement to simplify the interaction between all
     Whereabouts-classes.
     """
-    def __init__(self, location_road_manager, time_step):
+    def __init__(self, location_road_manager, clock):
         """
         Initialises the whereabouts manager, which keeps track of agents
         journeys.
@@ -23,15 +23,15 @@ class WhereaboutsManager():
         ----------
         location_road_manager : LocationRoadManager
             Handle to the location road manager.
-        time_step : int
-            Simulation time step in minutes.
+        clock: Clock
+            The instance of the clock module that provides information on time.
         Returns
         -------
         None.
         """
         self.lrm = location_road_manager
         self.whereabouts = dict()
-        self.time_step = time_step
+        self.time_step = clock.time_step
         self.agents_on_edge = dict()
         
     def track_new_agent(self, agent_uid, cur_location):

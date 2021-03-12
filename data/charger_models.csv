@@ -1,7 +1,7 @@
-Uid,Classification,Power_in_kW
-1,res,5000
-2,res,10000
-3,res,10000
-4,com,20000
-5,com,50000
-6,com,100000
+Uid,Classification,AC_Power_in_kW,DC_Power_in_kW
+1,res,5000,0
+2,res,10000,0
+3,res,10000,0
+4,com,20000,0
+5,com,50000,0
+6,com,100000,0

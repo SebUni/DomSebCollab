@@ -5,15 +5,20 @@ Created on Mon Dec 14 13:06:27 2020
 @author: S3739258
 """
 import sys
+import math
+import scipy.integrate
+import numpy
+import scipy.optimize
 
 from mesa import Agent
+
+from cal import Cal
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
     def __init__(self, uid, model, clock, cur_location, house_agent, company,
                  location_road_manager, car_model_manager, whereabouts_manager,
-                 calendar, departure_condition, reserve_range,
-                 queuing_condition):
+                 calendar_planer, parameters):
         """
         Parameters
         ----------
@@ -30,12 +35,17 @@ class CarAgent(Agent):
         location_road_manager : LocationRoadManager
             Handle to the location road manager.
         car_model_manager : CarModelManager
-            The object handling all car models created in ChargingModel class
+            The object handling all car models created in ChargingModel class.
         whereabouts_manager : WhereaboutsManager
-            The object handling all whereabouts created in ChargingModel class
-        calendar: {int, Location}
-            Holds the Locations where an agent shall go or be for each time
-            slot of one week.
+            The object handling all whereabouts created in ChargingModel class.
+        calendar_planer: CalendarPlaner
+            The object handling the creation of calendars across the
+            simulation.
+        parameters: Parameters
+            Provides external parameters.
+            
+        Parameters handed by Parameter class
+        ----------
         departure_condition : string
             Ensures that car never runs out of power midway. Can take three
             different values:
@@ -47,6 +57,9 @@ class CarAgent(Agent):
                                PLUS reserve_range.
         reserve_range : int
             Range the car needs to be able drive without charging in km.
+        reserve_speed : int
+            Velocity assumed car is driving maximum once it hits reserve in
+            km/h.
         queuing_condition : string
             Allows to choose if the car owner is actively trying to charge its
             car in case all chargers are blocked by the time of arrival. That
@@ -64,6 +77,7 @@ class CarAgent(Agent):
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
         self.uid = uid 
+        self.parameters = parameters
         self.clock = clock
         self.house_agent = house_agent
         self.company = company
@@ -74,45 +88,51 @@ class CarAgent(Agent):
                                                                cur_location)
          # TODO check if all agents should start with 100% SOC
         self.soc = self.car_model.battery_capacity # soc in kWh
-        self.charge_at_home = 0.0
+        self.charge_at_home_from_grid = 0.0
+        self.charge_at_home_from_pv = 0.0
         self.charge_at_work = 0.0
         
         self.electricity_cost = 0 # in $
-        self.calendar = calendar
-        if departure_condition not in {"ROUND_TRIP", "ONE_WAY_TRIP", 
-                                       "NEXT_NODE"}:
-            sys.exit("Departure condition: " + str(departure_condition) \
+        self.calendar = Cal(self.clock, self.lrm, calendar_planer,
+                            self.whereabouts, house_agent.location,
+                            company.location)
+        
+        self.departure_condition \
+            = parameters.get_parameter("departure_condition","string")
+        if self.departure_condition not in {"ROUND_TRIP", "ONE_WAY_TRIP", 
+                                            "NEXT_NODE"}:
+            sys.exit("Departure condition: " + str(self.departure_condition) \
                      + " is ill defined!")
-        self.departure_condition = departure_condition
-        self.reserve_range = reserve_range
-        self.reserve_speed = 100 # in km/h
+        self.reserve_range = parameters.get_parameter("reserve_range","int")
+        self.reserve_speed = parameters.get_parameter("reserve_speed","int")
         self.emergency_charging = 0.0 # in kWh
-        if queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
-            sys.exit("Queuing condition: " + str(queuing_condition) \
+        self.queuing_condition = parameters.get_parameter("queuing_condition",
+                                                          "string")
+        if self.queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
+            sys.exit("Queuing condition: " + str(self.queuing_condition) \
                      + " is ill defined!")
-        self.queuing_condition = queuing_condition
         
     def step(self):
         # Writing this while I should be celebrating christmas, fuck COVID
         self.plan()
         self.move()
         self.charge()
+        self.calendar.step()
         
     def plan(self):
         """ This function determines if the agent should start a new journey
         in this time step and when to charge. """
         # Decide on new destination
-        scheduled_loc = self.calendar[self.clock.time_of_week]
-        if self.whereabouts.cur_location != scheduled_loc:
-            if self.emergency_charging == 0.0:
-                if not self.whereabouts.is_travelling:
-                    self.whereabouts.set_destination(scheduled_loc)
+        if self.calendar.upcoming_departure_time <= self.clock.elapsed_time:
+            if self.emergency_charging == 0.0 \
+                and not self.whereabouts.is_travelling:
+                self.whereabouts.set_destination(self.calendar.next_location)
         # Decide on when to charge
         self.plan_charging()
     
     def move(self):
         """ Process agent's movement, incl. departure- and queuing conditions
-        as well as initiating ermergency charging and blocking chargers upon
+        as well as initiating emergency charging and blocking chargers upon
         arrivial."""
         # short hands
         tn = self.lrm.traffic_network
@@ -176,9 +196,6 @@ class CarAgent(Agent):
                     break
             # if next location can be reached during this time step
             if possible_distance_on_edge > remaining_distance_on_edge:
-                cur_calendar_item = self.calendar[self.clock.time_of_day].uid
-                cur_end_of_route = wa.route[-1]
-                cur_company_loc = self.company.location.uid
                 wa.cur_location = self.lrm.locations[end]
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
                 self.soc -= remaining_time_on_edge * inst_consumption
@@ -374,25 +391,6 @@ class CarAgent(Agent):
             # departure criterion in like ... you know .. ever
             pass
     
-    def find_next_location(self):
-        """
-        Finds the next planned location different from the current location.
-
-        Returns
-        -------
-        next_location : Location
-            See description above.
-
-        """
-        next_location = self.whereabouts.cur_location
-        checked_ts = self.clock.time_of_week
-        while self.whereabouts.cur_location == next_location:
-            checked_ts += self.clock.time_step
-            if checked_ts >= 60*24*7:
-                checked_ts = checked_ts % 60*24*7
-            next_location = self.calendar[checked_ts]
-        return next_location
-    
     def has_to_charge_prior_to_departure(self):
         """
         This function is executed after arrival at a final destination to check
@@ -403,16 +401,157 @@ class CarAgent(Agent):
         BOOL.
             Returns True or False, that is if the agent needs to charge or not.
         """
-        next_location = self.find_next_location()
         next_route = self.lrm.calc_route(self.whereabouts.cur_location,
-                                         next_location)
+                                         self.calendar.next_location)
         charge_needed = self.charge_for_departure_condition(next_route)
         if charge_needed < self.soc:
             return True
         else:
-            return False
+            return False             
     
     def plan_charging(self):
-        # TODO implement this properly
-        self.charge_at_home = self.car_model.battery_capacity - self.soc
-        self.charge_at_work = self.car_model.battery_capacity - self.soc
+        p_work = self.company.charger_cost_per_kWh
+        p_feed = self.house_agent.electricity_plan.feed_in_tariff
+        # TODO p_grid neglects time-of-tariffs
+        p_grid = self.house_agent.electricity_plan.cost_of_use(1, 
+                                                        self.clock.time_of_day)
+        
+        p_em = self.parameters.get_parameter("public_charger_cost_per_kWh",
+                                             "float")
+        
+        soc = self.soc
+        q_one_way = self.lrm.calc_route_length(self.calendar.next_route)
+        
+        c = self.parameters.get_parameter("confidence", "float")
+        mu_supply, sig_supply \
+            = self.house_agent.hgm.generation_forecast_distribution_parameter()
+        mu_demand, sig_demand \
+            = self.house_agent.hcm.consumption_forecast_distribution_parameters()
+        
+        mu = mu_supply - mu_demand
+        sig = numpy.sqrt(sig_supply**2 + sig_demand**2)
+        
+        if self.whereabouts.cur_location == self.company.location:
+            q_home \
+                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
+                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
+                          sig),
+                    bounds=((0, q_one_way),))
+            self.charge_at_work = max(2 * q_one_way - soc - q_home, 0)
+            
+        
+        if self.whereabouts.cur_location == self.house_agent.location:
+            self.charge_at_home_from_pv \
+                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_home,
+                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
+                          sig),
+                    bounds=((0, q_one_way),))
+            max_charge_rate \
+                = self.house_agent.max_charge_rate(self.car_model)
+            if p_em > p_work and p_em > p_grid:
+                charge_needed \
+                    = max(2 * q_one_way - soc, 0) if p_grid <= p_work \
+                        else max( q_one_way - soc, 0)
+                charge_needed = max(2 * q_one_way - soc, 0)
+                min_charge_time = charge_needed / max_charge_rate * 60
+                min_charge_time = (min_charge_time // self.clock.time_step) \
+                        * self.clock.time_step
+                if self.clock.elapsed_time \
+                    <= self.calendar.upcoming_departure_time - min_charge_time \
+                    < self.clock.elapsed_time + self.clock.time_step:
+                    self.charge_at_home_from_grid = charge_needed;
+            else:
+                msg = "Case p_em <= p_work || p_em <= p_grid not implemented"
+                sys.exit(msg)
+    
+    """
+    PARAMETER EXPLANATION
+    
+    q_h (q_home) 
+        quantity charged at home
+    q_ow (q_one_way)
+        charge needed to reach next destination
+    q_r (q_real)
+        realisation of the house demand-supply-'balance'
+    q_w (q_work)
+        quantity charged at work
+    p_w (p_work)
+        price paid per kWh at work
+    p_f (p_feed)
+        price received for feeding rooftop pv into grid
+    p_g (p_grid)
+        price paid per kWh at home
+    p_em (p_emergency)
+        most expensive price paid on the road to next to charging in case of
+        emergency charging
+    soc
+        state of charge of the EV's battery
+    c
+        confidence with which best cases are expected
+    mu
+        mean for predicition of rooftop pv output
+    sig
+        standard deviation for predicition of rooftop pv output
+    phi
+        value at risk
+    """
+    
+    # TODO update in draw.io ClassDiagram
+    
+    def parm_cost_fct_charging_at_home(self, q_h, q_ow, p_em, p_f, p_g, p_w, 
+                                       soc, c, mu, sig):
+        q_w = max(2 * q_ow - soc - q_h, 0)
+        return self.cost_fct_charging_at_home(q_h, q_ow, q_w, p_f, p_g, p_em, 
+                                              p_w, soc, c, mu, sig)
+    
+    def cost_fct_charging_at_home(self, q_h, q_ow, q_w, p_f, p_g, p_em, p_w,
+                                  soc, c, mu, sig):
+        p = lambda value : max(value, 0)
+        return q_w * p_w + q_h * p_f \
+          + (p(q_ow - soc - q_h) + p(q_ow - p(soc + q_h - q_ow) - q_w)) * p_em\
+          + self.CVaR(q_h, c, mu, sig, p_g, p_f)
+    
+    def parm_cost_fct_charging_at_work(self, q_h, q_ow, p_em, p_f, p_g, p_w, 
+                                       soc, c, mu, sig):
+        q_w = max(2 * q_ow - soc - q_h, 0)
+        return self.cost_fct_charging_at_work(q_h, q_ow, q_w, p_f, p_g, p_em, 
+                                              p_w, soc, c, mu, sig)
+    
+    def cost_fct_charging_at_work(self, q_h, q_ow, q_w, p_f, p_g, p_em, p_w,
+                                  soc, c, mu, sig):
+        p = lambda value : max(value, 0)
+        return q_w * p_w + q_h * p_f \
+          + (p(q_ow - soc - q_w) + p(q_ow - p(soc + q_w - q_ow) - q_h)) * p_em\
+          + self.CVaR(q_h, c, mu, sig, p_g, p_f)
+        
+    def CVaR(self, q_h, c, mu, sig, p_g, p_f):
+        optimisation_result \
+            = scipy.optimize.minimize_scalar(self.perf_fct,
+                                       args=(q_h, c, mu, sig, p_g, p_f))
+        if optimisation_result.success == True:
+            return optimisation_result.x
+        else:
+            values = "q_h, c, mu, sig, p_g, p_f = " + str(q_h) +  ", " \
+                   +  str(c) +  ", " + str(mu) +  ", " + str(sig) +  ", " \
+                   +  str(p_g) + ", " + str(p_f)
+            print(values)
+            msg = "CVaR minimisation for car_agent " + str(self.uid) \
+                + " in at elapsed time " + str(self.clock.elapsed_time) \
+                + " failed!"
+            sys.exit(msg)
+    
+    def perf_fct(self, phi, q_h, c, mu, sig, p_g, p_f):
+        ''' Conditional Value at Risk performance function'''
+        p = lambda value : max(value, 0)
+        loss_fct = lambda q_h, q_r : (p_g + p_f) * (q_h - q_r) * (q_h > q_r)
+        integrand = lambda q_r \
+            : p(loss_fct(q_h, q_r) - phi) * self.N(q_r, mu, sig)
+        value, abs_error \
+            = scipy.integrate.quad(integrand, - numpy.inf, numpy.inf)
+        return phi + (1 / (1 - c)) * value
+    
+    def N(self, x, mu, sig):
+        ''' Normal distribution evaluated at x. '''
+        pre_fac = 1/math.sqrt(2*math.pi)
+        return (pre_fac / sig) * math.exp( - (x - mu)**2 / (2 * sig**2))
+    

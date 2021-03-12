@@ -9,12 +9,14 @@ class CalendarPlanner():
     """
     Creates the work schedules of all agents.
     """
-    def __init__(self, clock, location_road_manager):
+    def __init__(self, parameters, clock, location_road_manager):
         """
         Der Konstruktor.
 
         Parameters
         ----------
+        parameters : Parameters
+            Provides external parameters.
         clock : Clock
             Needed for clock.time_step which is given in minutes.
         location_road_manager : LocationRoadManager
@@ -27,6 +29,8 @@ class CalendarPlanner():
         """
         self.clock = clock
         self.lrm = location_road_manager
+        self.arrival_time_reserve \
+            = parameters.get_parameter("arrival_time_reserve", "int")
         
     def create_calendar(self, home_location, work_location):
         """

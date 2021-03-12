@@ -42,12 +42,14 @@ class CarModelManager():
             mass = cast.to_positive_float(row[5], "Mass")
             battery_capacity \
                 = cast.to_positive_float(row[6], "Battery capacity")
-            charger_capacity \
-                = cast.to_positive_float(row[7], "Charger capacity")
+            charger_capacity_ac \
+                = cast.to_positive_float(row[7], "Charger capacity AC")
+            charger_capacity_dc \
+                = cast.to_positive_float(row[8], "Charger capacity DC")
                 
             cm = CarModel(uid, car_model_name, car_consumption, drag_coeff,
                           frontal_area, mass, battery_capacity,
-                          charger_capacity)
+                          charger_capacity_ac, charger_capacity_dc)
             self.car_models[uid] = cm
             
     def draw_car_model_at_random(self):

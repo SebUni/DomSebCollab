@@ -34,9 +34,10 @@ class ChargerManager():
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
             classification = row[1]
-            power = cast.to_positive_int(row[2], "Power")
+            ac_power = cast.to_positive_int(row[2], "AC Power")
+            dc_power = cast.to_positive_int(row[2], "DC Power")
             
-            cm = ChargerModel(uid, classification, power)
+            cm = ChargerModel(uid, classification, ac_power, dc_power)
             self.charger_models[uid] = cm
             if cm.classification == "com":
                 self.commercial_model_uids.append(cm.uid)
