@@ -5,10 +5,8 @@ Created on Thu Feb  4 16:35:38 2021
 @author: S3739258
 """
 
-import sys
 import random
 import math
-import numpy
 import scipy.stats
 
 from cast import Cast
@@ -84,10 +82,10 @@ class HouseConsumptionManager():
         
         cur_mu, cur_sig_sqr = 0, 0
         for time in range(0, self.clock.forecast_horizon,self.clock.time_step):
-            cur_mu = cur_mu + self.forecast_parameters[time][0]
-            cur_sig_sqr = cur_sig_sqr + self.forecast_parameters[time][0]**2
+            cur_mu += self.forecast_parameters[time][0]
+            cur_sig_sqr += self.forecast_parameters[time][0]**2
             
-        self.forecast_mu, self.forecast_sig = cur_mu, numpy.sqrt(cur_sig_sqr)
+        self.forecast_mu, self.forecast_sig = cur_mu, math.sqrt(cur_sig_sqr)
         
     def instantaneous_consumption(self, location, occupants):
         hourly_consumption = 0
@@ -138,10 +136,9 @@ class HouseConsumptionManager():
                 
             pf_prm = self.forecast_parameters[prev_forecast_horizon_time_step]
             nf_prm = self.forecast_parameters[next_forecast_horizon_time_step]
-            self.forecast_mu = self.forecast_mu - pf_prm[0] + nf_prm[0]
-            self.forecast_sig = numpy.sqrt(self.forecast_sig**2 - pf_prm[1] \
+            self.forecast_mu += - pf_prm[0] + nf_prm[0]
+            self.forecast_sig = math.sqrt(self.forecast_sig**2 - pf_prm[1] \
                                            + nf_prm[1])
         
-    
     def consumption_forecast_distribution_parameters(self):
         return self.forecast_mu, self.forecast_sig

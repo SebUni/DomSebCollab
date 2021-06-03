@@ -14,8 +14,15 @@ from csv_helper import CSVHelper
 from generation_forecast import GenerationForecast
 
 class HouseGenerationManager():
-    def __init__(self, parameters, clock):
+    def __init__(self, parameters, clock, electricity_plan_manager,
+                 car_model_manager):
+        self.parameters = parameters
         self.clock = clock
+        self.epm = electricity_plan_manager
+        self.max_car_battery_capacity = 0
+        for car_model in car_model_manager.car_models.values():
+            if car_model.battery_capacity > self.max_car_battery_capacity:
+                self.max_car_battery_capacity = car_model.battery_capacity
                 
         cast = Cast("Solar Irradation")
         self.irradiances = []
@@ -57,7 +64,7 @@ class HouseGenerationManager():
                 value = cast.to_positive_float(col, "Temperatures")
                 tmp_temperatures.append(value)
             self.temperatures.append(tmp_temperatures)
-            it = it + 1
+            it += 1
             
         self.cur_irradiances = self.irradiances[0]
         self.cur_temperatures = self.temperatures[0]
@@ -80,7 +87,7 @@ class HouseGenerationManager():
                     + cast.to_positive_int(row[0], "Elpased time")
             # elapsed_minutes = cast.to_positive_int(row[0], "Elapsed minutes")
             self.fit_data.append(GenerationForecast(self.clock, row))
-            it = it + 1
+            it += 1
         
         self.resolution_irradiance = resolution_irradiance
         self.resolution_temperatures = resolution_temperatures
@@ -105,6 +112,7 @@ class HouseGenerationManager():
         if self.max_output_co_count != 0:
            avg_max_output_co \
                = self.max_output_co_sum / self.max_output_co_count
+        # TODO should this be in brackets?
         self.forecast_mu = self.forecast_mu_po + avg_max_output_co / 2
         forecast_sig_co_sqr = (avg_max_output_co / 12) ** 2
         self.forecast_sig \
@@ -132,21 +140,17 @@ class HouseGenerationManager():
             pf_prm = self.fit_data[prev_forecast_horizon_it]
             nf_prm = self.fit_data[next_forecast_horizon_it]
             if pf_prm.peak_dominates_constant():
-                self.forecast_mu_po = self.forecast_mu_po - pf_prm.mu_po
-                self.forecast_sig_po_sqr = self.forecast_sig_po_sqr \
-                    - pf_prm.sig_po ** 2
+                self.forecast_mu_po -= pf_prm.mu_po
+                self.forecast_sig_po_sqr -= pf_prm.sig_po ** 2
             else:
-                self.max_output_co_sum = self.max_output_co_sum \
-                    - pf_prm.max_output
-                self.max_output_co_count = self.max_output_co_count - 1
+                self.max_output_co_sum -= pf_prm.max_output
+                self.max_output_co_count -= 1
             if nf_prm.peak_dominates_constant():
-                self.forecast_mu_po = self.forecast_mu_po + nf_prm.mu_po
-                self.forecast_sig_po_sqr = self.forecast_sig_po_sqr \
-                    + nf_prm.sig_po ** 2
+                self.forecast_mu_po += nf_prm.mu_po
+                self.forecast_sig_po_sqr += nf_prm.sig_po ** 2
             else:
-                self.max_output_co_sum = self.max_output_co_sum \
-                    + nf_prm.max_output
-                self.max_output_co_count = self.max_output_co_count + 1
+                self.max_output_co_sum += nf_prm.max_output
+                self.max_output_co_count += 1
                 
             avg_max_output_co = 0
             if self.max_output_co_count != 0:
@@ -170,4 +174,3 @@ class HouseGenerationManager():
     
     def generation_forecast_distribution_parameter(self):
         return self.forecast_mu, self.forecast_sig
-        

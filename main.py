@@ -26,7 +26,7 @@ def draw_car_agents(model, it):
     fig.savefig(title)
 
 draw_soc_chart = False
-draw_agents_on_map = True
+draw_agents_on_map = False
 
 nbr_of_agents = 50
 
@@ -44,4 +44,4 @@ for i in range(cm.clock.time_step_limit):
                 plt.plot(x, y, label = "line " + str(j) )
             plt.show()
     if draw_agents_on_map:
-         draw_car_agents(cm, i)
+        draw_car_agents(cm, i)

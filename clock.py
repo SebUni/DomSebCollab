@@ -95,7 +95,7 @@ class Clock():
         None.
 
         """
-        self.cur_time_step = self.cur_time_step + 1
+        self.cur_time_step += 1
         if not self.first_step_call:
             self.elapsed_time += self.time_step
             self.time_of_day = self.calc_time_of_day()

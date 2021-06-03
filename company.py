@@ -93,8 +93,6 @@ class Company():
             The car_agent attempting to charge
         charge_up_to : float
             The amount of charge the car demands at most.
-        car_charger_capacity : float
-            Maximum charging rate of the car.
 
         Returns
         -------
@@ -113,10 +111,10 @@ class Company():
         
         if self.ccm.can_charge(car_agent):
             company_charger = self.ccm.chargers_in_use_by_car_agent[car_agent]
-            charge_rate = max(min(car_agent.charger.charger_model.ac_power,
-                                  company_charger.charger_model.ac_power),
-                              min(car_agent.charger.charger_model.dc_power,
-                                  company_charger.charger_model.dc_power))
+            charge_rate = max(min(car_agent.car_model.charger_capacity_ac,
+                                  company_charger.charger_model.power_ac),
+                              min(car_agent.car_model.charger_capacity_dc,
+                                  company_charger.charger_model.power_dc))
         
             delivered_charge = min([self.clock.time_step / 60 * charge_rate,
                                 charge_up_to])

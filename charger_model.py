@@ -36,13 +36,13 @@ class ChargerModel():
             msg += "' is not a valid charger model"
             sys.exit(msg)
         self.classification = str(classification)
-        self.ac_power = int(ac_power)
-        self.dc_power = int(dc_power)
+        self.power_ac = int(ac_power)
+        self.power_dc = int(dc_power)
         
     def __repr__(self):
         msg = "Uid: " + str(self.uid) + "; "
         msg += "Classification: " + self.classification + "; "
-        msg += "AC Power: " + str(self.ac_power / 1000) + " kW; "
-        msg += "DC Power: " + str(self.dc_power / 1000) + " kW"
+        msg += "AC Power: " + str(self.power_ac / 1000) + " kW; "
+        msg += "DC Power: " + str(self.power_dc / 1000) + " kW"
         
         return msg

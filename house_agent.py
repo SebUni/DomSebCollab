@@ -23,7 +23,6 @@ class HouseAgent(Agent):
         self.clock = clock
         self.location = residency_location
         
-        # TODO check how occupants are chosen
         self.occupants = residency_location.draw_occupants_at_random()
         # TODO check how charger is chosen
         # if there is no charger assign "None"
@@ -31,7 +30,6 @@ class HouseAgent(Agent):
             = random.choice(charger_manager.residential_model_uids)
         charger_model = charger_manager.charger_models[charger_model_uid]
         self.charger = charger_manager.add_charger(charger_model)
-        # TODO check how PV capacity is chosen
         self.pv_capacity = residency_location.draw_pv_capacity_at_random()
         # TODO check how battery capacity is chosen
         self.battery_capacity \
@@ -44,17 +42,18 @@ class HouseAgent(Agent):
         self.battery_soc = 0.0
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
+        self.cur_pv_excess_supply = 0
             
-    def charge_car(self, charge_up_to, car_charger):
+    def charge_car(self, car_agent, charge_up_to):
         """
         Allow the car to charge at the house's charger.
 
         Parameters
         ----------
+        car_agent : CarAgent
+            The car_agent attempting to charge
         charge_up_to : float
             The amount of charge the car demands at most.
-        car_charger : Charger
-            Charger object of the car_agent.
 
         Returns
         -------
@@ -67,7 +66,7 @@ class HouseAgent(Agent):
         delivered_charge = 0.0
         charging_cost = 0.0
         
-        max_charge_rate = self.max_charge_rate(car_charger)
+        max_charge_rate = self.max_charge_rate(car_agent.car_model)
         delivered_charge = min([self.clock.time_step / 60 * max_charge_rate,
                                 charge_up_to])
         charging_cost \
@@ -78,9 +77,9 @@ class HouseAgent(Agent):
     
     def max_charge_rate(self, car_model):
         return max(min(car_model.charger_capacity_ac,
-                       self.charger.charger_model.ac_power),
+                       self.charger.charger_model.power_ac),
                    min(car_model.charger_capacity_dc,
-                       self.charger.charger_model.dc_power))
+                       self.charger.charger_model.power_dc))
         
     def step(self):
         # 1) Calculate house consumption
@@ -90,6 +89,7 @@ class HouseAgent(Agent):
         # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
+        self.cur_pv_excess_supply = cur_consumption - cur_generation
         # TODO 3) Determine car charge requirements once car has returned
         # TODO 4) Determine how much PV generation is consumed and how much is
         #         stored

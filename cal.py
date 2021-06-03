@@ -102,5 +102,5 @@ class Cal():
         
             self.next_location, self.next_location_arrival_time \
                 = self.find_next_location()
-            self.next_route = self.find_next_route()
+            self.next_route, self.next_route_length = self.find_next_route()
             self.upcoming_departure_time = self.find_upcoming_departure_time()

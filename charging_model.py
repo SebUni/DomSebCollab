@@ -44,7 +44,8 @@ class ChargingModel(Model):
         self.wm = WhereaboutsManager(self.lrm, self.clock)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
         self.hcm = HouseConsumptionManager(self.clock)
-        self.hgm = HouseGenerationManager(self.parameters, self.clock)
+        self.hgm = HouseGenerationManager(self.parameters, self.clock,
+                                          self.epm, self.cmm)
         self.schedule_cars = RandomActivation(self)
         self.schedule_houses = RandomActivation(self)
         # extra promil is needed as east_west_spread and north_south_spread
@@ -62,9 +63,6 @@ class ChargingModel(Model):
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
-            #TODO reconsider if agents should all start at home
-            cur_location = residency_location 
-            pos = self.lrm.relative_location_position(cur_location)
             house_agent = HouseAgent(agent_uid, self, self.clock,
                                      residency_location, self.chm, self.epm,
                                      self.hcm, self.hgm)
@@ -73,6 +71,11 @@ class ChargingModel(Model):
                 employment_location = \
                     self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
+            
+            #TODO reconsider if agents should all start at home
+            cur_location = residency_location 
+            pos = self.lrm.relative_location_position(cur_location)
+            
             car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
                                  house_agent, company, self.lrm, self.cmm,
                                  self.wm, self.cp, self.parameters)
@@ -93,6 +96,7 @@ class ChargingModel(Model):
         self.co.t_print("Now calculating time step #" \
                         + str(self.clock.cur_time_step))
         self.clock.step()
+        # self.hcm.step()
         self.hgm.step()
         self.wm.prepare_movement()
         self.schedule_houses.step()

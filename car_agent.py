@@ -6,8 +6,7 @@ Created on Mon Dec 14 13:06:27 2020
 """
 import sys
 import math
-import scipy.integrate
-import numpy
+import scipy.special
 import scipy.optimize
 
 from mesa import Agent
@@ -305,21 +304,39 @@ class CarAgent(Agent):
             # In case of non-emergency charging
             if self.emergency_charging == 0.0:
                 # If car agent is at home
-                if cur_location == self.house_agent.location \
-                    and self.charge_at_home != 0.0:
-                    charge_up_to = min(self.charge_at_home, missing_charge)
-                    received_charge, charging_cost \
-                        = self.house_agent.charge_car(charge_up_to,
-                                            self.car_model.charger_capacity)
-                    self.charge_at_home -= received_charge
+                if cur_location == self.house_agent.location:
+                    total_charge_cur_time_step = 0
+                    # First try to charge from pv
+                    if self.charge_at_home_from_pv != 0:
+                        max_from_pv = self.house_agent.cur_pv_excess_supply
+                        charge_up_to = min(self.charge_at_home_from_pv,
+                                           missing_charge, max_from_pv)
+                        received_charge, charging_cost \
+                            = self.house_agent.charge_car(self, charge_up_to)
+                        self.charge_at_home_from_pv \
+                            = self.charge_at_home_from_pv - received_charge
+                        total_charge_cur_time_step = received_charge
+                    if self.charge_at_home_from_grid != 0:
+                        charger_capacity_in_time_step \
+                            = self.house_agent.max_charge_rate(self.car_model)\
+                                * self.clock.time_step / 60
+                        remaining_charger_capacity \
+                            = charger_capacity_in_time_step \
+                              - total_charge_cur_time_step
+                        charge_up_to = min(self.charge_at_home_from_grid,
+                                           missing_charge,
+                                           remaining_charger_capacity)
+                        received_charge, charging_cost \
+                            = self.house_agent.charge_car(self, charge_up_to)
+                        self.charge_at_home_from_grid \
+                            = self.charge_at_home_from_grid - received_charge
                 # if car agent is at work
                 if cur_location == self.company.location \
                     and self.charge_at_work != 0.0 \
                     and self.company.can_charge(self):
                     charge_up_to = min(self.charge_at_work, missing_charge)
                     received_charge, charging_cost \
-                        = self.company.charge_car(self, charge_up_to,
-                                            self.car_model.charger_capacity)
+                        = self.company.charge_car(self, charge_up_to)
                     self.charge_at_work -= received_charge
                     if self.charge_at_work == 0:
                         self.company.unblock_charger(self)
@@ -328,16 +345,15 @@ class CarAgent(Agent):
                 # if car agent is at home
                 if cur_location == self.house_agent.location:
                     received_charge, charging_cost \
-                        = self.house_agent.charge_car(self.emergency_charging,
-                                            self.car_model.charger_capacity)
+                        = self.house_agent.charge_car(self, 
+                                                      self.emergency_charging)
                     self.emergency_charging -= received_charge
                 # if car agent is at work
                 elif cur_location == self.company.location:
                     if self.company.can_charge(self):
                         received_charge, charging_cost \
                             = self.company.charge_car(self,
-                                            self.emergency_charging,
-                                            self.car_model.charger_capacity)
+                                                      self.emergency_charging)
                         self.emergency_charging -= received_charge
                         if self.emergency_charging == 0:
                             self.company.unblock_charger(self)
@@ -348,8 +364,7 @@ class CarAgent(Agent):
                     if pub_company.can_charge(self):
                         received_charge, charging_cost \
                             = pub_company.charge_car(self,
-                                            self.emergency_charging,
-                                            self.car_model.charger_capacity)
+                                                     self.emergency_charging)
                         self.emergency_charging -= received_charge
                         if self.emergency_charging == 0:
                             pub_company.unblock_charger(self)
@@ -429,14 +444,14 @@ class CarAgent(Agent):
             = self.house_agent.hcm.consumption_forecast_distribution_parameters()
         
         mu = mu_supply - mu_demand
-        sig = numpy.sqrt(sig_supply**2 + sig_demand**2)
+        sig = math.sqrt(sig_supply**2 + sig_demand**2)
         
         if self.whereabouts.cur_location == self.company.location:
             q_home \
                 = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
                     args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
                           sig),
-                    bounds=((0, q_one_way),))
+                    bounds=((0, q_one_way),)).x
             self.charge_at_work = max(2 * q_one_way - soc - q_home, 0)
             
         
@@ -445,7 +460,7 @@ class CarAgent(Agent):
                 = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_home,
                     args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
                           sig),
-                    bounds=((0, q_one_way),))
+                    bounds=((0, q_one_way),)).x
             max_charge_rate \
                 = self.house_agent.max_charge_rate(self.car_model)
             if p_em > p_work and p_em > p_grid:
@@ -509,7 +524,7 @@ class CarAgent(Agent):
         p = lambda value : max(value, 0)
         return q_w * p_w + q_h * p_f \
           + (p(q_ow - soc - q_h) + p(q_ow - p(soc + q_h - q_ow) - q_w)) * p_em\
-          + self.CVaR(q_h, c, mu, sig, p_g, p_f)
+          + self.CVaR(q_h, c, mu, sig, p_f, p_g)
     
     def parm_cost_fct_charging_at_work(self, q_h, q_ow, p_em, p_f, p_g, p_w, 
                                        soc, c, mu, sig):
@@ -522,36 +537,25 @@ class CarAgent(Agent):
         p = lambda value : max(value, 0)
         return q_w * p_w + q_h * p_f \
           + (p(q_ow - soc - q_w) + p(q_ow - p(soc + q_w - q_ow) - q_h)) * p_em\
-          + self.CVaR(q_h, c, mu, sig, p_g, p_f)
-        
-    def CVaR(self, q_h, c, mu, sig, p_g, p_f):
-        optimisation_result \
-            = scipy.optimize.minimize_scalar(self.perf_fct,
-                                       args=(q_h, c, mu, sig, p_g, p_f))
-        if optimisation_result.success == True:
-            return optimisation_result.x
-        else:
-            values = "q_h, c, mu, sig, p_g, p_f = " + str(q_h) +  ", " \
-                   +  str(c) +  ", " + str(mu) +  ", " + str(sig) +  ", " \
-                   +  str(p_g) + ", " + str(p_f)
-            print(values)
-            msg = "CVaR minimisation for car_agent " + str(self.uid) \
-                + " in at elapsed time " + str(self.clock.elapsed_time) \
-                + " failed!"
-            sys.exit(msg)
-    
-    def perf_fct(self, phi, q_h, c, mu, sig, p_g, p_f):
-        ''' Conditional Value at Risk performance function'''
-        p = lambda value : max(value, 0)
-        loss_fct = lambda q_h, q_r : (p_g + p_f) * (q_h - q_r) * (q_h > q_r)
-        integrand = lambda q_r \
-            : p(loss_fct(q_h, q_r) - phi) * self.N(q_r, mu, sig)
-        value, abs_error \
-            = scipy.integrate.quad(integrand, - numpy.inf, numpy.inf)
-        return phi + (1 / (1 - c)) * value
+          + self.CVaR(q_h, c, mu, sig, p_f, p_g)
+          
+    def CVaR(self, q_h, c, mu, sig, p_f, p_g):
+        delta_p = p_g + p_f
+        VaR = max(delta_p * (q_h - mu - math.sqrt(2) * sig \
+                               * scipy.special.erfinv(1 - 2* c)), 0.0)
+        psi = q_h - mu - VaR / delta_p
+        return delta_p                                                     \
+            * (                                                            \
+                q_h - psi - mu                                             \
+                + (1 / (1 - c)) * (                                        \
+                                   (psi / 2)                               \
+                                   * (math.erf(psi / (math.sqrt(2) * sig)) \
+                                      + 1)                                 \
+                                    + sig**2 * self.N(psi, 0, sig)         \
+                                  )                                        \
+              )
     
     def N(self, x, mu, sig):
         ''' Normal distribution evaluated at x. '''
         pre_fac = 1/math.sqrt(2*math.pi)
         return (pre_fac / sig) * math.exp( - (x - mu)**2 / (2 * sig**2))
-    
