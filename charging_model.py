@@ -115,11 +115,11 @@ class ChargingModel(Model):
         
         flat_cars = []
         for car_agent in self.schedule_cars.agents:
-            if car_agent.ran_flat == True:
+            if car_agent.would_run_flat == True:
                 flat_cars.append(car_agent.uid)
         if len(flat_cars) == 0:
-            self.co.t_print("Flat Cars: None")
+            self.co.t_print("Cars that would run flat: None")
         else:
-            self.co.t_print("Flat Cars:" + str(flat_cars))
+            self.co.t_print("Cars that would run flat:" + str(flat_cars))
                 
             

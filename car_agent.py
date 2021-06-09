@@ -110,7 +110,7 @@ class CarAgent(Agent):
         if self.queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
             sys.exit("Queuing condition: " + str(self.queuing_condition) \
                      + " is ill defined!")
-        self.ran_flat = False
+        self.would_run_flat = False
         
     def step(self):
         # Writing this while I should be celebrating christmas, fuck COVID
@@ -403,7 +403,8 @@ class CarAgent(Agent):
                 self.location.companies[0].block_charger(self, True)
             self.emergency_charging = emergency_charge_volume
         else:
-            self.ran_flat = True
+            # car agent does not depart because it would run flat
+            self.would_run_flat = True
     
     def has_to_charge_prior_to_departure(self):
         """
