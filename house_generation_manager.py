@@ -19,10 +19,6 @@ class HouseGenerationManager():
         self.parameters = parameters
         self.clock = clock
         self.epm = electricity_plan_manager
-        self.max_car_battery_capacity = 0
-        for car_model in car_model_manager.car_models.values():
-            if car_model.battery_capacity > self.max_car_battery_capacity:
-                self.max_car_battery_capacity = car_model.battery_capacity
                 
         cast = Cast("Solar Irradation")
         self.irradiances = []
@@ -36,14 +32,14 @@ class HouseGenerationManager():
                 resolution_irradiance \
                     = - cast.to_positive_int(row[0], "Elapsed time")
             if it == 1:
-                resolution_irradiance = resolution_irradiance \
+                resolution_irradiance += \
                     + cast.to_positive_int(row[0], "Elapsed time")
             tmp_irradiances = []
             for col in row[1:]:
                 value = cast.to_positive_float(col, "Solar irradiance")
                 tmp_irradiances.append(value)
             self.irradiances.append(tmp_irradiances)
-            it = it + 1
+            it += 1
         
         cast = Cast("Temperatures")
         self.temperatures = []
@@ -57,7 +53,7 @@ class HouseGenerationManager():
                 resolution_temperatures \
                     = - cast.to_positive_int(row[0], "Elapsed time")
             if it == 1:
-                resolution_temperatures = resolution_temperatures \
+                resolution_temperatures += \
                     + cast.to_positive_int(row[0], "Elpased time")
             tmp_temperatures = []
             for col in row[1:]:
@@ -80,12 +76,9 @@ class HouseGenerationManager():
         resolution_fit = 0       
         for row in csv_helper.data:
             if it == 0:
-                resolution_fit \
-                    = - cast.to_positive_int(row[0], "Elapsed time")
+                resolution_fit = - cast.to_positive_int(row[0], "Elapsed time")
             if it == 1:
-                resolution_fit = resolution_fit \
-                    + cast.to_positive_int(row[0], "Elpased time")
-            # elapsed_minutes = cast.to_positive_int(row[0], "Elapsed minutes")
+                resolution_fit += cast.to_positive_int(row[0], "Elpased time")
             self.fit_data.append(GenerationForecast(self.clock, row))
             it += 1
         
@@ -100,19 +93,17 @@ class HouseGenerationManager():
             if it * self.resolution_fit >= self.clock.forecast_horizon:
                 break
             if fit_data_point.peak_dominates_constant():
-                self.forecast_mu_po = self.forecast_mu_po +fit_data_point.mu_po
-                self.forecast_sig_po_sqr = self.forecast_sig_po_sqr \
-                    + fit_data_point.sig_po ** 2
+                self.forecast_mu_po += fit_data_point.mu_po
+                self.forecast_sig_po_sqr += fit_data_point.sig_po ** 2
             else:
-                self.max_output_co_sum = self.max_output_co_sum \
-                    + fit_data_point.max_output
-                self.max_output_co_count = self.max_output_co_count + 1
+                self.max_output_co_sum += fit_data_point.max_output
+                self.max_output_co_count +=  1
         
         avg_max_output_co = 0
         if self.max_output_co_count != 0:
            avg_max_output_co \
                = self.max_output_co_sum / self.max_output_co_count
-        # TODO should this be in brackets?
+        # we use Irwin-Hall to derive normal distribution from co parts
         self.forecast_mu = self.forecast_mu_po + avg_max_output_co / 2
         forecast_sig_co_sqr = (avg_max_output_co / 12) ** 2
         self.forecast_sig \
