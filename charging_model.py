@@ -108,3 +108,18 @@ class ChargingModel(Model):
             cur_soc = car_agent.soc / car_agent.car_model.battery_capacity
             self.extracted_soc[i].append(cur_soc)
             
+    def summarise_simulation(self):
+        self.co.t_print("STEP CALCULATION COMPLETE")
+        self.co.t_print("")
+        self.co.t_print("Summary")
+        
+        flat_cars = []
+        for car_agent in self.schedule_cars.agents:
+            if car_agent.ran_flat == True:
+                flat_cars.append(car_agent.uid)
+        if len(flat_cars) == 0:
+            self.co.t_print("Flat Cars: None")
+        else:
+            self.co.t_print("Flat Cars:" + str(flat_cars))
+                
+            

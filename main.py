@@ -45,3 +45,4 @@ for i in range(cm.clock.time_step_limit):
             plt.show()
     if draw_agents_on_map:
         draw_car_agents(cm, i)
+cm.summarise_simulation()
