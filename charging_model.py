@@ -96,7 +96,7 @@ class ChargingModel(Model):
         self.co.t_print("Now calculating time step #" \
                         + str(self.clock.cur_time_step))
         self.clock.step()
-        # self.hcm.step()
+        self.hcm.step()
         self.hgm.step()
         self.wm.prepare_movement()
         self.schedule_houses.step()

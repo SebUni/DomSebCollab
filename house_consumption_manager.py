@@ -5,9 +5,8 @@ Created on Thu Feb  4 16:35:38 2021
 @author: S3739258
 """
 
-import random
 import math
-import scipy.stats
+import numpy.random
 
 from cast import Cast
 from csv_helper import CSVHelper
@@ -25,13 +24,13 @@ class HouseConsumptionManager():
         self.hourly_consumption = dict()
         csv_helper = CSVHelper("data","hourly_consumption.csv")
         for row in csv_helper.data:
-            hour = cast.to_positive_int(row[0], "Hour")
-            season_it = self.clock.season*3
-            hourly_cons = []
-            hourly_cons.append(cast.to_positive_float(row[season_it+1], "10%"))
-            hourly_cons.append(cast.to_positive_float(row[season_it+2], "50%"))
-            hourly_cons.append(cast.to_positive_float(row[season_it+3], "90%"))
-            self.hourly_consumption[hour] = hourly_cons
+            day = cast.to_positive_int(row[0], "Day")
+            hour = cast.to_positive_int(row[1], "Hour")
+            hour_this_week = (day-1)*24+hour
+            season_it = self.clock.season*2
+            mu = cast.to_positive_float(row[season_it+2], "Hourly Mean")
+            sig = cast.to_positive_float(row[season_it+3], "Hourly StdDev")
+            self.hourly_consumption[hour_this_week] = [mu, sig]
         
         # load deviation data for consumption
         cast = Cast("Consumption Deviation")
@@ -48,19 +47,9 @@ class HouseConsumptionManager():
             cons_deviation[5] = cast.to_positive_float(row[season_it+5], "5PHH")
             self.consumption_deviation[location_uid] = cons_deviation
             
-        #
-        cast = Cast("Consumption Forecast Parameters")
+        
         self.forecast_parameters = dict()
-        hourly_forecast_parameters = dict()
-        csv_helper = CSVHelper("data","hourly_consumption_fit.csv")
-        season_it = self.clock.season * 2 + 1
-        for row in csv_helper.data:
-            hour = cast.to_positive_int(row[0], "Hour")
-            mu = cast.to_positive_float(row[season_it], "mu")
-            sig = cast.to_positive_float(row[season_it + 1], "sig")
-            hourly_forecast_parameters[hour] = [mu, sig]
-            
-        for time_step in range(0,24 * 60, self.clock.time_step):
+        for time_step in range(0,24 * 60 * 7, self.clock.time_step):
             hour_begin = time_step // 60
             hour_end = (time_step + self.clock.time_step) // 60
             hour_end_remainder = (time_step + self.clock.time_step) % 60
@@ -70,7 +59,7 @@ class HouseConsumptionManager():
                             and hour_end_remainder == 0)
             
             if same_hour:
-                mu_hour, sig_hour = hourly_forecast_parameters[hour_begin]
+                mu_hour, sig_hour = self.hourly_consumption[hour_begin]
                 mu_time_step = mu_hour / (self.clock.time_step / 60)
                 sig_sqr_time_step = sig_hour ** 2 / (self.clock.time_step / 60)
                 
@@ -81,40 +70,21 @@ class HouseConsumptionManager():
                                    + " not implemented")
         
         cur_mu, cur_sig_sqr = 0, 0
-        for time in range(0, self.clock.forecast_horizon,self.clock.time_step):
+        for time_it in range(0, self.clock.forecast_horizon,self.clock.time_step):
+            time = time_it % (24 * 60 * 7)
             cur_mu += self.forecast_parameters[time][0]
             cur_sig_sqr += self.forecast_parameters[time][0]**2
             
         self.forecast_mu, self.forecast_sig = cur_mu, math.sqrt(cur_sig_sqr)
         
     def instantaneous_consumption(self, location, occupants):
-        hourly_consumption = 0
         
-        perc_10 = self.hourly_consumption[self.clock.time_of_day // 60][0]
-        perc_50 = self.hourly_consumption[self.clock.time_of_day // 60][1]
-        perc_90 = self.hourly_consumption[self.clock.time_of_day // 60][2]
+        mu = self.hourly_consumption[self.clock.time_of_week // 60][0]
+        sig = self.hourly_consumption[self.clock.time_of_week // 60][1]
         
-        # draw at random between 0 and 1
-        rnd = random.random()
-        
-        # pick right distribution to draw consumption from
-        if rnd < 0.1:
-            # for 0-10% use linear PDF
-            hourly_consumption = perc_10 * math.sqrt(10 * rnd)
-        elif rnd < 0.5:
-            # for 10-50% use normal distribution fitted using the 10% and 50%
-            # CDF marker
-            # scipy.stats.norm.ppf is the inverse of the normal CDF
-            mu = perc_50
-            sig = perc_50 - perc_10
-            hourly_consumption = scipy.stats.norm.ppf(rnd, loc=mu, scale=sig)
-        else:
-            # for 50-100% use normal distribution fitted using the 50% and 90%
-            # CDF marker
-            # scipy.stats.norm.ppf is the inverse of the normal CDF
-            mu = perc_50
-            sig = perc_90 - perc_50
-            hourly_consumption = scipy.stats.norm.ppf(rnd, loc=mu, scale=sig)
+        hourly_consumption = -1.0
+        while hourly_consumption < 0.0:
+            hourly_consumption = numpy.random.normal(mu, sig)
         
         # adapt consumption for location and occupants
         occupants_it = min(occupants, 5)
@@ -129,10 +99,12 @@ class HouseConsumptionManager():
             cur_time = self.clock.elapsed_time
             horizon = self.clock.forecast_horizon
             time_step = self.clock.time_step
-            prev_forecast_horizon_time_step = cur_time - time_step
+            prev_forecast_horizon_time_step \
+                = (cur_time - time_step) % (7 * 24 * 60)
             next_forecast_horizon_time_step \
                 = ( (cur_time + horizon) // time_step  \
-                    -((cur_time + horizon) % time_step == 0) * 1 ) * time_step
+                    -((cur_time + horizon) % time_step == 0) * 1 ) \
+                  * time_step % (7 * 24 * 60)
                 
             pf_prm = self.forecast_parameters[prev_forecast_horizon_time_step]
             nf_prm = self.forecast_parameters[next_forecast_horizon_time_step]
