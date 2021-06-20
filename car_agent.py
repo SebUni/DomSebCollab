@@ -427,7 +427,6 @@ class CarAgent(Agent):
     def plan_charging(self):
         p_work = self.company.charger_cost_per_kWh
         p_feed = self.house_agent.electricity_plan.feed_in_tariff
-        # TODO p_grid neglects time-of-tariffs
         p_grid = self.house_agent.electricity_plan.cost_of_use(1, 
                                                         self.clock.time_of_day)
         

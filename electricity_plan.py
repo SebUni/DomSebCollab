@@ -86,7 +86,9 @@ class ElectricityPlan():
         -------
         float.
         """
-        return self.tariff[time_of_use]*used_kWh
+        # Deactivate time of use 
+        # return self.tariff[time_of_use]*used_kWh
+        return self.tariff[0]*used_kWh
     
     def __repr__(self):
         msg = "Uid: " + str(self.uid) + "; "

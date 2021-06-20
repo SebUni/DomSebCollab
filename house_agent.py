@@ -70,8 +70,8 @@ class HouseAgent(Agent):
         delivered_charge = min([self.clock.time_step / 60 * max_charge_rate,
                                 charge_up_to])
         charging_cost \
-            = self.electricity_plan.cost_of_use(delivered_charge,
-                                                self.clock.time_of_day)
+             = self.electricity_plan.cost_of_use(delivered_charge,
+                                                 self.clock.time_of_day)
         
         return delivered_charge, charging_cost
     
