@@ -13,7 +13,7 @@ class HouseAgent(Agent):
     """
     An agent which represents the house assgined to a car agent.
     """
-    def __init__(self, uid, model, clock, residency_location,
+    def __init__(self, uid, model, clock, residency_location, company,
                  charger_manager, electricity_plan_manager,
                  house_consumption_manager, house_generation_manager):
         super().__init__(uid, model)
@@ -42,7 +42,10 @@ class HouseAgent(Agent):
         self.battery_soc = 0.0
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
-        self.cur_pv_excess_supply = 0
+        self.charging_price_at_company \
+            = company.electricity_plan.cost_of_use(1,0);
+        self.earnings_from_feed_in = 0
+        self.spendings_for_house_consumption = 0
             
     def charge_car(self, car_agent, charge_up_to):
         """
@@ -89,9 +92,32 @@ class HouseAgent(Agent):
         # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
-        self.cur_pv_excess_supply = cur_consumption - cur_generation
-        # TODO 3) Determine car charge requirements once car has returned
-        # TODO 4) Determine how much PV generation is consumed and how much is
-        #         stored
-        # TODO 5) Charge battery from grid if needed
+        # 3) Determine car charge requirements once car has returned (only
+        #    required once time of use is considered)
+        # 4) Marry house consumption and generation
+        balance = cur_generation - cur_consumption
+        feed_in = self.electricity_plan.feed_in_tariff
+        charging_price_at_home = self.electricity_plan.cost_of_use(1,
+                                                        self.clock.time_of_day)
+        if balance > 0:
+            if self.charging_price_at_company \
+                < charging_price_at_home + feed_in:
+                self.earnings_from_feed_in += balance * feed_in
+            else:
+                self.battery_soc += balance
+        else:
+            power_to_purchase = - balance
+            if self.charging_price_at_company \
+                < charging_price_at_home + feed_in:
+                power_from_battery = min(self.battery_soc, power_to_purchase)
+                self.battery_soc -= power_from_battery
+                power_to_purchase -= power_from_battery
+            self.spendings_for_house_consumption \
+                += self.electricity_plan.cost_of_use(power_to_purchase,
+                                                     self.clock.time_of_day)
+                
+        #if balance < 0:
+        #    if batter
+        # 5) Charge battery from grid if needed (only required once time of
+        #ä    use is considered)
         pass

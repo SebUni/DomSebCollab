@@ -1,0 +1,11 @@
+How many hours did aussies work:
+https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia-detailed/latest-release
+-> Table 9 (6291009.xls) 
+
+When do americans go to work and depart from it:
+https://www.census.gov/programs-surveys/acs/microdata.html
+https://data.census.gov/mdat/#/ -> 2015 ACS 1 Year Public Use Microdata -> 2019 -> JWAD & JWDP
+
+Where from and where to do aussies commute:
+https://www.abs.gov.au/websitedbs/censushome.nsf/home/tablebuilder
+Login -> 2016 Census of Population and Housing -> Census TableBuilder Basic -> 2016 Census - Employment, Income and Education (double click) -> Geographical Areas (Usual residency) -> Main Statistical Area Strucutre (Main ASGS) (UR) -> Victroia -> Select SA 3 regions wanted -> click Add to: Column -> Geographical Areas (Place of Work) -> Main Statistical Area Strucutre (Main ASGS) (UR) -> Victroia -> Select SA 3 regions wanted -> click Add to: Row -> Retreive Data -> Enjoy 

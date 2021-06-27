@@ -40,7 +40,7 @@ class ChargingModel(Model):
         self.epm = ElectricityPlanManager(self.parameters, self.clock)
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
                                   self.epm)
-        self.lrm = LocationRoadManager(self.cpm)
+        self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock)
         self.wm = WhereaboutsManager(self.lrm, self.clock)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
         self.hcm = HouseConsumptionManager(self.clock)
@@ -63,9 +63,6 @@ class ChargingModel(Model):
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
-            house_agent = HouseAgent(agent_uid, self, self.clock,
-                                     residency_location, self.chm, self.epm,
-                                     self.hcm, self.hgm)
             employment_location = residency_location
             while employment_location == residency_location:
                 employment_location = \
@@ -76,6 +73,9 @@ class ChargingModel(Model):
             cur_location = residency_location 
             pos = self.lrm.relative_location_position(cur_location)
             
+            house_agent = HouseAgent(agent_uid, self, self.clock,
+                                     residency_location, company, self.chm,
+                                     self.epm, self.hcm, self.hgm)
             car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
                                  house_agent, company, self.lrm, self.cmm,
                                  self.wm, self.cp, self.parameters)

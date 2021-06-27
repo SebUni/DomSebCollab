@@ -14,3 +14,5 @@ queuing_condition,WHEN_NEEDED,Allows to choose if the car_agent is trying to cha
 feed_in_tariff,0.01,Price received for feeding electricity into the grid
 number_of_public_chargers,100,Number of public chargers available at each location
 confidence,0.9,Risk confidence level
+k_jam,150,Jam density
+pcu_length,4.9,Passenger Car Unit length in Meter

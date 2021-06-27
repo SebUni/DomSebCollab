@@ -34,7 +34,7 @@ class LocationRoadManager():
     """
     Holds information on locations and how they interact.
     """
-    def __init__(self, company_manager):
+    def __init__(self, parameters, company_manager, clock):
         self.min_lat = 90.0   # most southern point
         self.max_lat = -90.0  # most northern point
         self.min_lon = 361.0  # most western point
@@ -45,7 +45,9 @@ class LocationRoadManager():
         self.acc_population = {}
         self.locations = {}
         self.traffic_network = nx.Graph()
+        self.parameters = parameters
         self.cpm = company_manager
+        self.clock = clock
         
         self.load_locations()
         self.load_connections()
@@ -77,7 +79,7 @@ class LocationRoadManager():
                 travel_time += distance / speed_limit
                 
             start_node = end_node
-            start_node_defined = True;
+            start_node_defined = True
         
         return travel_time
     
@@ -126,7 +128,7 @@ class LocationRoadManager():
         Reads information on suburb connection from connections.csv.
         """
         cast = Cast("Connection")
-        self.traffic_network = nx.Graph()
+        self.traffic_network = nx.DiGraph()
         # add locations
         for location in self.locations.values():
             self.traffic_network.add_node(location.uid)
@@ -143,18 +145,19 @@ class LocationRoadManager():
                          + row[1] + ".")
             flt_dist = self.direct_distance_between_locations(start_location,
                                                               end_location)
-            speed_lmt = cast.to_positive_float(row[2], "Speed limit")
-            # TODO incorperate conversion of Dom's road levels to speed_lmt
-            speed_lmt = 50 # in km/h
+            speed_lmt = cast.to_positive_int(row[3], "Speed limit")
+            nbr_of_lns = cast.to_positive_int(row[4], "Number of lanes")
                 
             self.traffic_network.add_edge(start_location.uid, end_location.uid,
                                           distance=flt_dist,
                                           speed_limit=speed_lmt,
-                                          current_velocity=speed_lmt)
+                                          current_velocity=speed_lmt,
+                                          number_of_lanes=nbr_of_lns)
             self.traffic_network.add_edge(end_location.uid, start_location.uid,
                                           distance=flt_dist,
                                           speed_limit=speed_lmt,
-                                          current_velocity=speed_lmt)
+                                          current_velocity=speed_lmt,
+                                          number_of_lanes=nbr_of_lns)
     
     def process_location_data(self):
         """
@@ -265,6 +268,25 @@ class LocationRoadManager():
             start_node, start_node_defined = end_node, True
         
         return distance
+    
+    def determine_current_velocity_on_edges(self, agents_on_edges):
+        for edge in list(self.traffic_network.edges):
+            K = self.traffic_network.edges[edge]['distance']
+            N = agents_on_edges[edge]
+            v_lim = self.traffic_network.edges[edge]['speed_limit']
+            k_jam = self.parameters.get_parameter("k_jam","float")
+            pcu_length = self.parameters.get_parameter("pcu_length","float")
+            nbr_of_lanes = self.traffic_network.edges[edge]['number_of_lanes']
+            
+            cur_speed_flow = self.traffic_network.edges[edge]['speed_limit']
+            if N != 0:
+                cur_speed_flow = (K/N) \
+                    * ((1000 * v_lim * nbr_of_lanes)/(pcu_length + 2 * v_lim))\
+                    * ((N / K - k_jam)/((1/(pcu_length + 2 * v_lim)) - k_jam))
+            
+            self.traffic_network.edges[edge]['cur_speed'] \
+                = min(cur_speed_flow, \
+                      self.traffic_network.edges[edge]['speed_limit'])
             
         
     def print_locations(self):

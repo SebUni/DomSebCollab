@@ -32,7 +32,6 @@ class WhereaboutsManager():
         self.lrm = location_road_manager
         self.whereabouts = dict()
         self.time_step = clock.time_step
-        self.agents_on_edge = dict()
         
     def track_new_agent(self, agent_uid, cur_location):
         """ Adds tracking of a new agent to the manager. """
@@ -45,22 +44,18 @@ class WhereaboutsManager():
         """ Counts how many agents are on each edge.
         
         Needed to estimate congestions and calculate agents velocity."""
-        self.agents_on_edge = dict()
+        agents_on_edge = dict()
         for edge in list(self.lrm.traffic_network.edges):
-            edge_inv = (edge[1], edge[0])
             count = 0
             for whereabouts_it in self.whereabouts.values():
-                if whereabouts_it.cur_edge == edge or \
-                    whereabouts_it.cur_edge == edge_inv:
-                        count += 1
-            self.agents_on_edge[edge] = count
+                if whereabouts_it.cur_edge == edge:
+                    count += 1
+            agents_on_edge[edge] = count
+        
+        return agents_on_edge
     
     def prepare_movement(self):
         """ Determines all parameters, especially the velocity, required by
         Agents to calculate their next movement. """
-        self.count_agents_on_edges()
-        # TODO this now changes 'velocity' edge-attribute of
-        # self.lrm.traffic_network
-        for wa in self.whereabouts.values():
-            # TODO determine velocity
-            wa.cur_velocity = 50
+        agents_on_edges = self.count_agents_on_edges()
+        self.lrm.determine_current_velocity_on_edges(agents_on_edges)
