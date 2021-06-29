@@ -42,6 +42,7 @@ class HouseAgent(Agent):
         self.battery_soc = 0.0
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
+        self.cur_pv_excess_supply = 0
         self.charging_price_at_company \
             = company.electricity_plan.cost_of_use(1,0);
         self.earnings_from_feed_in = 0
@@ -92,21 +93,23 @@ class HouseAgent(Agent):
         # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
+        self.cur_pv_excess_supply = cur_consumption - cur_generation
         # 3) Determine car charge requirements once car has returned (only
         #    required once time of use is considered)
+        
+    def step_late(self):
         # 4) Marry house consumption and generation
-        balance = cur_generation - cur_consumption
         feed_in = self.electricity_plan.feed_in_tariff
         charging_price_at_home = self.electricity_plan.cost_of_use(1,
                                                         self.clock.time_of_day)
-        if balance > 0:
+        if self.cur_pv_excess_supply > 0:
             if self.charging_price_at_company \
                 < charging_price_at_home + feed_in:
-                self.earnings_from_feed_in += balance * feed_in
+                self.earnings_from_feed_in += self.cur_pv_excess_supply * feed_in
             else:
-                self.battery_soc += balance
+                self.battery_soc += self.cur_pv_excess_supply
         else:
-            power_to_purchase = - balance
+            power_to_purchase = - self.cur_pv_excess_supply
             if self.charging_price_at_company \
                 < charging_price_at_home + feed_in:
                 power_from_battery = min(self.battery_soc, power_to_purchase)
@@ -115,9 +118,3 @@ class HouseAgent(Agent):
             self.spendings_for_house_consumption \
                 += self.electricity_plan.cost_of_use(power_to_purchase,
                                                      self.clock.time_of_day)
-                
-        #if balance < 0:
-        #    if batter
-        # 5) Charge battery from grid if needed (only required once time of
-        #ä    use is considered)
-        pass

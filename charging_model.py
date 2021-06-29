@@ -107,6 +107,8 @@ class ChargingModel(Model):
         self.wm.prepare_movement()
         self.schedule_houses.step()
         self.schedule_cars.step()
+        for house_agent in self.schedule_houses.agents:
+            house_agent.step_late()
         
         for i, car_agent in enumerate(self.schedule_cars.agents):
             self.extracted_lon[i].append(car_agent.pos[0])

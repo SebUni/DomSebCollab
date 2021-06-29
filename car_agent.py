@@ -316,6 +316,7 @@ class CarAgent(Agent):
                             = self.house_agent.charge_car(self, charge_up_to)
                         self.charge_at_home_from_pv \
                             = self.charge_at_home_from_pv - received_charge
+                        self.house_agent.cur_pv_excess_supply -= received_charge
                         total_charge_cur_time_step = received_charge
                     if self.charge_at_home_from_grid != 0:
                         charger_capacity_in_time_step \
