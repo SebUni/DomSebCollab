@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Dec 26 14:34:59 2020
+Created on Mon Jun 28 19:52:46 2021
 
 @author: S3739258
 """
@@ -17,11 +17,11 @@ def th(hour):
         return hour - 168
     return hour
 
-class CalendarPlanner():
+class TestClass():
     """
     Creates the work schedules of all agents.
     """
-    def __init__(self, parameters, clock, location_road_manager):
+    def __init__(self):
         """
         Der Konstruktor.
 
@@ -39,10 +39,6 @@ class CalendarPlanner():
         None.
 
         """
-        self.clock = clock
-        self.lrm = location_road_manager
-        self.arrival_time_reserve \
-            = parameters.get_parameter("arrival_time_reserve", "int")
             
         self.min_hour_per_week = []
         self.max_hour_per_week = []
@@ -54,33 +50,43 @@ class CalendarPlanner():
         self.distribution_weekly_work_hours = []
         self.load_distribution_weekly_work_hours()
         
-    def create_calendar(self, hours_worked_per_week, home_location,
-                        work_location):
+    def create_calendar(self, home_location, work_location):
         """
         Calculates the entries for one agent in self.event_distribution.
         """
         calendar = dict()
+        weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+        weekend_days = ["Sat", "Sun"]
         
-        starts, ends = self.generate_schedule(hours_worked_per_week)
+        # TODO these need to be drawn at random from a yet to be determined
+        #      distribution; best would be an extra function to jus that
+        work_days = {"Mon", "Tue", "Wed", "Thu", "Fri"}
+        start_time_weekdays = 9*60 # 9 o'clock AM
+        start_time_weekends = 9*60 # 9 o'clock AM
+        work_hours_per_week = 40*60 # 40 hours a week
+        
+        work_hours_per_day = work_hours_per_week / len(work_days)
+        
         estimated_travel_time \
             = self.lrm.estimated_travel_time_between_locations(
                 home_location, work_location)
-        init_start = starts[0]
-        for time_slot in range(0, 60*24*7, self.clock.time_step):
-            if len(starts) != 0:
-                if time_slot < starts[0] * 60 - estimated_travel_time:
-                    calendar[time_slot] = home_location
-                elif time_slot < ends[0] * 60:
-                    calendar[time_slot] = work_location
+        for time_slot in range(0, 60*24, self.clock.time_step):
+            # Weekdays
+            for i, day in enumerate(weekdays):
+                if start_time_weekdays - estimated_travel_time < time_slot and\
+                    time_slot < start_time_weekdays + work_hours_per_day and \
+                    day in work_days:
+                        calendar[time_slot+60*24*i] = work_location
                 else:
-                    calendar[time_slot] = home_location
-                    starts = starts[1:]
-                    ends = ends[1:]
-            elif init_start * 60 - estimated_travel_time < 0:
-                if time_slot >= (init_start + 168) * 60 - estimated_travel_time:
-                    calendar[time_slot] = work_location
+                        calendar[time_slot+60*24*i] = home_location
+            # Weekend days
+            for i, day in enumerate(weekend_days):
+                if start_time_weekends - estimated_travel_time < time_slot and\
+                    time_slot < start_time_weekends + work_hours_per_day and \
+                    day in work_days:
+                        calendar[time_slot+60*24*(i+5)] = work_location
                 else:
-                    calendar[time_slot] = home_location
+                        calendar[time_slot+60*24*(i+5)] = home_location
             
         return calendar
     

@@ -422,7 +422,10 @@ class CarAgent(Agent):
         if charge_needed < self.soc:
             return True
         else:
-            return False             
+            return False           
+        
+    def generate_calendar_entries(self):
+        self.calendar.generate_schedule()
     
     def plan_charging(self):
         p_work = self.company.charger_cost_per_kWh

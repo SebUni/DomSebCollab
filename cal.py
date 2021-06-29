@@ -30,14 +30,26 @@ class Cal():
         """
         self.clock = clock
         self.lrm = location_road_manager
-        self.calendar = calendar_planer.create_calendar(residency_location,
-                                                        employment_location)
+        self.cp = calendar_planer
+        self.calendar = dict()
         self.whereabouts = whereabouts
         self.residency_location = residency_location
         self.employment_location = employment_location
         self.time_reserve = calendar_planer.arrival_time_reserve
+        self.hours_worked_per_week \
+            = calendar_planer.draw_hours_worked_per_week_at_random()
         
-        self.cur_scheduled_location = self.calendar[clock.elapsed_time]
+        self.cur_scheduled_location = None
+        self.next_location, self.next_location_arrival_time = None, None
+        self.next_route, self.next_route_length = None, None
+        self.upcoming_departure_time = None
+    
+    def generate_schedule(self):
+        self.calendar = self.cp.create_calendar(self.hours_worked_per_week,
+                                                self.residency_location,
+                                                self.employment_location)
+        
+        self.cur_scheduled_location = self.calendar[self.clock.elapsed_time]
         self.next_location, self.next_location_arrival_time \
             = self.find_next_location()
         self.next_route, self.next_route_length = self.find_next_route()

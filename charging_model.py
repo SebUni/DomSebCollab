@@ -87,6 +87,12 @@ class ChargingModel(Model):
             self.extracted_soc.append([])
         
         self.co.t_print("Agent creation complete")
+        self.co.t_print("Create agent's work schedule")
+        self.cp.prepare_schedule_generation()
+        for car_agent in self.schedule_cars.agents:
+            car_agent.generate_calendar_entries()
+        self.co.t_print("Completed agent's work schedule")
+        self.co.t_print("Agent creation complete")
         self.co.t_print("INITIALISATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("COMMENCING STEP CALCULATION")
