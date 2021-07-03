@@ -12,8 +12,8 @@ class CSVHelper():
     """
     Opens a csv file and provides access to its content. First row is treated
     as header!
-    """
-    def __init__(self, relative_path, filename):
+    """            
+    def __init__(self, relative_path, filename, skip_header=True):
         """
         Parameters
         ----------
@@ -21,6 +21,8 @@ class CSVHelper():
             E.g.: For "data\file_name.csv" enter "data".
         filename : string
             E.g.: For "data\file_name.csv" enter "file_name.csv".
+        skip_header : bool
+            If true, first line is skipped.
 
         Returns
         -------
@@ -34,7 +36,8 @@ class CSVHelper():
         self.data = []
         with open(path_and_file, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-            next(reader, None) # skip header
+            if skip_header:
+                next(reader, None) # skip header
             for row in reader:
                 self.data.append(row)
         

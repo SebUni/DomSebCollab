@@ -116,3 +116,24 @@ class Cal():
                 = self.find_next_location()
             self.next_route, self.next_route_length = self.find_next_route()
             self.upcoming_departure_time = self.find_upcoming_departure_time()
+            
+    def __repr__(self):
+        msg = ""
+        
+        prev_location = None
+        start_time = None
+        last_time = None
+        for key in self.calendar:
+            if prev_location == None:
+                start_time = key
+                prev_location = self.calendar[key]
+            elif not self.calendar[key] == prev_location:
+                msg += "From " + str(start_time) + " to " + str(last_time) \
+                        + " @ " + prev_location.name + "\n"
+                start_time = key
+                prev_location = self.calendar[key]
+            last_time = key
+        msg += "From " + str(start_time) + " to " + str(last_time) \
+                + " @ " + prev_location.name
+                
+        return msg

@@ -76,7 +76,7 @@ class CalendarPlanner():
                     calendar[time_slot] = home_location
                     starts = starts[1:]
                     ends = ends[1:]
-            elif init_start * 60 - estimated_travel_time < 0:
+            else:
                 if time_slot >= (init_start + 168) * 60 - estimated_travel_time:
                     calendar[time_slot] = work_location
                 else:

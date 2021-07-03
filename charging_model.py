@@ -75,7 +75,8 @@ class ChargingModel(Model):
             
             house_agent = HouseAgent(agent_uid, self, self.clock,
                                      residency_location, company, self.chm,
-                                     self.epm, self.hcm, self.hgm)
+                                     self.epm, self.hcm, self.hgm,
+                                     self.parameters)
             car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
                                  house_agent, company, self.lrm, self.cmm,
                                  self.wm, self.cp, self.parameters)

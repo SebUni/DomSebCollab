@@ -10,23 +10,17 @@ import random
 
 class Location():
     """Object storing information on individual regions or suburbs."""
-    def __init__(self, uid, name, longitude, latitude, population,
-                 commute_mean, commute_std_dev, occupant_distribution,
-                 occupant_values, pv_capacity_mean, pv_capacity_std_dev,
-                 battery_capacity_mean, battery_capacity_std_dev):
+    def __init__(self, uid, name, longitude, latitude, occupant_distribution, 
+                 occupant_values, pv_density, pv_avg_capacity):
         self.uid = uid
         self.name = str(name).strip(" ").strip('"')
         self.longitude = longitude  # east-west-coordinate
         self.latitude = latitude   # north-south-coordinate
-        self.population = population
-        self.commute_mean = commute_mean
-        self.commute_std_dev = commute_std_dev
+        self.population = None # is calculated by employee commutes
         self.occupant_distribution = occupant_distribution
         self.occupant_values = occupant_values
-        self.pv_capacity_mean = pv_capacity_mean
-        self.pv_capacity_std_dev = pv_capacity_std_dev
-        self.battery_capacity_mean = battery_capacity_mean
-        self.battery_capacity_std_dev = battery_capacity_std_dev
+        self.pv_density = pv_density
+        self.pv_avg_capacity = pv_avg_capacity
         self.companies = dict()
         
     def draw_occupants_at_random(self):
@@ -43,17 +37,11 @@ class Location():
         return occupants
     
     def draw_pv_capacity_at_random(self):
-        return self.draw_positve_from_gaussian(self.pv_capacity_mean,
-                                               self.pv_capacity_std_dev)
-    
-    def draw_battery_capacity_at_random(self):
-        return self.draw_positve_from_gaussian(self.battery_capacity_mean,
-                                               self.battery_capacity_std_dev)
-    
-    def draw_commute_at_random(self):
-        return self.draw_positve_from_gaussian(self.commute_mean,
-                                               self.commute_std_dev)
-    
+        if random.random() <= self.pv_density:
+            return self.pv_avg_capacity
+        else:
+            return 0
+        
     # I ate an apple while implementing this function
     def draw_positve_from_gaussian(self, mean, std_dev):
         value = -1
@@ -84,6 +72,4 @@ class Location():
         #        str(self.pv_capacity_std_dev)
         # msg += "Battery Capacity: " + str(self.battery_capacity_mean) + " +/- " + \
         #        str(self.battery_capacity_std_dev)
-        # msg += "Commute: " + str(self.commute_mean) + " +/- " + \
-        #        str(self.commute_std_dev)
         return msg

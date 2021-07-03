@@ -1,4 +1,0 @@
-Uid,Classification,Base,Tariff_(start_time_in_min:price)
-1,res,10,0:0.4;480:0.5;1200:0.4
-2,res,15,0:0.5
-3,com,100,0:0.3;360:0.4;540:0.3;900:0.4;1080:0.3

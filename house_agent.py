@@ -15,7 +15,8 @@ class HouseAgent(Agent):
     """
     def __init__(self, uid, model, clock, residency_location, company,
                  charger_manager, electricity_plan_manager,
-                 house_consumption_manager, house_generation_manager):
+                 house_consumption_manager, house_generation_manager,
+                 parameters):
         super().__init__(uid, model)
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
@@ -31,9 +32,8 @@ class HouseAgent(Agent):
         charger_model = charger_manager.charger_models[charger_model_uid]
         self.charger = charger_manager.add_charger(charger_model)
         self.pv_capacity = residency_location.draw_pv_capacity_at_random()
-        # TODO check how battery capacity is chosen
-        self.battery_capacity \
-            = residency_location.draw_battery_capacity_at_random()
+        self.battery_capacity = \
+            parameters.get_parameter("battery_capacity","float")
         # TODO check how electricity plan is chosen
         electricity_plan_uid \
             = random.choice(electricity_plan_manager.residential_plan_uids)

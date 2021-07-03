@@ -45,12 +45,14 @@ class LocationRoadManager():
         self.acc_population = {}
         self.locations = {}
         self.traffic_network = nx.Graph()
+        self.commutes = {}
         self.parameters = parameters
         self.cpm = company_manager
         self.clock = clock
         
         self.load_locations()
         self.load_connections()
+        self.load_commutes()
         self.process_location_data()
     
     def direct_distance_between_locations(self, location_1, location_2):
@@ -93,35 +95,25 @@ class LocationRoadManager():
         for row in csv_helper.data:
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
-            name = row[2]
-            longitude = cast.to_float(row[3], "Longitude")
-            latitude = cast.to_float(row[4], "Latitude")
-            population = cast.to_positive_int(row[5], "Population")
-            commute_mean = cast.to_positive_float(row[6], "Commute mean")
-            commute_std_dev = cast.to_positive_float(row[7], "Commute std dev")
+            name = row[1]
+            longitude = cast.to_float(row[2], "Longitude")
+            latitude = cast.to_float(row[3], "Latitude")
             occupant_distribution \
-                = cast.to_positive_int_list(row[8], "Occupant distribution")
+                = cast.to_positive_int_list(row[4], "Occupant distribution")
             occupant_values \
-                = cast.to_positive_int_list(row[9], "Occupant values")
-            pv_capacity_mean \
-                = cast.to_positive_float(row[10], "PV capacity mean")
-            pv_capacity_std_dev \
-                = cast.to_positive_float(row[11], "PV capacity std dev")
-            battery_capacity_mean \
-                = cast.to_positive_float(row[12], "Battery capacity mean")
-            battery_capacity_std_dev\
-                = cast.to_positive_float(row[13], "Battery capacity std dev")
+                = cast.to_positive_int_list(row[5], "Occupant values")
+            pv_density \
+                = cast.to_positive_float(row[6], "PV density")
+            pv_avg_capacity \
+                = cast.to_positive_float(row[7], "PV average capacity")
                     
-            loc = Location(uid, name, longitude, latitude, population,
-                           commute_mean, commute_std_dev,
+            loc = Location(uid, name, longitude, latitude,
                            occupant_distribution, occupant_values,
-                           pv_capacity_mean, pv_capacity_std_dev,
-                           battery_capacity_mean, battery_capacity_std_dev)
+                           pv_density, pv_avg_capacity)
             # add public charger
             self.cpm.add_company(loc)
             
             self.locations[loc.uid] = loc
-            
         
     def load_connections(self):
         """
@@ -145,8 +137,8 @@ class LocationRoadManager():
                          + row[1] + ".")
             flt_dist = self.direct_distance_between_locations(start_location,
                                                               end_location)
-            speed_lmt = cast.to_positive_int(row[3], "Speed limit")
-            nbr_of_lns = cast.to_positive_int(row[4], "Number of lanes")
+            speed_lmt = cast.to_positive_int(row[2], "Speed limit")
+            nbr_of_lns = cast.to_positive_int(row[3], "Number of lanes")
                 
             self.traffic_network.add_edge(start_location.uid, end_location.uid,
                                           distance=flt_dist,
@@ -158,6 +150,33 @@ class LocationRoadManager():
                                           speed_limit=speed_lmt,
                                           current_velocity=speed_lmt,
                                           number_of_lanes=nbr_of_lns)
+            
+    def load_commutes(self):
+        cast = Cast("Commutes")
+        self.commutes = dict()
+        work_locations = dict()
+        csv_helper = CSVHelper("data","commutes.csv",False)
+        for i, row in enumerate(csv_helper.data):
+            # determine possible work location
+            if i == 0:
+                for j, col in enumerate(row[1:]):
+                    work_locations[j+1] \
+                        = self.locations[cast.to_positive_int(col,
+                                                              "Work location")]
+            else:
+                abs_commutes = dict()
+                residency_location \
+                    = self.locations[cast.to_positive_int(row[0],
+                                                         "Residency location")]
+                for j, col in enumerate(row[1:]):
+                    abs_commutes[work_locations[j+1]] \
+                        = cast.to_positive_int(col, "Commute Amount")
+                total_workers_at_res_loc = sum(abs_commutes.values())
+                self.commutes[residency_location] = dict()
+                for work_location, abs_commute in abs_commutes.items():
+                    self.commutes[residency_location][work_location] \
+                        = abs_commute / total_workers_at_res_loc
+                residency_location.population = total_workers_at_res_loc
     
     def process_location_data(self):
         """
@@ -196,17 +215,16 @@ class LocationRoadManager():
         Returns a location which was drawn at random based on the location of
         residency and the average commute from this suburb.
         """
-        distance_work_residency = residency_location.draw_commute_at_random()
-        min_diff = -1
-        min_diff_location = residency_location
-        for location in self.locations.values():    
-            diff = abs(distance_work_residency - \
-                       self.direct_distance_between_locations(residency_location,
-                                                       location))
-            if min_diff == -1 or min_diff > diff:
-                min_diff = diff
-                min_diff_location = location
-        return min_diff_location
+        rnd = random.random()
+        sum_rel_commutes = 0
+        location_of_employment = None
+        for work_location, rel_commute in self.commutes[residency_location].items():
+            sum_rel_commutes += rel_commute
+            location_of_employment = work_location
+            if sum_rel_commutes >= rnd:
+                break
+        
+        return location_of_employment
     
     def relative_location_position(self, location):
         """

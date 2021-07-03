@@ -6,7 +6,9 @@ Created on Mon Dec 14 13:06:27 2020
 """
 import sys
 import math
+import numpy
 import scipy.special
+from scipy.special import erf, erfinv
 import scipy.optimize
 
 from mesa import Agent
@@ -396,7 +398,7 @@ class CarAgent(Agent):
                 # well nothting much needs to be done at home as there is one
                 # charger per car
                 pass
-            elif self.company.location == self.whereabouts.location:
+            elif self.company.location == self.whereabouts.cur_location:
                 # charge at place of employment
                 self.company.block_charger(self, True)
             else:
@@ -450,20 +452,30 @@ class CarAgent(Agent):
         sig = math.sqrt(sig_supply**2 + sig_demand**2)
         
         if self.whereabouts.cur_location == self.company.location:
-            q_home \
-                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
-                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
-                          sig),
-                    bounds=((0, q_one_way),)).x
-            self.charge_at_work = max(2 * q_one_way - soc - q_home, 0)
+            # q_home \
+            #     = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
+            #         args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
+            #               sig),
+            #         bounds=((0, q_one_way),)).x
+            # self.charge_at_work = max(2 * q_one_way - soc - q_home, 0)
+            self.charge_at_work \
+                 = self.parm_cost_fct_charging_at_work_anal(q_one_way, p_feed, 
+                                                           p_grid, p_em,
+                                                           p_work, soc, c, mu,
+                                                           sig)
             
         
         if self.whereabouts.cur_location == self.house_agent.location:
+#            self.charge_at_home_from_pv \
+#                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_home,
+#                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
+#                          sig),
+#                    bounds=((0, q_one_way),)).x
             self.charge_at_home_from_pv \
-                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_home,
-                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
-                          sig),
-                    bounds=((0, q_one_way),)).x
+                = self.parm_cost_fct_charging_at_home_anal(q_one_way, p_feed, 
+                                                           p_grid, p_em,
+                                                           p_work, soc, c, mu,
+                                                           sig)
             max_charge_rate \
                 = self.house_agent.max_charge_rate(self.car_model)
             if p_em > p_work and p_em > p_grid:
@@ -562,3 +574,73 @@ class CarAgent(Agent):
         ''' Normal distribution evaluated at x. '''
         pre_fac = 1/math.sqrt(2*math.pi)
         return (pre_fac / sig) * math.exp( - (x - mu)**2 / (2 * sig**2))
+    
+    def parm_cost_fct_charging_at_home_anal(self, q_ow, p_f, p_g, p_em, p_w,
+                                            soc, c, mu, sig):
+        q_tw, q_th = q_ow, q_ow
+        sqrt2sig = math.sqrt(2) * sig
+        # performance helper
+        thresh = mu + sqrt2sig * erfinv(1 - 2*c)
+        # shorthands
+        dp = p_g - p_f
+        dp_div = dp / (2 * (1 - c))
+        
+        if thresh < q_tw - soc:
+            if p_g < p_w:
+                return q_tw + q_th - soc
+            elif p_g == p_w:
+                return q_tw - soc
+            else:
+                return q_tw - soc
+        elif q_tw + q_th - soc < thresh:
+            if p_w <= p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1):
+                return q_tw - soc
+            elif p_w >= p_f + dp_div * (erf((q_tw + q_th - soc - mu) / sqrt2sig) + 1):
+                return q_tw + q_th - soc
+            else:
+                return sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
+        else:
+            if p_w > p_g:
+                return q_tw + q_th - soc
+            elif p_w == p_g:
+                return q_tw + q_th - soc
+            elif p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1) < p_w < p_g:
+                return sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
+            else:
+                return q_tw - soc
+    
+    def parm_cost_fct_charging_at_work_anal(self, q_ow, p_f, p_g, p_em, p_w,
+                                            soc, c, mu, sig):
+        q_tw, q_th = q_ow, q_ow
+        sqrt2sig = math.sqrt(2) * sig
+        # performance helper
+        thresh = mu + sqrt2sig * erfinv(1 - 2*c)
+        # shorthands
+        dp = p_g - p_f
+        dp_div = dp / (2 * (1 - c))
+        
+        if q_tw < thresh:
+            if p_w >= p_f + dp_div * (erf((q_tw - mu) / sqrt2sig) + 1):
+                return q_th - soc
+            elif p_w <= p_f + dp_div * (1 - erf(mu / sqrt2sig)):
+                return q_th + q_tw - soc
+            else:
+                return q_th + q_tw - soc - mu \
+                    - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
+        elif thresh < 0:
+            if p_g < p_w:
+                return q_th - soc
+            elif p_g == p_w:
+                return q_th - soc
+            else:
+                return q_th + q_tw - soc
+        else:
+            if p_w < p_g:
+                return q_th + q_tw - soc
+            elif p_w == p_g:
+                return q_th - soc
+            elif p_f + dp_div * (erf(q_tw - mu) / sqrt2sig + 1) > p_w > p_g:
+                return q_th + q_tw - soc - mu \
+                    - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
+            else:
+                return q_th - soc

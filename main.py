@@ -26,9 +26,9 @@ def draw_car_agents(model, it):
     fig.savefig(title)
 
 draw_soc_chart = False
-draw_agents_on_map = False
+draw_agents_on_map = True
 
-nbr_of_agents = 50
+nbr_of_agents = 6000
 
 cm = charging_model.ChargingModel(nbr_of_agents)
 
