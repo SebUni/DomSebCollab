@@ -49,6 +49,10 @@ class LocationRoadManager():
         self.parameters = parameters
         self.cpm = company_manager
         self.clock = clock
+        self.traffic_jam_velocity \
+            = self.parameters.get_parameter("traffic_jam_velocity","float")
+        self.k_jam = self.parameters.get_parameter("k_jam","float")
+        self.pcu_length = self.parameters.get_parameter("pcu_length","float")
         
         self.load_locations()
         self.load_connections()
@@ -292,19 +296,17 @@ class LocationRoadManager():
             K = self.traffic_network.edges[edge]['distance']
             N = agents_on_edges[edge]
             v_lim = self.traffic_network.edges[edge]['speed_limit']
-            k_jam = self.parameters.get_parameter("k_jam","float")
-            pcu_length = self.parameters.get_parameter("pcu_length","float")
             nbr_of_lanes = self.traffic_network.edges[edge]['number_of_lanes']
-            
             cur_speed_flow = self.traffic_network.edges[edge]['speed_limit']
             if N != 0:
                 cur_speed_flow = (K/N) \
-                    * ((1000 * v_lim * nbr_of_lanes)/(pcu_length + 2 * v_lim))\
-                    * ((N / K - k_jam)/((1/(pcu_length + 2 * v_lim)) - k_jam))
+                    * ((1000 * v_lim * nbr_of_lanes)/(self.pcu_length + 2 * v_lim))\
+                    * ((N / K - self.k_jam)/((1/(self.pcu_length + 2 * v_lim)) - self.k_jam))
             
             self.traffic_network.edges[edge]['cur_speed'] \
-                = min(cur_speed_flow, \
-                      self.traffic_network.edges[edge]['speed_limit'])
+                = max(min(cur_speed_flow, \
+                      self.traffic_network.edges[edge]['speed_limit']),
+                      self.traffic_jam_velocity)
             
         
     def print_locations(self):

@@ -145,7 +145,8 @@ class CarAgent(Agent):
             return
         # if trip is about to start (that is only directly after route is
         # planned) check departure condition
-        if wa.cur_location.uid == wa.route[0]:
+        if wa.cur_location.uid == wa.route[0] \
+            and wa.distance_since_last_location == 0:
             charge_needed = self.charge_for_departure_condition(wa.route)
             if charge_needed > self.soc:
                 self.initiate_emergency_charging(charge_needed - self.soc)
@@ -203,7 +204,6 @@ class CarAgent(Agent):
                 self.soc -= remaining_time_on_edge * inst_consumption
                 # if next location is final destination
                 if wa.route[-1] == end:
-                    wa.cur_edge = (end, end)
                     wa.terminate_trip()
                     remaining_time = 0
                     self.plan_charging()

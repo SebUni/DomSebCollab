@@ -28,11 +28,13 @@ def draw_car_agents(model, it):
 draw_soc_chart = False
 draw_agents_on_map = True
 
-nbr_of_agents = 6000
+nbr_of_agents = 1200
 
 cm = charging_model.ChargingModel(nbr_of_agents)
 
 for i in range(cm.clock.time_step_limit):
+    if i == 21:
+        test = 1
     cm.step()
     if draw_soc_chart:
         if 130 < i < 170:

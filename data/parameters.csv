@@ -17,3 +17,4 @@ confidence,0.9,Risk confidence level
 k_jam,150,Jam density
 pcu_length,4.9,Passenger Car Unit length in Meter
 battery_capacity,10,Home battery capacity in kW
+traffic_jam_velocity,4,velocity cars travel at when stuck in a traffic jam

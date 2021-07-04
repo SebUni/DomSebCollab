@@ -37,6 +37,7 @@ class Whereabouts():
     def terminate_trip(self):
         """ Aborts the current trip. """
         self.route = []
+        self.cur_edge = (self.cur_location, self.cur_location)
         self.is_travelling = False
         self.distance_since_last_location = 0
     
