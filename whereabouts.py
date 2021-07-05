@@ -12,12 +12,14 @@ class Whereabouts():
     This class calculates the progress of travels and feeds information on the
     geographic whereabouts of the agent to the charging model.
     """
-    def __init__(self, agent_uid, start_location, location_road_manager,
-                 time_step):
+    def __init__(self, agent_uid, start_activity, start_location,
+                 location_road_manager, calendar_planner, time_step):
         
         self.agent_uid = agent_uid
         self.lrm = location_road_manager
+        self.cp = calendar_planner
         self.time_step = time_step
+        self.cur_activity = start_activity
         self.cur_location = start_location
         self.cur_edge = (start_location.uid, start_location.uid)
         self.cur_location_coordinates = self.cur_location.coordinates()
@@ -31,7 +33,11 @@ class Whereabouts():
         """
         self.route = self.lrm.calc_route(self.cur_location,
                                          destination_location)
-        self.cur_edge = (self.route[0], self.route[1])
+        if len(self.route) >= 2:
+            route = self.route
+            self.cur_edge = (self.route[0], self.route[1])
+        else:
+            self.cur_edge = (self.route[0], self.route[0])
         self.is_travelling = True
         
     def terminate_trip(self):

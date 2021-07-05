@@ -1,2 +1,0 @@
-requires asgs2016absstructuresmainstructureandgccsa.gpkg
-download from here: https://data.gov.au/data/dataset/asgs-2016-edition-boundaries/resource/48a33591-0b0a-4712-a60b-39ef4b564f2b

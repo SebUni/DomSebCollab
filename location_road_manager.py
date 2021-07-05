@@ -53,6 +53,8 @@ class LocationRoadManager():
             = self.parameters.get_parameter("traffic_jam_velocity","float")
         self.k_jam = self.parameters.get_parameter("k_jam","float")
         self.pcu_length = self.parameters.get_parameter("pcu_length","float")
+        self.inner_area_speed_limit \
+            = self.parameters.get_parameter("inner_area_speed_limit","float")
         
         self.load_locations()
         self.load_connections()
@@ -94,8 +96,9 @@ class LocationRoadManager():
         Reads information on individual suburbs from locations.csv.
         """
         cast = Cast("Location")
+        sa_level = self.parameters.get_parameter("sa_level","int")
         self.locations = {}
-        csv_helper = CSVHelper("data","locations.csv")
+        csv_helper = CSVHelper("data/SA" + str(sa_level),"locations.csv")
         for row in csv_helper.data:
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
@@ -110,10 +113,16 @@ class LocationRoadManager():
                 = cast.to_positive_float(row[6], "PV density")
             pv_avg_capacity \
                 = cast.to_positive_float(row[7], "PV average capacity")
+            distance_commuted_if_work_and_home_equal_distribution \
+                = cast.to_positive_int_list(row[8], "Distance distribution")
+            distance_commuted_if_work_and_home_equal_values \
+                = cast.to_positive_float_list(row[9], "Distance values")
                     
             loc = Location(uid, name, longitude, latitude,
                            occupant_distribution, occupant_values,
-                           pv_density, pv_avg_capacity)
+                           pv_density, pv_avg_capacity,
+                         distance_commuted_if_work_and_home_equal_distribution,
+                         distance_commuted_if_work_and_home_equal_values)
             # add public charger
             self.cpm.add_company(loc)
             
@@ -124,12 +133,13 @@ class LocationRoadManager():
         Reads information on suburb connection from connections.csv.
         """
         cast = Cast("Connection")
+        sa_level = self.parameters.get_parameter("sa_level","int")
         self.traffic_network = nx.DiGraph()
         # add locations
         for location in self.locations.values():
             self.traffic_network.add_node(location.uid)
         # add edges
-        csv_helper = CSVHelper("data","connections.csv")
+        csv_helper = CSVHelper("data/SA" + str(sa_level),"connections.csv")
         for row in csv_helper.data:
             try:
                 start_location_uid = int(row[0])
@@ -157,9 +167,10 @@ class LocationRoadManager():
             
     def load_commutes(self):
         cast = Cast("Commutes")
+        sa_level = self.parameters.get_parameter("sa_level","int")
         self.commutes = dict()
         work_locations = dict()
-        csv_helper = CSVHelper("data","commutes.csv",False)
+        csv_helper = CSVHelper("data/SA" + str(sa_level),"commutes.csv",False)
         for i, row in enumerate(csv_helper.data):
             # determine possible work location
             if i == 0:

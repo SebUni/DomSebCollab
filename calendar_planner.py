@@ -53,6 +53,8 @@ class CalendarPlanner():
         
         self.distribution_weekly_work_hours = []
         self.load_distribution_weekly_work_hours()
+        self.HOME = 0
+        self.WORK = 1
         
     def create_calendar(self, hours_worked_per_week, home_location,
                         work_location):
@@ -69,18 +71,18 @@ class CalendarPlanner():
         for time_slot in range(0, 60*24*7, self.clock.time_step):
             if len(starts) != 0:
                 if time_slot < starts[0] * 60 - estimated_travel_time:
-                    calendar[time_slot] = home_location
+                    calendar[time_slot] = self.HOME
                 elif time_slot < ends[0] * 60:
-                    calendar[time_slot] = work_location
+                    calendar[time_slot] = self.WORK
                 else:
-                    calendar[time_slot] = home_location
+                    calendar[time_slot] = self.HOME
                     starts = starts[1:]
                     ends = ends[1:]
             else:
                 if time_slot >= (init_start + 168) * 60 - estimated_travel_time:
-                    calendar[time_slot] = work_location
+                    calendar[time_slot] = self.WORK
                 else:
-                    calendar[time_slot] = home_location
+                    calendar[time_slot] = self.HOME
             
         return calendar
     
@@ -97,7 +99,8 @@ class CalendarPlanner():
         self.max_hour_per_week = []
         self.hour_share_per_week = []
         
-        csv_helper = CSVHelper("data","hours_worked_per_week.csv")
+        csv_helper = CSVHelper("data",
+                               "share_of_total_shift_lengths_per_week.csv")
         for row in csv_helper.data:
             self.min_hour_per_week.append( \
                         cast.to_positive_int(row[0], "Min Hours Worked")) 
@@ -137,7 +140,8 @@ class CalendarPlanner():
         cast = Cast("Distribution of Weekly Work Hours")
         self.distribution_weekly_work_hours = []
         
-        csv_helper = CSVHelper("data","distribution_weekly_work_hours.csv")
+        csv_helper = CSVHelper("data",
+                    "share_of_total_hours_worked_per_hour_for_one_week.csv")
         for row in csv_helper.data:
             self.distribution_weekly_work_hours.append( \
                     cast.to_positive_float(row[1], "Share weekly work hours"))
@@ -162,6 +166,8 @@ class CalendarPlanner():
         slctd_pks = []
         i = 0
         largest_gap = 0
+        max_attempts = 10000
+        attempts = 0
         while len(slctd_pks) == 0 or largest_gap > 1 + 2 * rest_between_shifts:
             cur_pk = srtd_indx[i]
             is_close_to_other_peak = False
@@ -186,12 +192,18 @@ class CalendarPlanner():
                     largest_gap = slctd_pks_srtd[j] - slctd_pks_srtd[prev_j] + offset
             i += 1
             if i == 168: break
+            attempts += 1
+            if attempts >= max_attempts:
+                raise RuntimeError("Failed to create schedue. Please restart!")
         
+        all_init_slctd_pks = slctd_pks
         hours_remaining = hours_worked_per_week
         starts = []
         ends = []
         
+        attempts = 0
         while hours_remaining != 0:
+            scheduled_hour_successul = False
             best_start = 0
             best_start_it = -1
             best_end = 0
@@ -256,6 +268,7 @@ class CalendarPlanner():
                 slctd_pks.remove(best_new_it)
                 
                 self.assigned_hour_share[th(best_new_it)] += 1 / self.hours_weekly[th(best_new_it)]
+                scheduled_hour_successul = True
             elif best_start_it != -1 \
                 and (best_end >= best_start or best_end_it == -1) \
                 and (best_new >= best_start or best_new_it == -1 or len(starts) >= 7):
@@ -263,6 +276,7 @@ class CalendarPlanner():
                 self.assigned_hour_share[th(starts[best_start_it])] \
                     += 1 / self.hours_weekly[th(starts[best_start_it])]
                 hours_remaining -= 1
+                scheduled_hour_successul = True
             elif best_end_it != -1 \
                 and (best_start >= best_end or best_start_it == -1) \
                 and (best_new >= best_end or best_new_it == -1 or len(starts) >= 7):
@@ -270,6 +284,7 @@ class CalendarPlanner():
                 self.assigned_hour_share[th(ends[best_end_it])] \
                     += 1 / self.hours_weekly[th(ends[best_end_it])]
                 hours_remaining -= 1
+                scheduled_hour_successul = True
             else:
                 largest_gap = 0
                 largest_gap_center = -1
@@ -288,5 +303,10 @@ class CalendarPlanner():
                     slctd_pks.append(largest_gap_center)
                 else:
                     raise RuntimeError("Scheduling error!")
-                        
+            if not scheduled_hour_successul and len(starts) == 7:
+                slctd_pks = [12,36,60,84,108,132,156]
+                hours_remaining = hours_worked_per_week
+                starts = []
+                ends = []
+                
         return starts, ends

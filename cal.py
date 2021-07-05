@@ -7,7 +7,9 @@ Created on Tue Mar  9 13:40:31 2021
 
 class Cal():
     def __init__(self, clock, location_road_manager, calendar_planer,
-                 whereabouts, residency_location, employment_location):
+                 whereabouts, residency_location, employment_location,
+                 cur_activity, cur_location,
+                 distance_commuted_if_work_and_home_equal):
         """
         Well it's a constructor'
 
@@ -35,11 +37,15 @@ class Cal():
         self.whereabouts = whereabouts
         self.residency_location = residency_location
         self.employment_location = employment_location
+        self.distance_commuted_if_work_and_home_equal \
+            = distance_commuted_if_work_and_home_equal
         self.time_reserve = calendar_planer.arrival_time_reserve
         self.hours_worked_per_week \
             = calendar_planer.draw_hours_worked_per_week_at_random()
         
-        self.cur_scheduled_location = None
+        self.cur_scheduled_activity = cur_activity
+        self.cur_scheduled_location = cur_location
+        self.next_activity = None
         self.next_location, self.next_location_arrival_time = None, None
         self.next_route, self.next_route_length = None, None
         self.upcoming_departure_time = None
@@ -49,13 +55,17 @@ class Cal():
                                                 self.residency_location,
                                                 self.employment_location)
         
-        self.cur_scheduled_location = self.calendar[self.clock.elapsed_time]
-        self.next_location, self.next_location_arrival_time \
-            = self.find_next_location()
+        self.cur_scheduled_activity = self.calendar[self.clock.elapsed_time]
+        if self.cur_scheduled_activity == self.cp.HOME:
+            self.cur_scheduled_location = self.residency_location
+        else:
+            self.cur_scheduled_location = self.employment_location
+        self.next_activity, self.next_location, \
+            self.next_location_arrival_time = self.find_next_activity()
         self.next_route, self.next_route_length = self.find_next_route()
         self.upcoming_departure_time = self.find_upcoming_departure_time()
     
-    def find_next_location(self):
+    def find_next_activity(self):
         """
         Finds the next planned location different from the current location.
 
@@ -67,28 +77,37 @@ class Cal():
             Time in minutes noted for arrival at the next location.
 
         """
-        if self.employment_location != self.residency_location:
-            next_location = self.whereabouts.cur_location
-            checked_time = self.clock.time_of_week
-            checked_weekly_time = checked_time
-            while self.whereabouts.cur_location == next_location:
-                checked_time += self.clock.time_step
-                checked_weekly_time += self.clock.time_step
-                if checked_weekly_time >= 60*24*7:
-                    checked_weekly_time = checked_weekly_time % 60*24*7
-                next_location = self.calendar[checked_weekly_time]
-            return next_location, checked_time
+        start_time_of_the_week = self.clock.time_of_week
+        checked_time = start_time_of_the_week
+        checked_weekly_time = start_time_of_the_week
+        
+        cur_activity = self.whereabouts.cur_activity
+        next_activity = self.calendar[checked_weekly_time]
+        
+        while cur_activity == next_activity:
+            checked_time += self.clock.time_step
+            checked_weekly_time += self.clock.time_step
+            if checked_weekly_time >= 60*24*7:
+                checked_weekly_time = checked_weekly_time % 60*24*7
+            if checked_weekly_time == start_time_of_the_week:
+                raise RuntimeWarning("Agent does not never commute!")
+            next_activity = self.calendar[checked_weekly_time]
+            
+        if next_activity == self.cp.HOME:
+            next_location = self.residency_location
         else:
-            return self.residency_location, \
-                    (self.clock.time_step_limit + 1) * self.clock.time_step
+            next_location = self.employment_location
+            
+        return next_activity, next_location, checked_time
     
     def find_next_route(self):
-        if self.whereabouts.cur_location != self.next_location:
+        if self.whereabouts.cur_activity != self.next_activity:
             route = self.lrm.calc_route(self.whereabouts.cur_location,
                                         self.next_location)
-            return route, self.lrm.calc_route_length(route)
-        else:
-            return [], 0
+            if len(route) >= 2:
+                return route, self.lrm.calc_route_length(route)
+            else:
+                return route, self.distance_commuted_if_work_and_home_equal
     
     def find_upcoming_departure_time(self):
         """
@@ -109,11 +128,11 @@ class Cal():
         return rounded_departure_time
     
     def step(self):
-        if self.whereabouts.cur_location == self.next_location \
+        if self.whereabouts.cur_activity == self.next_activity \
             or self.clock.elapsed_time >= self.next_location_arrival_time:
         
-            self.next_location, self.next_location_arrival_time \
-                = self.find_next_location()
+            self.next_activity, self.next_location, \
+                self.next_location_arrival_time = self.find_next_activity()
             self.next_route, self.next_route_length = self.find_next_route()
             self.upcoming_departure_time = self.find_upcoming_departure_time()
             

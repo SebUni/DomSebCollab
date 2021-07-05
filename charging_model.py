@@ -41,9 +41,9 @@ class ChargingModel(Model):
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
                                   self.epm)
         self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock)
-        self.wm = WhereaboutsManager(self.lrm, self.clock)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
-        self.hcm = HouseConsumptionManager(self.clock)
+        self.wm = WhereaboutsManager(self.lrm, self.clock, self.cp)
+        self.hcm = HouseConsumptionManager(self.clock, self.parameters)
         self.hgm = HouseGenerationManager(self.parameters, self.clock,
                                           self.epm, self.cmm)
         self.schedule_cars = RandomActivation(self)
@@ -63,13 +63,12 @@ class ChargingModel(Model):
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
-            employment_location = residency_location
-            while employment_location == residency_location:
-                employment_location = \
-                    self.lrm.draw_location_of_employment(residency_location)
+            employment_location = \
+                self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
             
             #TODO reconsider if agents should all start at home
+            cur_activity = self.cp.HOME
             cur_location = residency_location 
             pos = self.lrm.relative_location_position(cur_location)
             
@@ -77,9 +76,9 @@ class ChargingModel(Model):
                                      residency_location, company, self.chm,
                                      self.epm, self.hcm, self.hgm,
                                      self.parameters)
-            car_agent = CarAgent(agent_uid, self, self.clock, cur_location,
-                                 house_agent, company, self.lrm, self.cmm,
-                                 self.wm, self.cp, self.parameters)
+            car_agent = CarAgent(agent_uid, self, self.clock, cur_activity,
+                                 cur_location, house_agent, company, self.lrm,
+                                 self.cmm, self.wm, self.cp, self.parameters)
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)

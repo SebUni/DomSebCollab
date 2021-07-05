@@ -14,7 +14,7 @@ class WhereaboutsManager():
     This class is implement to simplify the interaction between all
     Whereabouts-classes.
     """
-    def __init__(self, location_road_manager, clock):
+    def __init__(self, location_road_manager, clock, calendar_planner):
         """
         Initialises the whereabouts manager, which keeps track of agents
         journeys.
@@ -30,14 +30,15 @@ class WhereaboutsManager():
         None.
         """
         self.lrm = location_road_manager
+        self.cp = calendar_planner
         self.whereabouts = dict()
         self.time_step = clock.time_step
         
-    def track_new_agent(self, agent_uid, cur_location):
+    def track_new_agent(self, agent_uid, cur_activity, cur_location):
         """ Adds tracking of a new agent to the manager. """
         self.whereabouts[agent_uid] \
-            = whereabouts.Whereabouts(agent_uid, cur_location, self.lrm,
-                                      self.time_step)
+            = whereabouts.Whereabouts(agent_uid, cur_activity, cur_location,
+                                      self.lrm, self.cp, self.time_step)
         return self.whereabouts[agent_uid]
     
     def count_agents_on_edges(self):

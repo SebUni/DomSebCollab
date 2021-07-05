@@ -6,7 +6,6 @@ Created on Mon Dec 14 13:06:27 2020
 """
 import sys
 import math
-import numpy
 import scipy.special
 from scipy.special import erf, erfinv
 import scipy.optimize
@@ -17,9 +16,10 @@ from cal import Cal
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
-    def __init__(self, uid, model, clock, cur_location, house_agent, company,
-                 location_road_manager, car_model_manager, whereabouts_manager,
-                 calendar_planer, parameters):
+    def __init__(self, uid, model, clock, cur_activity, cur_location,
+                 house_agent, company, location_road_manager,
+                 car_model_manager, whereabouts_manager, calendar_planer,
+                 parameters):
         """
         Parameters
         ----------
@@ -82,10 +82,13 @@ class CarAgent(Agent):
         self.clock = clock
         self.house_agent = house_agent
         self.company = company
+        self.distance_commuted_if_work_and_home_equal \
+            = house_agent.location.draw_distance_commuted_if_work_equal_home_at_random()
         # TODO reconsider how car models are chosen
         self.lrm = location_road_manager
         self.car_model = car_model_manager.draw_car_model_at_random()
         self.whereabouts = whereabouts_manager.track_new_agent(uid,
+                                                               cur_activity,
                                                                cur_location)
          # TODO check if all agents should start with 100% SOC
         self.soc = self.car_model.battery_capacity # soc in kWh
@@ -96,7 +99,8 @@ class CarAgent(Agent):
         self.electricity_cost = 0 # in $
         self.calendar = Cal(self.clock, self.lrm, calendar_planer,
                             self.whereabouts, house_agent.location,
-                            company.location)
+                            company.location, cur_activity, cur_location,
+                            self.distance_commuted_if_work_and_home_equal)
         
         self.departure_condition \
             = parameters.get_parameter("departure_condition","string")
@@ -139,6 +143,8 @@ class CarAgent(Agent):
         # short hands
         tn = self.lrm.traffic_network
         wa = self.whereabouts
+        
+        
         # for wa.is_travelling to be True, cur_loc != scheduled_loc and no
         # emergency charing is required therefore if clauses are omitted
         if not wa.is_travelling:
@@ -152,6 +158,16 @@ class CarAgent(Agent):
                 self.initiate_emergency_charging(charge_needed - self.soc)
                 wa.terminate_trip()
                 return
+        # in case of travel within one area only 
+        if self.house_agent.location == self.company.location:
+            time_travelled = self.distance_commuted_if_work_and_home_equal \
+                / self.lrm.inner_area_speed_limit
+            instant_consumption \
+                = self.car_model.instantaneous_consumption(\
+                                               self.lrm.inner_area_speed_limit)
+            self.soc -= instant_consumption * time_travelled
+            self.arrival_at_destination()
+            return
         
         # time remaining of step in h
         remaining_time = self.clock.time_step / 60
@@ -204,23 +220,8 @@ class CarAgent(Agent):
                 self.soc -= remaining_time_on_edge * inst_consumption
                 # if next location is final destination
                 if wa.route[-1] == end:
-                    wa.terminate_trip()
                     remaining_time = 0
-                    self.plan_charging()
-                    # check if agent has arrived at work and intends to charge
-                    # at work
-                    if self.company.location == wa.cur_location \
-                        and self.charge_at_work != 0:
-                        # the logic check if a charger is available or if agent
-                        # has to que for charging happens in
-                        # company_charger_manager
-                        is_queuing = None
-                        if self.queuing_condition == "ALWAYS":
-                            is_queuing = True
-                        else: # i.e. if self.queuing_condition == "WHEN_NEEDED"
-                            is_queuing \
-                                = self.has_to_charge_prior_to_departure()
-                        self.company.block_charger(self, is_queuing)
+                    self.arrival_at_destination()
                 # if next location is not final destination
                 else:
                     index_end = wa.route.index(end)
@@ -247,6 +248,22 @@ class CarAgent(Agent):
         relative_position \
             =self.lrm.relative_coordinate_position(wa.cur_location_coordinates)
         self.model.space.move_agent(self, relative_position)
+        
+    def arrival_at_destination(self):
+        self.whereabouts.cur_activity = self.calendar.next_activity
+        self.whereabouts.terminate_trip()
+        self.plan_charging()
+        # check if agent has arrived at work and intends to charge at work
+        if self.company.location ==self.whereabouts.cur_location \
+            and self.charge_at_work != 0:
+            # the logic check if a charger is available or if agent has to que
+            # for charging happens in company_charger_manager
+            is_queuing = None
+            if self.queuing_condition == "ALWAYS":
+                is_queuing = True
+            else: # i.e. if self.queuing_condition == "WHEN_NEEDED"
+                is_queuing = self.has_to_charge_prior_to_departure()
+            self.company.block_charger(self, is_queuing)
         
     def charge_for_departure_condition(self, route):
         """
@@ -281,7 +298,15 @@ class CarAgent(Agent):
             instant_consumption \
                 = self.car_model.instantaneous_consumption(speed_limits[i])
             expected_consumption.append(instant_consumption * time_on_segment)
-        
+        # in case agent works in its home area
+        if expected_consumption == []:
+            time_on_segment = self.distance_commuted_if_work_and_home_equal \
+                / self.lrm.inner_area_speed_limit
+            instant_consumption \
+                = self.car_model.instantaneous_consumption(\
+                                               self.lrm.inner_area_speed_limit)
+            expected_consumption.append(instant_consumption * time_on_segment)
+            
         reserve_power \
             = self.car_model.instantaneous_consumption(self.reserve_speed)
         
@@ -482,7 +507,6 @@ class CarAgent(Agent):
                 charge_needed \
                     = max(2 * q_one_way - soc, 0) if p_grid <= p_work \
                         else max( q_one_way - soc, 0)
-                charge_needed = max(2 * q_one_way - soc, 0)
                 min_charge_time = charge_needed / max_charge_rate * 60
                 min_charge_time = (min_charge_time // self.clock.time_step) \
                         * self.clock.time_step

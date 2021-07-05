@@ -8,19 +8,27 @@ Created on Sun Jan 17 17:32:43 2021
 import charging_model
 import matplotlib.pyplot as plt
 
+from parameters import Parameters
+
+def time_stamp(i):
+    parameters = Parameters()
+    time_step = parameters.get_parameter("time_step","int")
+    hours = i * time_step // 60
+    minutes = i * time_step - hours * 60
+    
+    return format(hours,"02") + ":" + format(minutes,"02")
+
 def draw_car_agents(model, it):
     x_vals = []
     y_vals = []
-    col_vals = []
     for boid in model.schedule_cars.agents:
         x, y = boid.pos
-        soc = boid.soc / boid.car_model.battery_capacity
         x_vals.append(x)
         y_vals.append(y)
-        col_vals.append(((1-soc)*0.7, soc*0.7, 0))
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(111)
     ax.scatter(x_vals, y_vals)
+    ax.text(0, 0, time_stamp(it), fontsize=24)
     ax.axis('off')
     title = str(it) + ".png"
     fig.savefig(title)
@@ -28,7 +36,8 @@ def draw_car_agents(model, it):
 draw_soc_chart = False
 draw_agents_on_map = True
 
-nbr_of_agents = 1200
+parameters = Parameters()
+nbr_of_agents = parameters.get_parameter("nbr_of_agents","int")
 
 cm = charging_model.ChargingModel(nbr_of_agents)
 

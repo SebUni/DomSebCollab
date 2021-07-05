@@ -16,8 +16,9 @@ class HouseConsumptionManager():
     Handles the consumption of houses including locational, seasonal and day-
     time dependet differences.
     """
-    def __init__(self, clock):
+    def __init__(self, clock, parameters):
         self.clock = clock
+        self.parameters = parameters
         
         # load hourly consumption data
         cast = Cast("Hourly Consumption")
@@ -34,8 +35,10 @@ class HouseConsumptionManager():
         
         # load deviation data for consumption
         cast = Cast("Consumption Deviation")
+        sa_level = self.parameters.get_parameter("sa_level","int")
         self.consumption_deviation = dict()
-        csv_helper = CSVHelper("data","consumption_deviation.csv")
+        csv_helper = CSVHelper("data/SA" + str(sa_level),
+                               "consumption_deviation.csv")
         for row in csv_helper.data:
             location_uid = cast.to_positive_int(row[0], "LocationUid")
             season_it = self.clock.season * 5

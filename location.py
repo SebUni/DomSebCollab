@@ -11,7 +11,9 @@ import random
 class Location():
     """Object storing information on individual regions or suburbs."""
     def __init__(self, uid, name, longitude, latitude, occupant_distribution, 
-                 occupant_values, pv_density, pv_avg_capacity):
+                 occupant_values, pv_density, pv_avg_capacity,
+                 distance_commuted_if_work_equal_home_distribution,
+                 distance_commuted_if_work_equal_home_values):
         self.uid = uid
         self.name = str(name).strip(" ").strip('"')
         self.longitude = longitude  # east-west-coordinate
@@ -22,6 +24,10 @@ class Location():
         self.pv_density = pv_density
         self.pv_avg_capacity = pv_avg_capacity
         self.companies = dict()
+        self.distance_commuted_if_work_equal_home_distribution \
+            = distance_commuted_if_work_equal_home_distribution
+        self.distance_commuted_if_work_equal_home_values \
+            = distance_commuted_if_work_equal_home_values
         
     def draw_occupants_at_random(self):
         total = sum(self.occupant_distribution)
@@ -49,7 +55,20 @@ class Location():
             value = np.random.normal(mean, std_dev)
             
         return value
+    
+    def draw_distance_commuted_if_work_equal_home_at_random(self):
+        rnd = random.random()
+        cum_chance = 0
+        value = 0
+        nbr_of_keys = len(self.distance_commuted_if_work_equal_home_values)
+        for dist_it in range(nbr_of_keys):
+            cum_chance \
+                += self.distance_commuted_if_work_equal_home_values[dist_it]
+            value \
+                = self.distance_commuted_if_work_equal_home_distribution[dist_it]
+            if cum_chance > rnd: break
         
+        return value
     
     def coordinates(self):
         """
