@@ -1,7 +1,7 @@
 #parameter_name,parameter_value,description
 season,0,Season of the year: 0-Spring 1-Summer 2-Autumn 3-Winter
 time_step,5,Length of each time step in minutes
-time_step_limit,2304,Amount of time steps executed before simulation termination.
+time_step_limit,3000,Amount of time steps executed before simulation termination (288 is 1 day in 5 min steps).
 forecast_horizon,1440,Time for solar forecast
 company_charger_cost_per_kWh,0.5,Price charged by companies per kWh charged
 public_charger_cost_per_kWh,1,Price charged while using public chargers per kWh charged
@@ -18,6 +18,6 @@ k_jam,150,Jam density
 pcu_length,4.9,Passenger Car Unit length in Meter
 battery_capacity,10,Home battery capacity in kW
 traffic_jam_velocity,4,velocity cars travel at when stuck in a traffic jam
-nbr_of_agents,3000,Number of car agents
+nbr_of_agents,1200,Number of car agents
 sa_level,3,statistical area level; choose 3 for high and 4 for low details
 inner_area_speed_limit,50,Speed limit applied if agent travels only with in one area

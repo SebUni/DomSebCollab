@@ -117,19 +117,33 @@ class CarAgent(Agent):
             sys.exit("Queuing condition: " + str(self.queuing_condition) \
                      + " is ill defined!")
         self.would_run_flat = False
+        self.extracted_data = dict()
         
     def step(self):
+        # initialise extraction data
+        self.extracted_data = dict()
+        self.extracted_data["car_consumption"] = 0
+        self.extracted_data["dist_travelled"] = 0
+        self.extracted_data["charge_received"] = 0
+        self.extracted_data["emergency_charge_instruction"] = 0
+        self.extracted_data["home_charge_instruction"] = 0
+        self.extracted_data["work_charge_instruction"] = 0
+        self.extracted_data["soc"] = 0
+        
         # Writing this while I should be celebrating christmas, fuck COVID
         self.plan()
         self.move()
         self.charge()
         self.calendar.step()
         
+        cur_soc = self.soc / self.car_model.battery_capacity
+        self.extracted_data["soc"] = cur_soc
+        
     def plan(self):
         """ This function determines if the agent should start a new journey
         in this time step and when to charge. """
         # Decide on new destination
-        if self.calendar.upcoming_departure_time <= self.clock.elapsed_time:
+        if self.calendar.upcoming_departure_time <= self.clock.time_of_week:
             if self.emergency_charging == 0.0 \
                 and not self.whereabouts.is_travelling:
                 self.whereabouts.set_destination(self.calendar.next_location)
@@ -143,7 +157,8 @@ class CarAgent(Agent):
         # short hands
         tn = self.lrm.traffic_network
         wa = self.whereabouts
-        
+        distance_travelled_cur_time_step = 0
+        consumption_cur_time_step = 0
         
         # for wa.is_travelling to be True, cur_loc != scheduled_loc and no
         # emergency charing is required therefore if clauses are omitted
@@ -166,6 +181,10 @@ class CarAgent(Agent):
                 = self.car_model.instantaneous_consumption(\
                                                self.lrm.inner_area_speed_limit)
             self.soc -= instant_consumption * time_travelled
+            self.extracted_data["car_consumption"] \
+                = instant_consumption * time_travelled
+            self.extracted_data["dist_travelled"] \
+                = self.distance_commuted_if_work_and_home_equal
             self.arrival_at_destination()
             return
         
@@ -218,6 +237,9 @@ class CarAgent(Agent):
                 wa.cur_location = self.lrm.locations[end]
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
                 self.soc -= remaining_time_on_edge * inst_consumption
+                consumption_cur_time_step \
+                    += remaining_time_on_edge * inst_consumption
+                distance_travelled_cur_time_step += remaining_distance_on_edge
                 # if next location is final destination
                 if wa.route[-1] == end:
                     remaining_time = 0
@@ -243,11 +265,18 @@ class CarAgent(Agent):
                     [coord_start[0] + ratio_trvld_on_edge * diff_vct[0],
                      coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
                 self.soc -= remaining_time * inst_consumption
+                consumption_cur_time_step += remaining_time * inst_consumption
+                distance_travelled_cur_time_step \
+                    += remaining_time * cur_velocity
                 remaining_time = 0
         # update position on grid
         relative_position \
             =self.lrm.relative_coordinate_position(wa.cur_location_coordinates)
         self.model.space.move_agent(self, relative_position)
+        self.extracted_data["dist_travelled"] \
+            = distance_travelled_cur_time_step
+        self.extracted_data["car_consumption"] \
+            = consumption_cur_time_step
         
     def arrival_at_destination(self):
         self.whereabouts.cur_activity = self.calendar.next_activity
@@ -335,7 +364,8 @@ class CarAgent(Agent):
                 if cur_location == self.house_agent.location:
                     total_charge_cur_time_step = 0
                     # First try to charge from pv
-                    if self.charge_at_home_from_pv != 0:
+                    if self.charge_at_home_from_pv != 0 \
+                        and self.house_agent.cur_pv_excess_supply > 0:
                         max_from_pv = self.house_agent.cur_pv_excess_supply
                         charge_up_to = min(self.charge_at_home_from_pv,
                                            missing_charge, max_from_pv)
@@ -399,6 +429,7 @@ class CarAgent(Agent):
                             pub_company.unblock_charger(self)
                     
             self.soc += received_charge
+            self.extracted_data["charge_received"] = received_charge
             self.electricity_cost += charging_cost
             
     def initiate_emergency_charging(self, emergency_charge_volume):
@@ -430,6 +461,8 @@ class CarAgent(Agent):
                 # charge at public charger
                 self.location.companies[0].block_charger(self, True)
             self.emergency_charging = emergency_charge_volume
+            self.extracted_data["emergency_charge_instruction"] \
+                = emergency_charge_volume
         else:
             # car agent does not depart because it would run flat
             self.would_run_flat = True
@@ -465,7 +498,7 @@ class CarAgent(Agent):
                                              "float")
         
         soc = self.soc
-        q_one_way = self.lrm.calc_route_length(self.calendar.next_route)
+        q_one_way = self.calendar.next_route_length
         
         c = self.parameters.get_parameter("confidence", "float")
         mu_supply, sig_supply \
@@ -476,6 +509,7 @@ class CarAgent(Agent):
         mu = mu_supply - mu_demand
         sig = math.sqrt(sig_supply**2 + sig_demand**2)
         
+        # TODO change this from location to activity
         if self.whereabouts.cur_location == self.company.location:
             # q_home \
             #     = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
@@ -488,7 +522,8 @@ class CarAgent(Agent):
                                                            p_grid, p_em,
                                                            p_work, soc, c, mu,
                                                            sig)
-            
+            self.extracted_data["work_charge_instruction"] \
+                = self.charge_at_work            
         
         if self.whereabouts.cur_location == self.house_agent.location:
 #            self.charge_at_home_from_pv \
@@ -501,6 +536,9 @@ class CarAgent(Agent):
                                                            p_grid, p_em,
                                                            p_work, soc, c, mu,
                                                            sig)
+            self.extracted_data["home_charge_instruction"] \
+                = self.charge_at_home_from_pv
+        
             max_charge_rate \
                 = self.house_agent.max_charge_rate(self.car_model)
             if p_em > p_work and p_em > p_grid:
@@ -609,29 +647,32 @@ class CarAgent(Agent):
         dp = p_g - p_f
         dp_div = dp / (2 * (1 - c))
         
+        instruction = 0
         if thresh < q_tw - soc:
             if p_g < p_w:
-                return q_tw + q_th - soc
+                instruction = q_tw + q_th - soc
             elif p_g == p_w:
-                return q_tw - soc
+                instruction = q_tw - soc
             else:
-                return q_tw - soc
+                instruction = q_tw - soc
         elif q_tw + q_th - soc < thresh:
             if p_w <= p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1):
-                return q_tw - soc
+                instruction = q_tw - soc
             elif p_w >= p_f + dp_div * (erf((q_tw + q_th - soc - mu) / sqrt2sig) + 1):
-                return q_tw + q_th - soc
+                instruction = q_tw + q_th - soc
             else:
-                return sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
+                instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
         else:
             if p_w > p_g:
-                return q_tw + q_th - soc
+                instruction = q_tw + q_th - soc
             elif p_w == p_g:
-                return q_tw + q_th - soc
+                instruction = q_tw + q_th - soc
             elif p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1) < p_w < p_g:
-                return sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
+                instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
             else:
-                return q_tw - soc
+                instruction = q_tw - soc
+                
+        return max(0, instruction)
     
     def parm_cost_fct_charging_at_work_anal(self, q_ow, p_f, p_g, p_em, p_w,
                                             soc, c, mu, sig):
@@ -643,28 +684,31 @@ class CarAgent(Agent):
         dp = p_g - p_f
         dp_div = dp / (2 * (1 - c))
         
+        instruction = 0
         if q_tw < thresh:
             if p_w >= p_f + dp_div * (erf((q_tw - mu) / sqrt2sig) + 1):
-                return q_th - soc
+                instruction = q_th - soc
             elif p_w <= p_f + dp_div * (1 - erf(mu / sqrt2sig)):
-                return q_th + q_tw - soc
+                instruction = q_th + q_tw - soc
             else:
-                return q_th + q_tw - soc - mu \
+                instruction = q_th + q_tw - soc - mu \
                     - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
         elif thresh < 0:
             if p_g < p_w:
-                return q_th - soc
+                instruction = q_th - soc
             elif p_g == p_w:
-                return q_th - soc
+                instruction = q_th - soc
             else:
-                return q_th + q_tw - soc
+                instruction = q_th + q_tw - soc
         else:
             if p_w < p_g:
-                return q_th + q_tw - soc
+                instruction = q_th + q_tw - soc
             elif p_w == p_g:
-                return q_th - soc
+                instruction = q_th - soc
             elif p_f + dp_div * (erf(q_tw - mu) / sqrt2sig + 1) > p_w > p_g:
-                return q_th + q_tw - soc - mu \
+                instruction = q_th + q_tw - soc - mu \
                     - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
             else:
-                return q_th - soc
+                instruction = q_th - soc
+                
+        return max(0, instruction)

@@ -55,9 +55,8 @@ class ChargingModel(Model):
                                      self.lrm.north_south_spread * 1.001,
                                      False)
         
-        self.extracted_lon = []
-        self.extracted_lat = []
         self.extracted_soc = []
+        self.extracted_data = dict()
         
         # create agents
         self.co.t_print("Start to create agents")
@@ -82,9 +81,6 @@ class ChargingModel(Model):
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)
-            self.extracted_lon.append([])
-            self.extracted_lat.append([])
-            self.extracted_soc.append([])
         
         self.co.t_print("Agent creation complete")
         self.co.t_print("Create agent's work schedule")
@@ -102,6 +98,8 @@ class ChargingModel(Model):
         self.co.t_print("Now calculating time step #" \
                         + str(self.clock.cur_time_step))
         self.clock.step()
+        if self.clock.cur_time_step == 2300:
+            test = 1
         self.hcm.step()
         self.hgm.step()
         self.wm.prepare_movement()
@@ -110,11 +108,10 @@ class ChargingModel(Model):
         for house_agent in self.schedule_houses.agents:
             house_agent.step_late()
         
-        for i, car_agent in enumerate(self.schedule_cars.agents):
-            self.extracted_lon[i].append(car_agent.pos[0])
-            self.extracted_lat[i].append(car_agent.pos[1])
-            cur_soc = car_agent.soc / car_agent.car_model.battery_capacity
-            self.extracted_soc[i].append(cur_soc)
+        self.extracted_data[self.clock.elapsed_time] = dict()
+        for car_agent in self.schedule_cars.agents:
+            self.extracted_data[self.clock.elapsed_time][car_agent.uid] \
+                = car_agent.extracted_data
             
     def summarise_simulation(self):
         self.co.t_print("STEP CALCULATION COMPLETE")

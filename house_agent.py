@@ -47,6 +47,7 @@ class HouseAgent(Agent):
             = company.electricity_plan.cost_of_use(1,0);
         self.earnings_from_feed_in = 0
         self.spendings_for_house_consumption = 0
+        self.extracted_data = dict()
             
     def charge_car(self, car_agent, charge_up_to):
         """
@@ -86,6 +87,8 @@ class HouseAgent(Agent):
                        self.charger.charger_model.power_dc))
         
     def step(self):
+        self.extracted_data = dict()
+        
         # 1) Calculate house consumption
         inst_consumption \
             = self.hcm.instantaneous_consumption(self.location, self.occupants)

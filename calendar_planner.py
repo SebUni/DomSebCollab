@@ -196,7 +196,6 @@ class CalendarPlanner():
             if attempts >= max_attempts:
                 raise RuntimeError("Failed to create schedue. Please restart!")
         
-        all_init_slctd_pks = slctd_pks
         hours_remaining = hours_worked_per_week
         starts = []
         ends = []
@@ -302,7 +301,10 @@ class CalendarPlanner():
                 if largest_gap > rest_between_shifts * 2:
                     slctd_pks.append(largest_gap_center)
                 else:
-                    raise RuntimeError("Scheduling error!")
+                    slctd_pks = [12,36,60,84,108,132,156]
+                    hours_remaining = hours_worked_per_week
+                    starts = []
+                    ends = []
             if not scheduled_hour_successul and len(starts) == 7:
                 slctd_pks = [12,36,60,84,108,132,156]
                 hours_remaining = hours_worked_per_week

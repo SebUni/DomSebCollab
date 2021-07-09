@@ -34,7 +34,6 @@ class Whereabouts():
         self.route = self.lrm.calc_route(self.cur_location,
                                          destination_location)
         if len(self.route) >= 2:
-            route = self.route
             self.cur_edge = (self.route[0], self.route[1])
         else:
             self.cur_edge = (self.route[0], self.route[0])
