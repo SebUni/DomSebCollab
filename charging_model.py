@@ -33,8 +33,7 @@ class ChargingModel(Model):
         self.parameters = Parameters()
         self.num_agents = nbr_of_agents
         # time step and time step limit in minutes
-        self.clock = Clock(self.parameters) 
-        
+        self.clock = Clock(self.parameters)
         self.cmm = CarModelManager()
         self.chm = ChargerManager()
         self.epm = ElectricityPlanManager(self.parameters, self.clock)
@@ -98,8 +97,6 @@ class ChargingModel(Model):
         self.co.t_print("Now calculating time step #" \
                         + str(self.clock.cur_time_step))
         self.clock.step()
-        if self.clock.cur_time_step == 2300:
-            test = 1
         self.hcm.step()
         self.hgm.step()
         self.wm.prepare_movement()
@@ -107,11 +104,13 @@ class ChargingModel(Model):
         self.schedule_cars.step()
         for house_agent in self.schedule_houses.agents:
             house_agent.step_late()
+        self.cpm.step()
         
-        self.extracted_data[self.clock.elapsed_time] = dict()
-        for car_agent in self.schedule_cars.agents:
-            self.extracted_data[self.clock.elapsed_time][car_agent.uid] \
-                = car_agent.extracted_data
+        if self.clock.is_pre_heated:
+            self.extracted_data[self.clock.elapsed_time] = dict()
+            for car_agent in self.schedule_cars.agents:
+                self.extracted_data[self.clock.elapsed_time][car_agent.uid] \
+                    = car_agent.extracted_data
             
     def summarise_simulation(self):
         self.co.t_print("STEP CALCULATION COMPLETE")

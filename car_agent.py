@@ -84,19 +84,20 @@ class CarAgent(Agent):
         self.company = company
         self.distance_commuted_if_work_and_home_equal \
             = house_agent.location.draw_distance_commuted_if_work_equal_home_at_random()
-        # TODO reconsider how car models are chosen
         self.lrm = location_road_manager
+        # TODO reconsider how car models are chosen
         self.car_model = car_model_manager.draw_car_model_at_random()
         self.whereabouts = whereabouts_manager.track_new_agent(uid,
                                                                cur_activity,
                                                                cur_location)
-         # TODO check if all agents should start with 100% SOC
-        self.soc = self.car_model.battery_capacity # soc in kWh
+        self.soc = self.car_model.battery_capacity \
+            * self.parameters.get_parameter("start_soc","float")# soc in kWh
         self.charge_at_home_from_grid = 0.0
         self.charge_at_home_from_pv = 0.0
         self.charge_at_work = 0.0
         
-        self.electricity_cost = 0 # in $
+        self.electricity_cost = 0 # in 
+        self.cp = calendar_planer
         self.calendar = Cal(self.clock, self.lrm, calendar_planer,
                             self.whereabouts, house_agent.location,
                             company.location, cur_activity, cur_location,
@@ -117,6 +118,7 @@ class CarAgent(Agent):
             sys.exit("Queuing condition: " + str(self.queuing_condition) \
                      + " is ill defined!")
         self.would_run_flat = False
+        self.total_charge = {"home":0, "work":0, "emergency":0}
         self.extracted_data = dict()
         
     def step(self):
@@ -354,6 +356,7 @@ class CarAgent(Agent):
         """ Charges the EV. """
         if not self.whereabouts.is_travelling \
             and self.soc < self.car_model.battery_capacity:
+            cur_activity = self.whereabouts.cur_activity
             cur_location = self.whereabouts.cur_location
             missing_charge =  self.car_model.battery_capacity - self.soc
             received_charge = 0.0
@@ -361,7 +364,7 @@ class CarAgent(Agent):
             # In case of non-emergency charging
             if self.emergency_charging == 0.0:
                 # If car agent is at home
-                if cur_location == self.house_agent.location:
+                if cur_activity == self.cp.HOME:
                     total_charge_cur_time_step = 0
                     # First try to charge from pv
                     if self.charge_at_home_from_pv != 0 \
@@ -389,8 +392,9 @@ class CarAgent(Agent):
                             = self.house_agent.charge_car(self, charge_up_to)
                         self.charge_at_home_from_grid \
                             = self.charge_at_home_from_grid - received_charge
+                    self.total_charge["home"] += received_charge
                 # if car agent is at work
-                if cur_location == self.company.location \
+                if cur_activity == self.cp.WORK \
                     and self.charge_at_work != 0.0 \
                     and self.company.can_charge(self):
                     charge_up_to = min(self.charge_at_work, missing_charge)
@@ -399,16 +403,18 @@ class CarAgent(Agent):
                     self.charge_at_work -= received_charge
                     if self.charge_at_work == 0:
                         self.company.unblock_charger(self)
+                    self.total_charge["work"] += received_charge
             # In case of emergency charging
             else:
                 # if car agent is at home
-                if cur_location == self.house_agent.location:
+                if cur_activity == self.cp.HOME:
                     received_charge, charging_cost \
                         = self.house_agent.charge_car(self, 
                                                       self.emergency_charging)
                     self.emergency_charging -= received_charge
+                    self.total_charge["home"] += received_charge
                 # if car agent is at work
-                elif cur_location == self.company.location:
+                elif cur_activity == self.cp.WORK:
                     if self.company.can_charge(self):
                         received_charge, charging_cost \
                             = self.company.charge_car(self,
@@ -416,6 +422,7 @@ class CarAgent(Agent):
                         self.emergency_charging -= received_charge
                         if self.emergency_charging == 0:
                             self.company.unblock_charger(self)
+                    self.total_charge["work"] += received_charge
                 # if car agent has to use public charger whilst in between home
                 # and work
                 else:
@@ -427,6 +434,7 @@ class CarAgent(Agent):
                         self.emergency_charging -= received_charge
                         if self.emergency_charging == 0:
                             pub_company.unblock_charger(self)
+                        self.total_charge["emergency"] += received_charge
                     
             self.soc += received_charge
             self.extracted_data["charge_received"] = received_charge
@@ -502,7 +510,8 @@ class CarAgent(Agent):
         
         c = self.parameters.get_parameter("confidence", "float")
         mu_supply, sig_supply \
-            = self.house_agent.hgm.generation_forecast_distribution_parameter()
+            = self.house_agent.hgm.generation_forecast_distribution_parameter(\
+                                                  self.house_agent.pv_capacity)
         mu_demand, sig_demand \
             = self.house_agent.hcm.consumption_forecast_distribution_parameters()
         

@@ -78,7 +78,18 @@ class Location():
         -------
         (float, float).
         """
-        return [self.longitude, self.latitude]     
+        return [self.longitude, self.latitude]   
+    
+    def average_company_charger_utilisation(self):
+        all_individual_company_averages = []
+        for key, company in self.companies.items():
+            if key != 0:
+                all_individual_company_averages.append( \
+                                            sum(company.charger_utilisation) \
+                                            / len(company.charger_utilisation))
+        
+        return sum(all_individual_company_averages) \
+                / len(all_individual_company_averages)
         
     def __repr__(self):
         msg = "Id: " + str(self.uid) + ", "

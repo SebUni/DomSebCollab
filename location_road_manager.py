@@ -318,7 +318,15 @@ class LocationRoadManager():
                 = max(min(cur_speed_flow, \
                       self.traffic_network.edges[edge]['speed_limit']),
                       self.traffic_jam_velocity)
-            
+                    
+    def average_company_charger_utilisation(self):
+        all_individual_location_averages = []
+        for location in self.locations.values():
+            all_individual_location_averages.append( \
+                                location.average_company_charger_utilisation())
+        
+        return sum(all_individual_location_averages) \
+                / len(all_individual_location_averages)        
         
     def print_locations(self):
         """

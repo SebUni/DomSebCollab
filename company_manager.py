@@ -111,3 +111,7 @@ class CompanyManager():
         company.add_employee()
         
         return company
+    
+    def step(self):
+        for company in self.companies:
+            company.step()

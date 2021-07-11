@@ -163,5 +163,7 @@ class HouseGenerationManager():
         # Using this you can substitute efficiency * surface = x m^-2
         return pv_capacity * irradiance * (1 - 0.05 * (temperature - 25))
     
-    def generation_forecast_distribution_parameter(self):
-        return self.forecast_mu, self.forecast_sig
+    # TODO this neglects the PV capacity and return irradiation not pv power output! Needs to return power output
+    def generation_forecast_distribution_parameter(self, name_plate_capacity):
+        return self.forecast_mu * name_plate_capacity, \
+                self.forecast_sig * name_plate_capacity

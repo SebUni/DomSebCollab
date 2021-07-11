@@ -62,6 +62,7 @@ class Company():
             self.charger_cost_per_kWh = charger_cost_per_kWh
             self.electricity_plan = electricity_plan
             self.employees_per_charger = employees_per_charger
+            self.charger_utilisation = []
         
     def add_employee(self):
         """
@@ -81,7 +82,7 @@ class Company():
         cur_employees_per_charger = self.nbr_of_employees / divisor
         if cur_employees_per_charger > self.employees_per_charger\
             or self.nbr_of_employees == 1:
-                self.ccm.add_charger()
+            self.ccm.add_charger()
                 
     def charge_car(self, car_agent, charge_up_to):
         """
@@ -186,6 +187,12 @@ class Company():
 
         """
         self.ccm.unblock_charger(car_agent)
+        
+    def step(self):
+        if self.clock.is_pre_heated:
+            self.charger_utilisation.append(1 \
+                                        - len(self.ccm.chargers_not_in_use) \
+                                        / len(self.ccm.chargers))
     
     def __repr__(self):
         msg = ""

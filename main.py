@@ -140,3 +140,13 @@ plt.show()
 # for line in out:
 #     f.writelines(line + "\n")
 # f.close()
+
+total_charge = {"home":0, "work":0, "emergency":0}
+for agent in cm.schedule_cars.agents:
+    total_charge["home"] += agent.total_charge["home"]
+    total_charge["work"] += agent.total_charge["work"]
+    total_charge["emergency"] += agent.total_charge["emergency"]
+print("Charge: @home = {}, @work = {}, @emergency = {},".format(total_charge["home"],
+                                                                total_charge["work"],
+                                                                total_charge["emergency"]))
+print("Company Charger Utilisation: {}".format(cm.lrm.average_company_charger_utilisation()))

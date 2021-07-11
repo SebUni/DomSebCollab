@@ -35,6 +35,9 @@ class Clock():
         co = ConsoleOutput()
         self.elapsed_time = 0
         self.cur_time_step = 0;
+        self.pre_heat_time \
+            = parameters.get_parameter("pre_heat_simulation", "int")
+        self.is_pre_heated = False
         self.season = parameters.get_parameter("season","int")
         self.time_step = parameters.get_parameter("time_step","int")
         self.time_step_limit = parameters.get_parameter("time_step_limit",
@@ -100,5 +103,7 @@ class Clock():
             self.elapsed_time += self.time_step
             self.time_of_day = self.calc_time_of_day()
             self.time_of_week = self.calc_time_of_week()
+            if self.elapsed_time >= self.pre_heat_time:
+                self.is_pre_heated = True
         else:
             self.first_step_call = False
