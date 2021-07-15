@@ -107,8 +107,25 @@ class CompanyChargerManager():
             del self.chargers_in_use_by_charger[charger]
             self.chargers_not_in_use.append(charger)
             # if charging que is not empty
-            if self.charging_que:
+            if len(self.charging_que):
                 # retrieve next car agent to be charged, remove it from que and
                 # block a charger for it
-                car_agent = self.charging_que.popleft()
-                self.block_charger(car_agent, True)
+                next_car_agent = self.charging_que.popleft()
+                self.block_charger(next_car_agent, True)
+        
+    def remove_from_charging_que(self, car_agent):
+        if car_agent in self.charging_que:
+            self.charging_que.remove(car_agent)
+                
+    def history(self):
+        hist = dict()
+        hist["que"] = [agent.uid for agent in list(self.charging_que)]
+        charger_use = dict()
+        for charger, agent in self.chargers_in_use_by_car_agent.items():
+            charger_use[charger.uid] = agent.uid
+        hist["used_chargers"] = charger_use
+        hist["unused_chargers"] = self.chargers_not_in_use
+        if len(charger_use) == 0 and len(self.chargers_not_in_use) == 0:
+            test = 0
+        return hist
+        

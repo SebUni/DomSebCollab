@@ -53,24 +53,23 @@ class CalendarPlanner():
         
         self.distribution_weekly_work_hours = []
         self.load_distribution_weekly_work_hours()
-        self.HOME = 0
-        self.WORK = 1
+        self.TRANSIT = 0
+        self.HOME = 1
+        self.WORK = 2
+        self.EMERGENCY_CHARGING = 3
         
-    def create_calendar(self, hours_worked_per_week, home_location,
-                        work_location):
+    def create_calendar(self, hours_worked_per_week):
         """
         Calculates the entries for one agent in self.event_distribution.
         """
         calendar = dict()
         
         starts, ends = self.generate_schedule(hours_worked_per_week)
-        estimated_travel_time \
-            = self.lrm.estimated_travel_time_between_locations(
-                home_location, work_location)
+        starts_org, ends_orgs = starts, ends
         init_start = starts[0]
         for time_slot in range(0, 60*24*7, self.clock.time_step):
             if len(starts) != 0:
-                if time_slot < starts[0] * 60 - estimated_travel_time:
+                if time_slot < starts[0] * 60:
                     calendar[time_slot] = self.HOME
                 elif time_slot < ends[0] * 60:
                     calendar[time_slot] = self.WORK
@@ -79,12 +78,12 @@ class CalendarPlanner():
                     starts = starts[1:]
                     ends = ends[1:]
             else:
-                if time_slot >= (init_start + 168) * 60 - estimated_travel_time:
+                if time_slot >= (init_start + 168) * 60:
                     calendar[time_slot] = self.WORK
                 else:
                     calendar[time_slot] = self.HOME
             
-        return calendar
+        return calendar, starts_org, ends_orgs
     
     def load_hours_worked_per_week(self):
         """
@@ -260,13 +259,15 @@ class CalendarPlanner():
                 and (best_new <= best_start or best_start_it == -1) \
                 and (best_new <= best_end or best_end_it == -1):
                 starts.append(best_new_it)
-                ends.append(best_new_it)
+                ends.append(best_new_it+1)
                 starts.sort()
                 ends.sort()
                 
                 slctd_pks.remove(best_new_it)
                 
                 self.assigned_hour_share[th(best_new_it)] += 1 / self.hours_weekly[th(best_new_it)]
+                self.assigned_hour_share[th(best_new_it+1)] += 1 / self.hours_weekly[th(best_new_it+1)]
+                hours_remaining -= 1
                 scheduled_hour_successul = True
             elif best_start_it != -1 \
                 and (best_end >= best_start or best_end_it == -1) \

@@ -62,7 +62,10 @@ class Company():
             self.charger_cost_per_kWh = charger_cost_per_kWh
             self.electricity_plan = electricity_plan
             self.employees_per_charger = employees_per_charger
+        
+            self.chargers_used_this_time_step = []
             self.charger_utilisation = []
+            self.charger_history = dict()
         
     def add_employee(self):
         """
@@ -120,6 +123,8 @@ class Company():
             delivered_charge = min([self.clock.time_step / 60 * charge_rate,
                                 charge_up_to])
             charging_cost = self.charger_cost_per_kWh * delivered_charge
+            if company_charger not in self.chargers_used_this_time_step:
+                self.chargers_used_this_time_step.append(company_charger)
         
         return delivered_charge, charging_cost
     
@@ -188,11 +193,15 @@ class Company():
         """
         self.ccm.unblock_charger(car_agent)
         
+    def remove_from_charging_que(self, car_agent):
+        self.ccm.remove_from_charging_que(car_agent)
+        
     def step(self):
         if self.clock.is_pre_heated:
-            self.charger_utilisation.append(1 \
-                                        - len(self.ccm.chargers_not_in_use) \
-                                        / len(self.ccm.chargers))
+            self.charger_utilisation.append( \
+                len(self.chargers_used_this_time_step)/len(self.ccm.chargers))
+            self.charger_history[self.clock.elapsed_time] = self.ccm.history()
+        self.chargers_used_this_time_step.clear()
     
     def __repr__(self):
         msg = ""

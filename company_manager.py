@@ -39,7 +39,8 @@ class CompanyManager():
     
     def add_company(self, location):
         uid = len(self.companies)
-            
+        is_public_facility = True if len(location.companies) == 0 else False
+        
         if len(self.electricity_plan_manager.commercial_plan_uids) == 0:
             sys.exit("CompanyManager: No commercial electricity plans to"\
                      + "to choose from")
@@ -51,7 +52,7 @@ class CompanyManager():
             
         # TODO Add criteria for charger cost
         charger_cost_per_kWh, employees_per_charger = 0, 0
-        if len(location.companies) == 0: # if company provides public charging
+        if is_public_facility:
             charger_cost_per_kWh \
                 = self.parameters.get_parameter("public_charger_cost_per_kWh",
                                                 "float")
@@ -73,22 +74,19 @@ class CompanyManager():
         charger_model \
             = self.charger_manager.charger_models[charger_model_uid]
             
-        # TODO Add criteria to choose this ratio
-        employees_per_charger \
-            = self.parameters.get_parameter("employees_per_charger",
-                                            "positive_int") 
-            
         company = Company(uid, self.clock, location, electricity_plan,
                           self.charger_manager, charger_cost_per_kWh,
                           charger_model, employees_per_charger)
         self.companies.append(company)
-        location.companies[company.uid] = company
+        location.companies.append(company)
         
         # add chargers to public charging company
-        number_of_public_chargers \
-            = self.parameters.get_parameter("number_of_public_chargers", "int")
-        for i in range(number_of_public_chargers):
-            company.ccm.add_charger()
+        if is_public_facility:
+            number_of_public_chargers \
+                = self.parameters.get_parameter("number_of_public_chargers",
+                                                "int")
+            for i in range(number_of_public_chargers):
+                company.ccm.add_charger()
         
         return company
         
@@ -106,7 +104,7 @@ class CompanyManager():
         if add_to_new_company:
             company = self.add_company(location)
         else:
-            company = random.choice(list(location.companies.values())[1:])
+            company = random.choice(location.companies[1:])
             
         company.add_employee()
         

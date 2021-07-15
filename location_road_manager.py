@@ -75,7 +75,7 @@ class LocationRoadManager():
         """
         route = nx.shortest_path(self.traffic_network, location_1.uid,
                                  location_2.uid, 'distance')
-        travel_time = 0
+        travel_time_in_h = 0
         start_node = -1
         start_node_defined = False
         for end_node in route:
@@ -84,12 +84,12 @@ class LocationRoadManager():
                     self.traffic_network[start_node][end_node]['distance']
                 speed_limit = \
                     self.traffic_network[start_node][end_node]['speed_limit']
-                travel_time += distance / speed_limit
+                travel_time_in_h += distance / speed_limit
                 
             start_node = end_node
             start_node_defined = True
         
-        return travel_time
+        return travel_time_in_h * 60
     
     def load_locations(self):
         """
@@ -230,9 +230,9 @@ class LocationRoadManager():
         Returns a location which was drawn at random based on the location of
         residency and the average commute from this suburb.
         """
+        location_of_employment = None
         rnd = random.random()
         sum_rel_commutes = 0
-        location_of_employment = None
         for work_location, rel_commute in self.commutes[residency_location].items():
             sum_rel_commutes += rel_commute
             location_of_employment = work_location
@@ -322,8 +322,9 @@ class LocationRoadManager():
     def average_company_charger_utilisation(self):
         all_individual_location_averages = []
         for location in self.locations.values():
-            all_individual_location_averages.append( \
-                                location.average_company_charger_utilisation())
+            value = location.average_company_charger_utilisation()
+            if math.isnan(value) == False:
+                all_individual_location_averages.append(value)
         
         return sum(all_individual_location_averages) \
                 / len(all_individual_location_averages)        

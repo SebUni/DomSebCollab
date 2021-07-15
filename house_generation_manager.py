@@ -11,8 +11,6 @@ import math
 from cast import Cast
 from csv_helper import CSVHelper
 
-from generation_forecast import GenerationForecast
-
 class HouseGenerationManager():
     def __init__(self, parameters, clock, electricity_plan_manager,
                  car_model_manager):
@@ -69,17 +67,28 @@ class HouseGenerationManager():
                                                          "int")
         
         cast = Cast("Normed rooftop PV output fit parameters")
-        self.fit_data = []
+        self.irwin_hall_factor = 0
+        self.irwin_hall_factors = []
         file_name = "normed_rooftop_pv_output_fit_parameters.csv"
         csv_helper = CSVHelper("data",file_name)   
         it = 0
-        resolution_fit = 0       
+        resolution_fit = cast.to_positive_int(csv_helper.data[1][0],
+                                              "Elapsed time") \
+                         - cast.to_positive_int(csv_helper.data[0][0],
+                                                "Elapsed time")
         for row in csv_helper.data:
-            if it == 0:
-                resolution_fit = - cast.to_positive_int(row[0], "Elapsed time")
-            if it == 1:
-                resolution_fit += cast.to_positive_int(row[0], "Elpased time")
-            self.fit_data.append(GenerationForecast(self.clock, row))
+            if self.clock.season_in_min["Start"] <= it * resolution_fit \
+                < self.clock.season_in_min["End"]:
+                time_factor = self.clock.time_step / 60
+                if 60 % clock.time_step != 0:
+                    raise RuntimeError("time_step do not add up to full hour!")
+                z = 2/3 # a constant that was derived in the generator excel
+                max_out = cast.to_positive_int(row[1], "Max output")
+                s_p = cast.to_positive_float(row[11], "surf_po")
+                s_c = cast.to_positive_float(row[12], "surf_co")
+                self.irwin_hall_factors.append(time_factor * (s_c!=0) *max_out\
+                                           * (1 + z * (1 - s_c / (s_p + s_c)))\
+                                           / 1000)
             it += 1
         
         self.resolution_irradiance = resolution_irradiance
@@ -89,25 +98,14 @@ class HouseGenerationManager():
         self.forecast_mu, self.forecast_sig = 0.0, 0.0
         self.forecast_mu_po, self.forecast_sig_po_sqr = 0.0, 0.0
         self.max_output_co_sum, self.max_output_co_count = 0.0, 0
-        for it, fit_data_point in enumerate(self.fit_data):
+        for it, irwin_hall_factor in enumerate(self.irwin_hall_factors):
             if it * self.resolution_fit >= self.clock.forecast_horizon:
                 break
-            if fit_data_point.peak_dominates_constant():
-                self.forecast_mu_po += fit_data_point.mu_po
-                self.forecast_sig_po_sqr += fit_data_point.sig_po ** 2
-            else:
-                self.max_output_co_sum += fit_data_point.max_output
-                self.max_output_co_count +=  1
+            self.irwin_hall_factor += irwin_hall_factor
         
-        avg_max_output_co = 0
-        if self.max_output_co_count != 0:
-           avg_max_output_co \
-               = self.max_output_co_sum / self.max_output_co_count
-        # we use Irwin-Hall to derive normal distribution from co parts
-        self.forecast_mu = self.forecast_mu_po + avg_max_output_co / 2
-        forecast_sig_co_sqr = (avg_max_output_co / 12) ** 2
-        self.forecast_sig \
-            = math.sqrt(self.forecast_sig_po_sqr + forecast_sig_co_sqr)
+        # we use Irwin-Hall to derive normal distribution
+        self.forecast_mu = self.irwin_hall_factor / 2
+        self.forecast_sig = math.sqrt(self.irwin_hall_factor / 12)
         
     def step(self):
         cur_elapsed_time = self.clock.elapsed_time
@@ -127,30 +125,11 @@ class HouseGenerationManager():
             next_forecast_horizon_it \
                 = ( (cur_time + horizon) // time_step  \
                     -((cur_time + horizon) % time_step == 0) * 1 )
-                
-            pf_prm = self.fit_data[prev_forecast_horizon_it]
-            nf_prm = self.fit_data[next_forecast_horizon_it]
-            if pf_prm.peak_dominates_constant():
-                self.forecast_mu_po -= pf_prm.mu_po
-                self.forecast_sig_po_sqr -= pf_prm.sig_po ** 2
-            else:
-                self.max_output_co_sum -= pf_prm.max_output
-                self.max_output_co_count -= 1
-            if nf_prm.peak_dominates_constant():
-                self.forecast_mu_po += nf_prm.mu_po
-                self.forecast_sig_po_sqr += nf_prm.sig_po ** 2
-            else:
-                self.max_output_co_sum += nf_prm.max_output
-                self.max_output_co_count += 1
-                
-            avg_max_output_co = 0
-            if self.max_output_co_count != 0:
-               avg_max_output_co \
-                   = self.max_output_co_sum / self.max_output_co_count
-            self.forecast_mu = self.forecast_mu_po + avg_max_output_co / 2
-            forecast_sig_co_sqr = (avg_max_output_co / 12) ** 2
-            self.forecast_sig \
-                = math.sqrt(self.forecast_sig_po_sqr + forecast_sig_co_sqr)
+            self.irwin_hall_factor\
+                += - self.irwin_hall_factors[prev_forecast_horizon_it] \
+                   + self.irwin_hall_factors[next_forecast_horizon_it]
+            self.forecast_mu = self.irwin_hall_factor / 2
+            self.forecast_sig = math.sqrt(self.irwin_hall_factor / 12)
     
     def instantaneous_generation(self, pv_capacity):
         irradiance = random.choice(self.cur_irradiances)
@@ -159,9 +138,9 @@ class HouseGenerationManager():
         # An x kW PV system refers to a PV system which under Standart Testing
         # Conditions (solar_irr = 1 kWm^-2, temp = 25°C) outputs x kW.
         # The equation to calculate PV output is:
-        # P = efficiency * surface * solar_irr *( 1 - 0.05 * (temp - 25K))
+        # P = efficiency * surface * solar_irr *( 1 - 0.005 * (temp - 25K))
         # Using this you can substitute efficiency * surface = x m^-2
-        return pv_capacity * irradiance * (1 - 0.05 * (temperature - 25))
+        return pv_capacity * irradiance * (1 - 0.005 * (temperature - 25)) / 1000
     
     # TODO this neglects the PV capacity and return irradiation not pv power output! Needs to return power output
     def generation_forecast_distribution_parameter(self, name_plate_capacity):

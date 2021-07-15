@@ -73,7 +73,7 @@ class CarModel():
              "Car tire on a rolled gravel road": 0.02,
              "Tarmacadam road": 0.025,
              "Unpaved road": 0.05} 
-        consumption = self.mass * a * velocity \
+        consumption = self.mass * a * vel_ms \
             + self.mass * g * vel_ms * math.sin(alpha) \
             + self.mass * g * C["Car tire on concrete road"] * math.cos(alpha)\
             + 1/2 * self.drag_coeff * self.frontal_area * math.pow(vel_ms, 3)

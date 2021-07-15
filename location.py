@@ -23,7 +23,7 @@ class Location():
         self.occupant_values = occupant_values
         self.pv_density = pv_density
         self.pv_avg_capacity = pv_avg_capacity
-        self.companies = dict()
+        self.companies = []
         self.distance_commuted_if_work_equal_home_distribution \
             = distance_commuted_if_work_equal_home_distribution
         self.distance_commuted_if_work_equal_home_values \
@@ -82,14 +82,16 @@ class Location():
     
     def average_company_charger_utilisation(self):
         all_individual_company_averages = []
-        for key, company in self.companies.items():
-            if key != 0:
+        for it, company in enumerate(self.companies):
+            if it != 0:
                 all_individual_company_averages.append( \
                                             sum(company.charger_utilisation) \
                                             / len(company.charger_utilisation))
-        
-        return sum(all_individual_company_averages) \
+        if len(all_individual_company_averages) != 0:
+            return sum(all_individual_company_averages) \
                 / len(all_individual_company_averages)
+        else:
+            return float('nan')
         
     def __repr__(self):
         msg = "Id: " + str(self.uid) + ", "

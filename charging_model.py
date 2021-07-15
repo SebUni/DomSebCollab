@@ -11,7 +11,6 @@ from mesa.space import ContinuousSpace
 
 
 from console_output import ConsoleOutput
-from parameters import Parameters
 from clock import Clock
 from car_agent import CarAgent
 from house_agent import HouseAgent
@@ -27,10 +26,10 @@ from house_generation_manager import HouseGenerationManager
 
 class ChargingModel(Model):
     """The charging model with N agents."""
-    def __init__(self, nbr_of_agents):
+    def __init__(self, nbr_of_agents, parameters):
         self.co = ConsoleOutput()
         self.co.t_print("INITIALISING CHARGING MODEL")
-        self.parameters = Parameters()
+        self.parameters = parameters
         self.num_agents = nbr_of_agents
         # time step and time step limit in minutes
         self.clock = Clock(self.parameters)
@@ -65,7 +64,7 @@ class ChargingModel(Model):
                 self.lrm.draw_location_of_employment(residency_location)
             company = self.cpm.add_employee_to_location(employment_location)
             
-            #TODO reconsider if agents should all start at home
+            # actual location is assigned once calendars have been generated
             cur_activity = self.cp.HOME
             cur_location = residency_location 
             pos = self.lrm.relative_location_position(cur_location)
@@ -86,6 +85,9 @@ class ChargingModel(Model):
         self.cp.prepare_schedule_generation()
         for car_agent in self.schedule_cars.agents:
             car_agent.generate_calendar_entries()
+            car_agent.whereabouts.set_activity_and_location( \
+                                    car_agent.calendar.cur_scheduled_activity,
+                                    car_agent.calendar.cur_scheduled_location)
         self.co.t_print("Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
         self.co.t_print("INITIALISATION COMPLETE")
@@ -126,4 +128,10 @@ class ChargingModel(Model):
         else:
             self.co.t_print("Cars that would run flat:" + str(flat_cars))
                 
-            
+    def total_charge(self):
+        total_charge = {"home":0, "work":0, "emergency":0}
+        for agent in self.schedule_cars.agents:
+            total_charge["home"] += agent.total_charge["home"]
+            total_charge["work"] += agent.total_charge["work"]
+            total_charge["emergency"] += agent.total_charge["emergency"]
+        return total_charge

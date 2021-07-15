@@ -25,6 +25,7 @@ SECTION 0.a: Imports
 import sys
 import csv
 
+import statistics
 from scipy.stats import norm
 from scipy import special
 import matplotlib.mlab
@@ -173,8 +174,8 @@ Leap days are excluded.
 
 # more detailed processing
 get_season = lambda month : ((month + 3) % 12) // 3
-get_month_it_in_season = lambda month : month % 3
-acc_days_season = [[0,30,61],[0,31,62],[0,30,61],[0,30,61]]
+get_month_it_in_season = lambda month : (month - 1) % 3
+acc_days_season = [[0,31,61],[0,31,59],[0,30,61],[0,31,62]]
 acc_days_year = [0,31,59,90,120,151,181,212,243,273,304,334]
 days_in_month = [31,28,31,30,31,30,31,31,30,31,30,31]
 irradiances = dict()
@@ -182,18 +183,16 @@ temperatures = dict()
 normed_output = dict()
 season_irradiances = [dict(), dict(), dict(), dict()]
 season_temperatures = [dict(), dict(), dict(), dict()]
+season_normed_outputs = [dict(), dict(), dict(), dict()]
 years = []
+
 for data_point in data:
     date = data_point[0]
     year = cast.to_positive_int(date[0:4], "Year")
     if year not in years:
         years.append(year)
     month = cast.to_positive_int(date[4:6], "Month")
-    season = ((month + 3) % 12) // 3
     day = cast.to_positive_int(date[6:8], "Day")
-    # exclude leap days
-    if month == 2 and day == 29:
-        continue
     hour = cast.to_positive_int(date[8:10], "Hour")
     minute = cast.to_positive_int(date[10:12], "Minutes")
     irrad = cast.to_positive_int(data_point[1], "Irradiance")
@@ -209,6 +208,11 @@ for data_point in data:
             if month > 12:
                 month = 1
                 year = year + 1
+                
+    season = ((month + 2) % 12) // 3
+    # exclude leap days
+    if month == 2 and day == 29:
+        continue
         
     elapsed_minutes_season = acc_days_season[season][get_month_it_in_season(month)] + day - 1
     elapsed_minutes_season = elapsed_minutes_season * 24 + hour
@@ -223,8 +227,11 @@ for data_point in data:
     if elapsed_minutes_season not in season_irradiances[season].keys():
         season_irradiances[season][elapsed_minutes_season] = []
         season_temperatures[season][elapsed_minutes_season] = []
+        season_normed_outputs[season][elapsed_minutes_season] = []
     season_irradiances[season][elapsed_minutes_season].append(irrad)
     season_temperatures[season][elapsed_minutes_season].append(temp)
+    season_normed_outputs[season][elapsed_minutes_season].append( \
+                                            irrad * (1 - (temp - 25) / 200))
     
     irradiances[elapsed_minutes_year] = irrad
     temperatures[elapsed_minutes_year] = temp
@@ -263,6 +270,18 @@ for cur_season in range(4):
     
         for key in keylist:
             output_file.writerow([key] + season_temperatures[cur_season][key])
+            
+    file_name = "nominal_output_" + season_name[cur_season] + ".csv"
+    with open(file_name, mode='w', newline='') as output_file:
+        output_file = csv.writer(output_file, delimiter=',', quotechar='"',
+                                 quoting=csv.QUOTE_MINIMAL)
+        header = ["#elapsed_minutes"]
+        for year in years:
+            header.append(str(year))
+        output_file.writerow(header)
+    
+        for key in keylist:
+            output_file.writerow([key] + season_normed_outputs[cur_season][key])
 
 """
 SECTION 5: Approximate solar output for normed PV rooftop installation.
@@ -299,6 +318,9 @@ it_term = 0
 
 for elapsed_minutes, outputs in fit_output.items():
     max_output = max(outputs)
+
+    avg = statistics.mean(fit_output[elapsed_minutes])
+    std_dev = statistics.stdev(fit_output[elapsed_minutes])
 
     # the histogram of the data
     n, bins \
@@ -378,7 +400,8 @@ for elapsed_minutes, outputs in fit_output.items():
                                         round(y0, 7),
                                         round(A_po, 3), int(mu_po),
                                         round(sig_po, 2), round(y_co, 7),
-                                        round(surf_po, 2), round(surf_co, 2)]
+                                        round(surf_po, 2), round(surf_co, 2),
+                                        int(avg), int(std_dev)]
     
     it_term = it_term + 1
     if it_term % (24 * 12 * 7) == 0:
@@ -432,11 +455,13 @@ with open(file_name, mode='w', newline='') as output_file:
     output_file = csv.writer(output_file, delimiter=',', quotechar='"',
                              quoting=csv.QUOTE_NONE)
     header = ["#elapsed_minutes","max_output","x_border","A","mu","sig","y0",
-              "A_po","mu_po","sig_po","y_co","surf_po","surf_co"]
+              "A_po","mu_po","sig_po","y_co","surf_po","surf_co","avg",
+              "std_dev"]
     output_file.writerow(header)
         
     keylist = list(fit_output_data.keys())
     keylist.sort()
     
     for key in keylist:
-        output_file.writerow([key] + fit_output_data[key])
+        key_time_zone_conv = (key + 10 * 60) % (365 * 24 * 60)
+        output_file.writerow([key] + fit_output_data[key_time_zone_conv])

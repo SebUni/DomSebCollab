@@ -87,8 +87,6 @@ class HouseAgent(Agent):
                        self.charger.charger_model.power_dc))
         
     def step(self):
-        self.extracted_data = dict()
-        
         # 1) Calculate house consumption
         inst_consumption \
             = self.hcm.instantaneous_consumption(self.location, self.occupants)
@@ -96,7 +94,7 @@ class HouseAgent(Agent):
         # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
-        self.cur_pv_excess_supply = cur_consumption - cur_generation
+        self.cur_pv_excess_supply = max(cur_generation - cur_consumption, 0)
         # 3) Determine car charge requirements once car has returned (only
         #    required once time of use is considered)
         

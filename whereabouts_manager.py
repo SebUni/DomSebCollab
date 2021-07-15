@@ -38,7 +38,7 @@ class WhereaboutsManager():
         """ Adds tracking of a new agent to the manager. """
         self.whereabouts[agent_uid] \
             = whereabouts.Whereabouts(agent_uid, cur_activity, cur_location,
-                                      self.lrm, self.cp, self.time_step)
+                                      self.lrm, self.cp)
         return self.whereabouts[agent_uid]
     
     def count_agents_on_edges(self):

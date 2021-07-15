@@ -35,8 +35,8 @@ class Clock():
         co = ConsoleOutput()
         self.elapsed_time = 0
         self.cur_time_step = 0;
-        self.pre_heat_time \
-            = parameters.get_parameter("pre_heat_simulation", "int")
+        self.pre_heat_steps \
+            = parameters.get_parameter("pre_heat_steps", "int")
         self.is_pre_heated = False
         self.season = parameters.get_parameter("season","int")
         self.time_step = parameters.get_parameter("time_step","int")
@@ -59,6 +59,16 @@ class Clock():
                              1 : "summer",
                              2 : "autumn",
                              3 : "winter"}
+        season_start_in_min = {0: 60*24*(31+28+31+30+31+30+31+31+30),
+                               1: 60*24*(0),
+                               2: 60*24*(31+28+31),
+                               3: 60*24*(31+28+31+30+31+30)}
+        next_season = self.season + 1 if self.season != 3 else 0
+        self.season_in_min = {"Start":season_start_in_min[self.season],
+                              "End":season_start_in_min[next_season]}
+        if next_season == 1:
+            self.season_in_min["End"] \
+                = 60*24*(31+28+31+30+31+30+31+31+30+31+30+31)
         if 0 <= self.season <= 3:
             co.t_print("Selected season: " + self.season_names[self.season])
         else:
@@ -103,7 +113,7 @@ class Clock():
             self.elapsed_time += self.time_step
             self.time_of_day = self.calc_time_of_day()
             self.time_of_week = self.calc_time_of_week()
-            if self.elapsed_time >= self.pre_heat_time:
+            if self.cur_time_step >= self.pre_heat_steps:
                 self.is_pre_heated = True
         else:
             self.first_step_call = False
