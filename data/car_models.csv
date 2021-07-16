@@ -1,4 +1,4 @@
-Uid,Make_and_model,Consumption_kWh/km,Drag_coeff,Front_area_in_m^2,Mass_in_kg,Battery_capacity_in_kWh,Charger_capacity_AC,Charger_capacity_DC87,0.28,2.27,1591,40,6.6,50
+Uid,Make_and_model,Consumption_kWh/km,Drag_coeff,Front_area_in_m^2,Mass_in_kg,Battery_capacity_in_kWh,Charger_capacity_AC,Charger_capacity_DC87
 2,Hyundai Ioniq Electric,0.155,0.24,2.17,1527,38.3,7.2,100
 3,Hyundai Kona Electric,0.175,0.29,2.29,1685,64,7.2,100
 4,BMW i3,0.186,0.29,2.33,1345,42.2,11,50
