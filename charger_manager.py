@@ -7,6 +7,7 @@ Created on Sat Dec 12 14:36:13 2020
 from cast import Cast
 from csv_helper import CSVHelper
 
+import random
 from charger_model import ChargerModel
 from charger import Charger
 
@@ -17,10 +18,13 @@ class ChargerManager():
     and chargers.
     """
     def __init__(self):
-        self.charger_models = dict()
+        self.HOME_CHARGER = "residential"
+        self.WORK_CHARGER = "work"
+        self.PUBLIC_CHARGER = "public"
+        
         self.chargers = []
-        self.commercial_model_uids = []
-        self.residential_model_uids = []
+        self.charger_models = {self.HOME_CHARGER: [], self.WORK_CHARGER: [],
+                               self.PUBLIC_CHARGER: []}
         self.load_charger_models()
     
     def load_charger_models(self):
@@ -28,25 +32,22 @@ class ChargerManager():
         Reads information on individual charger models from charger_models.csv.
         """
         cast = Cast("Charger Model")
-        self.charger_models = dict()
         csv_helper = CSVHelper("data","charger_models.csv")
         for row in csv_helper.data:
             uid = cast.to_positive_int(row[0], "Uid")
             cast.uid = uid
             classification = row[1]
-            ac_power = cast.to_positive_int(row[2], "AC Power")
-            dc_power = cast.to_positive_int(row[2], "DC Power")
+            ac_power = cast.to_positive_float(row[2], "AC Power")
+            dc_power = cast.to_positive_float(row[3], "DC Power")
             
-            cm = ChargerModel(uid, classification, ac_power, dc_power)
-            self.charger_models[uid] = cm
-            if cm.classification == "com":
-                self.commercial_model_uids.append(cm.uid)
-            else:
-                self.residential_model_uids.append(cm.uid)
+            cm = ChargerModel(uid, classification, ac_power, dc_power, self)
+            self.charger_models[classification].append(cm)
     
     def add_charger(self, charger_model):
         new_charger_uid = len(self.chargers)
         charger = Charger(new_charger_uid, charger_model)
-        self.chargers.append(charger)
-        
+        self.chargers.append(charger)#
         return charger
+        
+    def draw_charger_at_random(self, charger_classification):
+        return random.choice(self.charger_models[charger_classification])

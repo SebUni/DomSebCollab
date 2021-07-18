@@ -123,6 +123,11 @@ class CarAgent(Agent):
         res_dist = self.parameters.get_parameter("reserve_range", "float")
         res_time = res_dist / res_vel # in hours
         self.reserve_power = res_cons * res_time
+        minimum_relative_state_of_charge \
+            = self.parameters.get_parameter("minimum_relative_state_of_charge",
+                                            "float")
+        self.minimum_absolute_state_of_charge \
+            = self.car_model.battery_capacity*minimum_relative_state_of_charge
                 
         self.would_run_flat = False
         self.total_charge = {"home":0, "work":0, "emergency":0}
@@ -420,7 +425,6 @@ class CarAgent(Agent):
                         received_charge, charging_cost \
                             = self.house_agent.charge_car(self, charge_up_to)
                         self.charge_at_home_from_pv -= received_charge
-                        self.charge_at_home_from_grid -= received_charge
                         missing_charge -= received_charge
                         self.house_agent.cur_pv_excess_supply -= received_charge
                         total_received_charge += received_charge
@@ -597,58 +601,79 @@ class CarAgent(Agent):
         
         soc = self.soc
         q_one_way = self.charge_needed_for_route(self.calendar.next_route)
-        q_res = self.reserve_power
+        q_res = max(self.reserve_power, self.minimum_absolute_state_of_charge)
         
         c = self.parameters.get_parameter("confidence", "float")
         mu, sig = self.calc_total_forcast_mean_and_std_dev()
         
+        pv_cap = self.house_agent.pv_capacity
+        
         if self.whereabouts.destination_activity == self.cp.WORK:
-            # q_home \
-            #     = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_work,
-            #         args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
-            #               sig),
-            #         bounds=((0, q_one_way),)).x
-            # self.charge_at_work = max(2 * q_one_way - soc - q_home, 0)
-            self.charge_at_work \
-                 = self.parm_cost_fct_charging_at_work_anal(q_one_way, q_res,
-                                                            p_feed, p_grid,
-                                                            p_em, p_work, soc,
-                                                            c, mu, sig)
+            if pv_cap != 0 and self.house_agent.charger != None:
+                self.charge_at_work \
+                    = self.parm_cost_fct_charging_at_work_anal(q_one_way,q_res,
+                                                               p_feed, p_grid,
+                                                               p_em, p_work,
+                                                               soc, c, mu, sig)
+            elif pv_cap == 0 and self.house_agent.charger != None:
+                self.charge_at_work \
+                    = max(2*q_one_way+q_res - soc, 0) if p_grid > p_work \
+                        else max(q_one_way + q_res - soc, 0)
+            else:
+                self.charge_at_work \
+                    = max(2*q_one_way+q_res - soc, 0)
+            
             self.extracted_data["work_charge_instruction"] \
                 = self.charge_at_work            
         
         if self.whereabouts.destination_activity == self.cp.HOME:
-#            self.charge_at_home_from_pv \
-#                = scipy.optimize.minimize_scalar(self.parm_cost_fct_charging_at_home,
-#                    args=(q_one_way, p_em, p_feed, p_grid, p_work, soc, c, mu,
-#                          sig),
-#                    bounds=((0, q_one_way),)).x
-            self.charge_at_home_from_pv \
-                = self.parm_cost_fct_charging_at_home_anal(q_one_way, q_res,
-                                                           p_feed, p_grid,
-                                                           p_em, p_work, soc,
-                                                           c, mu, sig)
+            if pv_cap != 0 and self.house_agent.charger != None:
+                self.charge_at_home_from_pv \
+                    = self.parm_cost_fct_charging_at_home_anal(q_one_way,q_res,
+                                                               p_feed, p_grid,
+                                                               p_em, p_work,
+                                                               soc, c, mu, sig)
+                if p_em > p_work and p_em > p_grid:
+                    max_charge_rate \
+                        = self.house_agent.max_charge_rate(self.car_model)
+                    charge_needed \
+                        = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
+                            else max(q_one_way + q_res - soc, 0)
+                    min_charge_time = charge_needed / max_charge_rate * 60
+                    min_charge_time = self.clock.time_step\
+                            * (min_charge_time // self.clock.time_step + 1)
+                    if self.clock.elapsed_time \
+                        <= self.calendar.next_departure_time - min_charge_time\
+                        < self.clock.elapsed_time + self.clock.time_step:
+                        self.charge_at_home_from_grid = charge_needed
+                        if self.charge_at_home_from_grid < 0:    
+                            test = 0
+                else:
+                    msg = "Case p_em <= p_work || p_em <= p_grid not " \
+                        + "implemented!"
+                    raise RuntimeError("car_agent.py: " + msg)
+            elif pv_cap == 0 and self.house_agent.charger != None:
+                self.charge_at_home_from_grid \
+                    = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
+                        else max(q_one_way + q_res - soc, 0)    
+                if self.charge_at_home_from_grid < 0:    
+                    test = 0
+            else:
+                charge_needed = max(q_one_way + q_res - soc, 0)
+                self.initiate_emergency_charging(charge_needed)
+            
+            if self.charge_at_home_from_pv < 0:
+                test = 0
+            if self.charge_at_home_from_grid < 0:    
+                test = 0
+            if self.charge_at_work < 0:
+                test = 0
+            
             self.extracted_data["home_pv_charge_instruction"] \
                 = self.charge_at_home_from_pv
+            self.extracted_data["home_grid_charge_instruction"] \
+                = self.charge_at_home_from_grid
         
-            max_charge_rate \
-                = self.house_agent.max_charge_rate(self.car_model)
-            if p_em > p_work and p_em > p_grid:
-                charge_needed \
-                    = max(2 * q_one_way + q_res - soc, 0) if p_grid <= p_work \
-                        else max( q_one_way + q_res - soc, 0)
-                min_charge_time = charge_needed / max_charge_rate * 60
-                min_charge_time = (min_charge_time // self.clock.time_step+1) \
-                        * self.clock.time_step
-                if self.clock.elapsed_time \
-                    <= self.calendar.next_departure_time - min_charge_time \
-                    < self.clock.elapsed_time + self.clock.time_step:
-                    self.charge_at_home_from_grid = charge_needed
-                    self.extracted_data["home_grid_charge_instruction"] \
-                        = self.charge_at_home_from_pv
-            else:
-                msg = "Case p_em <= p_work || p_em <= p_grid not implemented"
-                sys.exit(msg)
     
     """
     PARAMETER EXPLANATION
@@ -683,53 +708,6 @@ class CarAgent(Agent):
     """
     
     # TODO update in draw.io ClassDiagram
-    
-    def parm_cost_fct_charging_at_home(self, q_h, q_ow, p_em, p_f, p_g, p_w, 
-                                       soc, c, mu, sig):
-        q_w = max(2 * q_ow - soc - q_h, 0)
-        return self.cost_fct_charging_at_home(q_h, q_ow, q_w, p_f, p_g, p_em, 
-                                              p_w, soc, c, mu, sig)
-    
-    def cost_fct_charging_at_home(self, q_h, q_ow, q_w, p_f, p_g, p_em, p_w,
-                                  soc, c, mu, sig):
-        p = lambda value : max(value, 0)
-        return q_w * p_w + q_h * p_f \
-          + (p(q_ow - soc - q_h) + p(q_ow - p(soc + q_h - q_ow) - q_w)) * p_em\
-          + self.CVaR(q_h, c, mu, sig, p_f, p_g)
-    
-    def parm_cost_fct_charging_at_work(self, q_h, q_ow, p_em, p_f, p_g, p_w, 
-                                       soc, c, mu, sig):
-        q_w = max(2 * q_ow - soc - q_h, 0)
-        return self.cost_fct_charging_at_work(q_h, q_ow, q_w, p_f, p_g, p_em, 
-                                              p_w, soc, c, mu, sig)
-    
-    def cost_fct_charging_at_work(self, q_h, q_ow, q_w, p_f, p_g, p_em, p_w,
-                                  soc, c, mu, sig):
-        p = lambda value : max(value, 0)
-        return q_w * p_w + q_h * p_f \
-          + (p(q_ow - soc - q_w) + p(q_ow - p(soc + q_w - q_ow) - q_h)) * p_em\
-          + self.CVaR(q_h, c, mu, sig, p_f, p_g)
-          
-    def CVaR(self, q_h, c, mu, sig, p_f, p_g):
-        delta_p = p_g + p_f
-        VaR = max(delta_p * (q_h - mu - math.sqrt(2) * sig \
-                               * scipy.special.erfinv(1 - 2* c)), 0.0)
-        psi = q_h - mu - VaR / delta_p
-        return delta_p                                                     \
-            * (                                                            \
-                q_h - psi - mu                                             \
-                + (1 / (1 - c)) * (                                        \
-                                   (psi / 2)                               \
-                                   * (math.erf(psi / (math.sqrt(2) * sig)) \
-                                      + 1)                                 \
-                                    + sig**2 * self.N(psi, 0, sig)         \
-                                  )                                        \
-              )
-    
-    def N(self, x, mu, sig):
-        ''' Normal distribution evaluated at x. '''
-        pre_fac = 1/math.sqrt(2*math.pi)
-        return (pre_fac / sig) * math.exp( - (x - mu)**2 / (2 * sig**2))
     
     def parm_cost_fct_charging_at_home_anal(self, q_ow, q_res, p_f, p_g, p_em,
                                             p_w, soc, c, mu, sig):
@@ -816,13 +794,13 @@ class CarAgent(Agent):
                 self.charge_at_home_from_pv, self.charge_at_home_from_grid)
         msg += "  @Work: {:.02f}, Emergency: {:.02f}\n".format( \
                 self.charge_at_work, self.emergency_charging)
-        msg += "Latest History: \n"
-        for time_step, hist in list(self.extracted_data_hist.items())[-3:]:
-            msg += str(time_step) + " | "
-            for key in hist.keys():
-                if key != "whereabouts":
-                    msg += "{}: {:0.2f} ".format(key, hist[key])
-                else:
-                    msg += "\n" + str(hist[key])
-            msg+= "\n"
+        # msg += "Latest History: \n"
+        # for time_step, hist in list(self.extracted_data_hist.items())[-3:]:
+        #     msg += str(time_step) + " | "
+        #     for key in hist.keys():
+        #         if key != "whereabouts":
+        #             msg += "{}: {:0.2f} ".format(key, hist[key])
+        #         else:
+        #             msg += "\n" + str(hist[key])
+        #     msg+= "\n"
         return msg

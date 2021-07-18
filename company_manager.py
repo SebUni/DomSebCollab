@@ -67,12 +67,16 @@ class CompanyManager():
             
         if len(self.charger_manager.charger_models) == 0:
             sys.exit("CompanyManager: No charger models to to choose from")
-            
-        # TODO Add criteria based on which the charger model is chosen
-        charger_model_uid \
-            = random.choice(self.charger_manager.commercial_model_uids)
-        charger_model \
-            = self.charger_manager.charger_models[charger_model_uid]
+        
+        charger_model = None
+        if is_public_facility:
+            charger_model \
+                = self.charger_manager.draw_charger_at_random(\
+                                        self.charger_manager.PUBLIC_CHARGER)
+        else:
+            charger_model \
+                = self.charger_manager.draw_charger_at_random(\
+                                        self.charger_manager.WORK_CHARGER)
             
         company = Company(uid, self.clock, location, electricity_plan,
                           self.charger_manager, charger_cost_per_kWh,

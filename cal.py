@@ -125,7 +125,7 @@ class Cal():
 
         """
         travel_time = self.lrm.estimated_travel_time_between_locations(
-                            self.whereabouts.cur_location, self.next_location)
+                            self.cur_scheduled_location, self.next_location)
         departure_time = self.next_activity_start_time - travel_time \
             - self.time_reserve
         rounded_departure_time = (departure_time // self.clock.time_step) \

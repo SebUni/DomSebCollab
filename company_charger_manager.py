@@ -125,7 +125,5 @@ class CompanyChargerManager():
             charger_use[charger.uid] = agent.uid
         hist["used_chargers"] = charger_use
         hist["unused_chargers"] = self.chargers_not_in_use
-        if len(charger_use) == 0 and len(self.chargers_not_in_use) == 0:
-            test = 0
         return hist
         

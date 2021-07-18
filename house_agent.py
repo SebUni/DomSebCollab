@@ -27,9 +27,8 @@ class HouseAgent(Agent):
         self.occupants = residency_location.draw_occupants_at_random()
         # TODO check how charger is chosen
         # if there is no charger assign "None"
-        charger_model_uid \
-            = random.choice(charger_manager.residential_model_uids)
-        charger_model = charger_manager.charger_models[charger_model_uid]
+        charger_model = charger_manager.draw_charger_at_random( \
+                                                charger_manager.HOME_CHARGER)
         self.charger = charger_manager.add_charger(charger_model)
         self.pv_capacity = residency_location.draw_pv_capacity_at_random()
         self.battery_capacity = \

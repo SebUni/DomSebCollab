@@ -21,6 +21,8 @@ nbr_of_agents = parameters.get_parameter("nbr_of_agents","int")
 # single run
 cm = charging_model.ChargingModel(nbr_of_agents, parameters)
 for i in range(cm.clock.time_step_limit):
+    if i in [2200, 2400, 2600, 2800, 3000, 3200, 3400]:
+        test = 0;
     cm.step()
     if draw_agents_on_map:
         od.draw_car_agents(cm, i)
