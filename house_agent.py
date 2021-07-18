@@ -24,15 +24,23 @@ class HouseAgent(Agent):
         self.clock = clock
         self.location = residency_location
         
+        self.is_house = residency_location.draw_shall_new_dwelling_be_a_house()
+        self.is_house_owned = residency_location.draw_shall_new_house_be_owned()
         self.occupants = residency_location.draw_occupants_at_random()
         # TODO check how charger is chosen
         # if there is no charger assign "None"
-        charger_model = charger_manager.draw_charger_at_random( \
-                                                charger_manager.HOME_CHARGER)
-        self.charger = charger_manager.add_charger(charger_model)
-        self.pv_capacity = residency_location.draw_pv_capacity_at_random()
-        self.battery_capacity = \
-            parameters.get_parameter("battery_capacity","float")
+        self.charger = None
+        self.battery_capacity = 0
+        self.pv_capacity = 0
+        if self.is_house:
+            charger_model = charger_manager.draw_charger_at_random( \
+                                                charger_manager.HOME_CHARGER)        
+            self.charger = charger_manager.add_charger(charger_model)
+            self.battery_capacity = \
+                parameters.get_parameter("battery_capacity","float")
+            if self.is_house_owned:
+                self.pv_capacity \
+                    = residency_location.draw_pv_capacity_at_random()
         # TODO check how electricity plan is chosen
         electricity_plan_uid \
             = random.choice(electricity_plan_manager.residential_plan_uids)

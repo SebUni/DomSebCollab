@@ -13,7 +13,8 @@ class Location():
     def __init__(self, uid, name, longitude, latitude, occupant_distribution, 
                  occupant_values, pv_density, pv_avg_capacity,
                  distance_commuted_if_work_equal_home_distribution,
-                 distance_commuted_if_work_equal_home_values):
+                 distance_commuted_if_work_equal_home_values, flats_total,
+                 houses_owned, houses_total):
         self.uid = uid
         self.name = str(name).strip(" ").strip('"')
         self.longitude = longitude  # east-west-coordinate
@@ -28,6 +29,10 @@ class Location():
             = distance_commuted_if_work_equal_home_distribution
         self.distance_commuted_if_work_equal_home_values \
             = distance_commuted_if_work_equal_home_values
+        # chances dwelling is a house, otherwise dwelling is a flat
+        self.chance_dwelling_is_a_house \
+            = houses_total / (flats_total + houses_total)
+        self.chance_house_is_owned = houses_owned / houses_total
         
     def draw_occupants_at_random(self):
         total = sum(self.occupant_distribution)
@@ -55,6 +60,13 @@ class Location():
             value = np.random.normal(mean, std_dev)
             
         return value
+    
+    # yepp it is sunday, weather is nice, and I'm sittin here, doin this, yaix
+    def draw_shall_new_dwelling_be_a_house(self):
+        return random.random() < self.chance_dwelling_is_a_house
+    
+    def draw_shall_new_house_be_owned(self):
+        return random.random() < self.chance_house_is_owned 
     
     def draw_distance_commuted_if_work_equal_home_at_random(self):
         rnd = random.random()

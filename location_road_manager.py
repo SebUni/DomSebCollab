@@ -117,12 +117,16 @@ class LocationRoadManager():
                 = cast.to_positive_int_list(row[8], "Distance distribution")
             distance_commuted_if_work_and_home_equal_values \
                 = cast.to_positive_float_list(row[9], "Distance values")
+            flats_total = cast.to_positive_int(row[10], "Flats total")
+            houses_owned = cast.to_positive_int(row[11], "Houses owned")
+            houses_total = cast.to_positive_int(row[12], "Houses total")
                     
             loc = Location(uid, name, longitude, latitude,
-                           occupant_distribution, occupant_values,
-                           pv_density, pv_avg_capacity,
+                         occupant_distribution, occupant_values,
+                         pv_density, pv_avg_capacity,
                          distance_commuted_if_work_and_home_equal_distribution,
-                         distance_commuted_if_work_and_home_equal_values)
+                         distance_commuted_if_work_and_home_equal_values,
+                         flats_total, houses_owned, houses_total)
             # add public charger
             self.cpm.add_company(loc)
             

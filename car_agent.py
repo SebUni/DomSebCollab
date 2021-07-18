@@ -135,6 +135,7 @@ class CarAgent(Agent):
         self.extracted_data_hist_list = []
         self.extracted_data = dict()
         self.last_charge_at_work = 0
+        self.activity_before_emergency_charging = None
         
     def step(self):
         # initialise extraction data
@@ -508,6 +509,11 @@ class CarAgent(Agent):
                             pub_company.unblock_charger(self)
                         if self.clock.is_pre_heated:
                             self.total_charge["emergency"] += received_charge
+                if self.emergency_charging == 0:
+                    if self.activity_before_emergency_charging \
+                        == self.calendar.cur_scheduled_activity:
+                        self.whereabouts.cur_activity \
+                            = self.activity_before_emergency_charging
             
             self.soc += total_received_charge
             self.extracted_data["charge_received"] = total_received_charge
@@ -530,6 +536,9 @@ class CarAgent(Agent):
         """
         # check if charging needs can be satisfied
         if self.soc+emergency_charge_volume <= self.car_model.battery_capacity:
+            if self.whereabouts.cur_activity != self.cp.EMERGENCY_CHARGING:
+                self.activity_before_emergency_charging \
+                    = self.whereabouts.cur_activity
             self.whereabouts.cur_activity = self.cp.EMERGENCY_CHARGING
             # prepare for charging
             if self.house_agent.location == self.whereabouts.cur_location \
@@ -656,18 +665,10 @@ class CarAgent(Agent):
                 self.charge_at_home_from_grid \
                     = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
                         else max(q_one_way + q_res - soc, 0)    
-                if self.charge_at_home_from_grid < 0:    
-                    test = 0
             else:
                 charge_needed = max(q_one_way + q_res - soc, 0)
-                self.initiate_emergency_charging(charge_needed)
-            
-            if self.charge_at_home_from_pv < 0:
-                test = 0
-            if self.charge_at_home_from_grid < 0:    
-                test = 0
-            if self.charge_at_work < 0:
-                test = 0
+                if charge_needed != 0:
+                    self.initiate_emergency_charging(charge_needed)
             
             self.extracted_data["home_pv_charge_instruction"] \
                 = self.charge_at_home_from_pv
