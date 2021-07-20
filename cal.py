@@ -42,6 +42,7 @@ class Cal():
         self.time_reserve = calendar_planer.arrival_time_reserve
         self.hours_worked_per_week \
             = calendar_planer.draw_hours_worked_per_week_at_random()
+        # self.hours_worked_per_week = 40
         
         self.cur_scheduled_activity = cur_activity
         self.cur_scheduled_location = cur_location

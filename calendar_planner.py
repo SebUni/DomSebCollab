@@ -156,134 +156,166 @@ class CalendarPlanner():
             self.assigned_hour_share.append(0)
     
     def generate_schedule(self, hours_worked_per_week):
-        srtd_indx = sorted(range(len(self.assigned_hour_share)),
-                                 key=lambda k: self.assigned_hour_share[k],
-                                 reverse=False)
         rest_between_shifts = 10
         max_shift_lengh = 12
-        peak_dist = rest_between_shifts + max_shift_lengh
-        slctd_pks = []
-        i = 0
-        largest_gap = 0
-        max_attempts = 10000
-        attempts = 0
-        while len(slctd_pks) == 0 or largest_gap > 1 + 2 * rest_between_shifts:
-            cur_pk = srtd_indx[i]
+        peak_distance = rest_between_shifts + max_shift_lengh
+        selected_peaks = []
+        # creates a list which sorts all hours of the week according to the
+        # relative amount of shifts covering this hour in descending order 
+        # in descending order
+        sorted_index \
+            = sorted(range(len(self.assigned_hour_share)),
+                               key=lambda k: (self.assigned_hour_share[k],
+                                    - self.distribution_weekly_work_hours[k]))
+        # search all hours of the week for best places, that is the hours which
+        # exhibit the lowest relative shift coverage to spawn a new shift at
+        for hour_it in range(7*24):
+            cur_hour = sorted_index[hour_it]
+            # determine next best hour to create a shift which is far enough
+            # away from other shift spawn points
             is_close_to_other_peak = False
-            for slctd_pk in slctd_pks:
-                if slctd_pk - peak_dist < cur_pk < slctd_pk + peak_dist:
+            for selected_peak in selected_peaks:
+                if selected_peak - peak_distance < cur_hour \
+                    < selected_peak + peak_distance:
                     is_close_to_other_peak = True
                     break
             if not is_close_to_other_peak:
-                slctd_pks.append(cur_pk)
+                selected_peaks.append(cur_hour)
             
-            slctd_pks_srtd = slctd_pks.copy()
-            slctd_pks_srtd.sort()
+            # bring all peak in chronological order
+            selected_peaks_sorted = selected_peaks.copy()
+            selected_peaks_sorted.sort()
             
+            # stop the search for new shift spawn points if next spawn point
+            # would be to close to already selected shift spawn points
             largest_gap = 0
-            for j in range(len(slctd_pks_srtd)):
-                prev_j = j - 1
+            for peak_it in range(len(selected_peaks_sorted)):
+                prev_peak_it = peak_it - 1
                 offset = 0
-                if j == 0:
-                    prev_j = len(slctd_pks_srtd) - 1
+                if peak_it == 0:
+                    prev_peak_it = len(selected_peaks_sorted) - 1
                     offset = 168
-                if slctd_pks_srtd[j] - slctd_pks_srtd[prev_j] + offset > largest_gap:
-                    largest_gap = slctd_pks_srtd[j] - slctd_pks_srtd[prev_j] + offset
-            i += 1
-            if i == 168: break
-            attempts += 1
-            if attempts >= max_attempts:
-                raise RuntimeError("Failed to create schedue. Please restart!")
+                gap_to_prev_peak = selected_peaks_sorted[peak_it] \
+                                   - selected_peaks_sorted[prev_peak_it]+offset
+                if gap_to_prev_peak > largest_gap:
+                    largest_gap = gap_to_prev_peak
+            if largest_gap <= 1+2*rest_between_shifts:
+                break
         
-        hours_remaining = hours_worked_per_week
-        starts = []
-        ends = []
-        
-        attempts = 0
-        while hours_remaining != 0:
+        # place hours for shifts
+        starts, ends = [], []
+        # create make shift for loop iterating over all hours, with iterator
+        # cur_hour iterating upon successful placement of an hour in a shift
+        cur_hour = 0
+        while cur_hour < hours_worked_per_week:
             scheduled_hour_successul = False
-            best_start = 0
-            best_start_it = -1
-            best_end = 0
-            best_end_it = -1
-            for i in range(len(starts)):
-                prev_i = i - 1
-                if prev_i < 0: prev_i = len(ends) - 1
-                next_i = i + 1
-                if next_i == len(starts): next_i = 0
+            # scan through all shifts to find the best places to start a shift
+            # earlier and end a shift later
+            best_start_main = 0 # = best_shift_to_start_earlier_rel_coverage
+            best_start_aux = 0  # = best_shift_to_start_earlier_rel_work_hours
+            best_start_it = -1  # = best_shift_to_start_earlier
+            best_end_main = 0   # = best_shift_to_end_later_rel_coverage
+            best_end_aux = 0    # = best_shift_to_end_later_rel_work_hours
+            best_end_it = -1    # = best_shift_to_end_later
+            # as shifts are stored in the lists 'starts' and 'ends' range
+            # depends on their length
+            for shift in range(len(starts)):
+                # modulus ensures that iterator stays with in the starts / ends
+                # interval
+                prev_shift = (shift - 1) % len(ends)
+                next_shift = (shift + 1) % len(starts)
+                # modulus ensures that distances and shift length are adapted
+                # for shifts that cover a night from Sunday to Monday
+                distance_to_prev_shift = (starts[shift] - ends[prev_shift])%168
+                distance_to_next_shift = (starts[next_shift] - ends[shift])%168
+                shift_length = (ends[shift] - starts[shift]) % 168
                 
-                dist_to_prev_shift = starts[i] - ends[prev_i]
-                if dist_to_prev_shift < 0: dist_to_prev_shift += 168
-                dist_to_next_shift =  starts[next_i] - ends[i]
-                if dist_to_next_shift < 0: dist_to_next_shift += 168
-                
-                shift_length = ends[i] - starts[i]
-                if shift_length < 0: shift_length += 168
-                
-                if dist_to_prev_shift > rest_between_shifts \
+                assigned_hour_share \
+                    = self.assigned_hour_share[(starts[shift] - 1) % 168]
+                distribution_weekly_work_hours \
+                    = self.distribution_weekly_work_hours[(starts[shift]-1)%168]
+                if distance_to_prev_shift > rest_between_shifts \
                     and shift_length < max_shift_lengh \
-                    and (self.assigned_hour_share[th(starts[i] - 1)] < best_start \
-                         or best_start_it == -1):
-                        best_start = self.assigned_hour_share[th(starts[i] - 1)]
-                        best_start_it = i
-                if dist_to_next_shift > rest_between_shifts \
+                    and (assigned_hour_share < best_start_main \
+                         or best_start_it == -1 or \
+                         (assigned_hour_share == best_start_main \
+                          and best_start_aux > distribution_weekly_work_hours)):
+                    best_start_main = assigned_hour_share
+                    best_start_aux  = distribution_weekly_work_hours
+                    best_start_it = shift
+                assigned_hour_share \
+                    = self.assigned_hour_share[(ends[shift] + 1) % 168]
+                distribution_weekly_work_hours \
+                    = self.distribution_weekly_work_hours[(ends[shift]+1)%168]
+                if distance_to_next_shift > rest_between_shifts \
                     and shift_length < max_shift_lengh \
-                    and (self.assigned_hour_share[th(ends[i] + 1)] < best_end \
-                         or best_end_it == -1):
-                        best_end = self.assigned_hour_share[th(ends[i] + 1)]
-                        best_end_it = i
-            best_new = 0
-            best_new_it = -1
-            for slctd_pk in slctd_pks:
+                    and (assigned_hour_share < best_end_main \
+                         or best_end_it == -1 or \
+                         (assigned_hour_share == best_end_main \
+                          and best_end_aux > distribution_weekly_work_hours)):
+                    best_end_main = assigned_hour_share
+                    best_end_aux = distribution_weekly_work_hours
+                    best_end_it = shift
+            # scan through all spawn places to find the best places for new a
+            # new shift to startshifts 
+            best_new_main = 0   # = best_hour_to_start_a_new_shift_rel_coverage
+            best_new_aux = 0    # = best_hour_to_start_a_new_shift_rel_work_hours
+            best_new_it = -1    # = best_hour_to_start_a_new_shift
+            for cur_spawn_pos in selected_peaks:
                 violates_dist_to_near_shifts = False
-                for i in range(len(starts)):
-                    prev_i = i - 1
-                    if i < 0: prev_i = len(ends) - 1
-                
-                    dist_to_prev_shift = abs(slctd_pk - ends[prev_i])
-                    dist_to_next_shift = abs(starts[i] - slctd_pk)
-                    
-                    if dist_to_next_shift < 10 or dist_to_prev_shift < rest_between_shifts \
+                for shift in range(len(starts)):
+                    prev_shift = (shift - 1) % len(ends)
+                    dist_to_prev_shift = abs(cur_spawn_pos - ends[prev_shift])
+                    dist_to_next_shift = abs(starts[shift] - cur_spawn_pos)
+                    if dist_to_next_shift < rest_between_shifts\
+                        or dist_to_prev_shift < rest_between_shifts \
                         or dist_to_next_shift > 168 - rest_between_shifts \
                         or dist_to_prev_shift > 168 - rest_between_shifts:
                         violates_dist_to_near_shifts = True
                     
-                
+                assigned_hour_share = self.assigned_hour_share[cur_spawn_pos]
+                distribution_weekly_work_hours \
+                    = self.distribution_weekly_work_hours[cur_spawn_pos]
                 if not violates_dist_to_near_shifts \
-                    and (self.assigned_hour_share[slctd_pk] < best_new \
-                         or best_new_it == -1):
-                    best_new = self.assigned_hour_share[slctd_pk]
-                    best_new_it = slctd_pk
+                    and (assigned_hour_share < best_new_main \
+                         or best_new_it == -1 or \
+                         (assigned_hour_share == best_new_main \
+                          and distribution_weekly_work_hours > best_new_aux)):
+                    best_new_main = assigned_hour_share
+                    best_new_aux = distribution_weekly_work_hours
+                    best_new_it = cur_spawn_pos
                     
-            if len(starts) < 7 and best_new_it != -1 \
-                and (best_new <= best_start or best_start_it == -1) \
-                and (best_new <= best_end or best_end_it == -1):
+            if self.cmp(best_new_main, best_new_aux, (best_new_it != -1 and len(starts) < 7),
+                        best_start_main, best_start_aux, best_start_it != -1,
+                        best_end_main, best_end_aux, best_end_it != -1):
                 starts.append(best_new_it)
                 ends.append(best_new_it+1)
                 starts.sort()
                 ends.sort()
                 
-                slctd_pks.remove(best_new_it)
+                selected_peaks.remove(best_new_it)
                 
-                self.assigned_hour_share[th(best_new_it)] += 1 / self.hours_weekly[th(best_new_it)]
-                self.assigned_hour_share[th(best_new_it+1)] += 1 / self.hours_weekly[th(best_new_it+1)]
-                hours_remaining -= 1
+                self.assigned_hour_share[best_new_it % 168] \
+                    += 1 / self.hours_weekly[best_new_it % 168]
+                self.assigned_hour_share[(best_new_it + 1) % 168] \
+                    += 1 / self.hours_weekly[(best_new_it + 1) % 168]
+                cur_hour += 1
                 scheduled_hour_successul = True
-            elif best_start_it != -1 \
-                and (best_end >= best_start or best_end_it == -1) \
-                and (best_new >= best_start or best_new_it == -1 or len(starts) >= 7):
+            elif self.cmp(best_start_main, best_start_aux, best_start_it != -1,
+                          best_new_main, best_new_aux, (best_new_it != -1 and len(starts) < 7),
+                          best_end_main, best_end_aux, best_end_it != -1):
                 starts[best_start_it] -= 1
                 self.assigned_hour_share[th(starts[best_start_it])] \
                     += 1 / self.hours_weekly[th(starts[best_start_it])]
-                hours_remaining -= 1
+                cur_hour += 1
                 scheduled_hour_successul = True
-            elif best_end_it != -1 \
-                and (best_start >= best_end or best_start_it == -1) \
-                and (best_new >= best_end or best_new_it == -1 or len(starts) >= 7):
+            elif self.cmp(best_end_main, best_end_aux, best_end_it != -1,
+                          best_start_main, best_start_aux, best_start_it != -1,
+                          best_new_main, best_new_aux, (best_new_it != -1 and len(starts) < 7)):
                 ends[best_end_it] += 1
                 self.assigned_hour_share[th(ends[best_end_it])] \
                     += 1 / self.hours_weekly[th(ends[best_end_it])]
-                hours_remaining -= 1
+                cur_hour += 1
                 scheduled_hour_successul = True
             else:
                 largest_gap = 0
@@ -300,16 +332,31 @@ class CalendarPlanner():
                         largest_gap_center = (starts[i] + ends[prev_i] - offset) // 2
                         if largest_gap_center < 0: largest_gap_center + offset
                 if largest_gap > rest_between_shifts * 2:
-                    slctd_pks.append(largest_gap_center)
+                    selected_peaks.append(largest_gap_center)
                 else:
-                    slctd_pks = [12,36,60,84,108,132,156]
-                    hours_remaining = hours_worked_per_week
+                    selected_peaks = [12,36,60,84,108,132,156]
+                    cur_hour = 0
                     starts = []
                     ends = []
             if not scheduled_hour_successul and len(starts) == 7:
-                slctd_pks = [12,36,60,84,108,132,156]
-                hours_remaining = hours_worked_per_week
+                selected_peaks = [12,36,60,84,108,132,156]
+                cur_hour = 0
                 starts = []
                 ends = []
                 
         return starts, ends
+    
+    def cmp(self, base_main, base_aux, base_allowed, a_main, a_aux, a_allowed,
+            b_main, b_aux, b_allowed):
+        return base_allowed == True and \
+            ( \
+              ( \
+                base_main < a_main or a_allowed == False \
+                or (base_main == a_main and base_aux >= a_aux) \
+              ) \
+              and \
+              ( \
+                base_main < b_main or b_allowed == False \
+                or (base_main == b_main and base_aux >= b_aux) \
+              )\
+            )

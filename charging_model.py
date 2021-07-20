@@ -33,12 +33,12 @@ class ChargingModel(Model):
         self.num_agents = nbr_of_agents
         # time step and time step limit in minutes
         self.clock = Clock(self.parameters)
-        self.cmm = CarModelManager()
         self.chm = ChargerManager()
         self.epm = ElectricityPlanManager(self.parameters, self.clock)
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
                                   self.epm)
         self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock)
+        self.cmm = CarModelManager(self.parameters, self.lrm)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
         self.wm = WhereaboutsManager(self.lrm, self.clock, self.cp)
         self.hcm = HouseConsumptionManager(self.clock, self.parameters)
@@ -53,8 +53,8 @@ class ChargingModel(Model):
                                      self.lrm.north_south_spread * 1.001,
                                      False)
         
-        self.extracted_soc = []
-        self.extracted_data = dict()
+        self.extracted_company_data = {"Charger utilisation": []}
+        self.extracted_car_data = dict()
         
         # create agents
         self.co.t_print("Start to create agents")
@@ -62,6 +62,8 @@ class ChargingModel(Model):
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
+            #residency_location = self.lrm.locations[21002]
+            #employment_location = self.lrm.locations[21402]
             company = self.cpm.add_employee_to_location(employment_location)
             
             # actual location is assigned once calendars have been generated
@@ -98,6 +100,12 @@ class ChargingModel(Model):
         '''Advance the model by one step.'''
         self.co.t_print("Now calculating time step #" \
                         + str(self.clock.cur_time_step))
+        
+        if self.clock.cur_time_step == self.parameters.next_stop:
+            test = 0
+            
+        #agents = self.schedule_cars.agents
+        #ccm = self.lrm.locations[20601].companies[1].ccm
         self.clock.step()
         self.hcm.step()
         self.hgm.step()
@@ -107,11 +115,15 @@ class ChargingModel(Model):
         for house_agent in self.schedule_houses.agents:
             house_agent.step_late()
         self.cpm.step()
+        #ccm = self.lrm.locations[20601].companies[1].ccm
+        #print(ccm)
         
         if self.clock.is_pre_heated:
-            self.extracted_data[self.clock.elapsed_time] = dict()
+            self.extracted_company_data["Charger utilisation"].append( \
+                                        self.lrm.company_charger_utilisation())
+            self.extracted_car_data[self.clock.elapsed_time] = dict()
             for car_agent in self.schedule_cars.agents:
-                self.extracted_data[self.clock.elapsed_time][car_agent.uid] \
+                self.extracted_car_data[self.clock.elapsed_time][car_agent.uid]\
                     = car_agent.extracted_data
             
     def summarise_simulation(self):

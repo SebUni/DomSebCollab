@@ -126,4 +126,13 @@ class CompanyChargerManager():
         hist["used_chargers"] = charger_use
         hist["unused_chargers"] = self.chargers_not_in_use
         return hist
+    
+    def __repr__(self):
+        utilisation = 1 - len(self.chargers_not_in_use)/len(self.chargers)
+        msg = "Utilisation: {:.01f}%".format(utilisation * 100)
+        for charger, car_agent in self.chargers_in_use_by_charger.items():
+            msg += "\nCharger #{:d} -> Car agent #{} (SOC: {:.01f}, CAW: {:.01f})".format( \
+                        charger.uid, car_agent.uid, car_agent.soc, car_agent.charge_at_work)
+        msg += "\nCharging que: " + str(list(self.charging_que))
         
+        return msg

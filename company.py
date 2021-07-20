@@ -64,7 +64,7 @@ class Company():
             self.employees_per_charger = employees_per_charger
         
             self.chargers_used_this_time_step = []
-            self.charger_utilisation = []
+            self.charger_utilisation = 0
             self.charger_history = dict()
         
     def add_employee(self):
@@ -198,9 +198,9 @@ class Company():
         
     def step(self):
         if self.clock.is_pre_heated:
-            self.charger_utilisation.append( \
-                len(self.chargers_used_this_time_step)/len(self.ccm.chargers))
-            self.charger_history[self.clock.elapsed_time] = self.ccm.history()
+            self.charger_utilisation \
+                = len(self.chargers_used_this_time_step)/len(self.ccm.chargers)
+            #self.charger_history[self.clock.elapsed_time] = self.ccm.history()
         self.chargers_used_this_time_step.clear()
     
     def __repr__(self):

@@ -4,11 +4,9 @@ Created on Mon Dec 14 13:06:27 2020
 
 @author: S3739258
 """
-import sys
 import math
 import scipy.special
 from scipy.special import erf, erfinv
-import scipy.optimize
 
 from mesa import Agent
 
@@ -85,18 +83,18 @@ class CarAgent(Agent):
         self.distance_commuted_if_work_and_home_equal \
             = house_agent.location.draw_distance_commuted_if_work_equal_home_at_random()
         self.lrm = location_road_manager
-        # TODO reconsider how car models are chosen
-        self.car_model = car_model_manager.draw_car_model_at_random()
+        self.car_model \
+            = car_model_manager.draw_car_model_at_random(house_agent.location,
+            company.location, self.distance_commuted_if_work_and_home_equal)
         self.whereabouts = whereabouts_manager.track_new_agent(uid,
                                                                cur_activity,
                                                                cur_location)
         self.soc = self.car_model.battery_capacity \
             * self.parameters.get_parameter("start_soc","float")# soc in kWh
-        self.charge_at_home_from_grid = 0.0
-        self.charge_at_home_from_pv = 0.0
+        self.charge_at_home = 0.0
         self.charge_at_work = 0.0
         
-        self.electricity_cost = 0 # in 
+        self.electricity_cost = 0 # in $ i guess ^^
         self.cp = calendar_planer
         self.calendar = Cal(self.clock, self.lrm, calendar_planer,
                             self.whereabouts, house_agent.location,
@@ -107,22 +105,18 @@ class CarAgent(Agent):
             = parameters.get_parameter("departure_condition","string")
         if self.departure_condition not in {"ROUND_TRIP", "ONE_WAY_TRIP", 
                                             "NEXT_NODE"}:
-            sys.exit("Departure condition: " + str(self.departure_condition) \
-                     + " is ill defined!")
+            raise RuntimeError("car_agent.py: Departure condition: " \
+                        + str(self.departure_condition) + " is ill defined!")
         self.reserve_range = parameters.get_parameter("reserve_range","int")
         self.reserve_speed = parameters.get_parameter("reserve_speed","int")
+        self.reserve_power = self.car_model.consumption(self.reserve_range,
+                                                        self.reserve_speed)
         self.emergency_charging = 0.0 # in kWh
         self.queuing_condition = parameters.get_parameter("queuing_condition",
                                                           "string")
         if self.queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
-            sys.exit("Queuing condition: " + str(self.queuing_condition) \
-                     + " is ill defined!")
-                
-        res_vel = self.parameters.get_parameter("reserve_speed", "float")
-        res_cons = self.car_model.instantaneous_consumption(res_vel)
-        res_dist = self.parameters.get_parameter("reserve_range", "float")
-        res_time = res_dist / res_vel # in hours
-        self.reserve_power = res_cons * res_time
+            raise RuntimeError("car_agent.py: Queuing condition: " \
+                + str(self.queuing_condition) + " is ill defined!")
         minimum_relative_state_of_charge \
             = self.parameters.get_parameter("minimum_relative_state_of_charge",
                                             "float")
@@ -130,37 +124,42 @@ class CarAgent(Agent):
             = self.car_model.battery_capacity*minimum_relative_state_of_charge
                 
         self.would_run_flat = False
-        self.total_charge = {"home":0, "work":0, "emergency":0}
-        self.extracted_data_hist = dict()
-        self.extracted_data_hist_list = []
+        #self.extracted_data_hist = dict()
+        #self.extracted_data_hist_list = []
         self.extracted_data = dict()
         self.last_charge_at_work = 0
         self.activity_before_emergency_charging = None
         
     def step(self):
+        if self.uid == self.parameters.uid_to_check:
+            test = 0
         # initialise extraction data
         self.extracted_data = dict()
         self.extracted_data["cur_activity"] = 0
-        self.extracted_data["charge_received"] = 0
-        self.extracted_data["emergency_charge_instruction"] = 0
-        self.extracted_data["home_pv_charge_instruction"] = 0
-        self.extracted_data["home_grid_charge_instruction"] = 0
-        self.extracted_data["work_charge_instruction"] = 0
+        self.extracted_data["charge_received_pv"] = 0
+        self.extracted_data["charge_received_grid"] = 0
+        self.extracted_data["charge_received_work"] = 0
+        self.extracted_data["charge_received_public"] = 0
         self.extracted_data["soc"] = 0
-        self.extracted_data["mu"], self.extracted_data["sig"] \
+        #self.extracted_data["mu"], self.extracted_data["sig"] \
+        self.extracted_data["mu"], _ \
             = self.calc_total_forcast_mean_and_std_dev()
         
         # Writing this while I should be celebrating christmas, fuck COVID
         self.calendar.step()
         self.plan()
         self.move()
+        self.extracted_data["work_charge_instruction"] = self.charge_at_work    
+        self.extracted_data["home_charge_instruction"] = self.charge_at_home
+        self.extracted_data["emergency_charge_instruction"] \
+            = self.emergency_charging
         self.charge()
         
         cur_soc = self.soc / self.car_model.battery_capacity
         self.extracted_data["soc"] = cur_soc
         self.extracted_data["cur_activity"] = self.whereabouts.cur_activity
-        self.extracted_data_hist[self.clock.cur_time_step] = self.extracted_data
-        self.extracted_data_hist_list.append(self.extracted_data)
+        #self.extracted_data_hist[self.clock.cur_time_step] = self.extracted_data
+        #self.extracted_data_hist_list.append(self.extracted_data)
         self.last_charge_at_work = self.charge_at_work
         
     def plan(self):
@@ -184,7 +183,7 @@ class CarAgent(Agent):
                                                  self.whereabouts.destination_location,
                                                  self.whereabouts.destination_activity_start_time)        
         # Decide on when to charge
-        self.plan_charging()
+        # self.plan_charging()
     
     def move(self):
         """ Process agent's movement, incl. departure- and queuing conditions
@@ -204,8 +203,12 @@ class CarAgent(Agent):
         # planned) 
         if wa.cur_location.uid == wa.route[0] \
             and wa.distance_since_last_location == 0:
+            self.charge_at_home = 0
+            self.charge_at_work = 0
             # if at work make sure to remove oneself from charging que
             self.company.remove_from_charging_que(self)
+            if self.company.can_charge(self):
+                self.company.unblock_charger(self)
             # check departure condition
             charge_needed = self.charge_for_departure_condition(wa.route)
             if charge_needed > self.soc:
@@ -214,12 +217,9 @@ class CarAgent(Agent):
                 return
         # in case of travel within one area only 
         if self.house_agent.location == self.company.location:
-            time_travelled = self.distance_commuted_if_work_and_home_equal \
-                / self.lrm.inner_area_speed_limit
-            instant_consumption \
-                = self.car_model.instantaneous_consumption(\
-                                               self.lrm.inner_area_speed_limit)
-            self.soc -= instant_consumption * time_travelled
+            velocity = self.lrm.inner_area_speed_limit
+            distance = self.distance_commuted_if_work_and_home_equal
+            self.soc -= self.car_model.consumption(velocity, distance)
             self.arrival_at_destination()
             return
         
@@ -242,10 +242,11 @@ class CarAgent(Agent):
             # be reached
             if wa.distance_since_last_location == 0:
                 max_consunption_on_edge \
-                    = self.car_model.instantaneous_consumption(speed_limit)
+                    = self.car_model.consumption(speed_limit,
+                                                 remaining_distance_on_edge)
                 # if next location can't be reached determine required
                 # emergency charge volume and abort trip
-                if self.soc < max_consunption_on_edge * remaining_time_on_edge:
+                if self.soc < max_consunption_on_edge:
                     # determine emergency charge volume
                     index_start = wa.route.index(start)
                     # iterate throuh all locations en route starting from
@@ -271,9 +272,12 @@ class CarAgent(Agent):
             if possible_distance_on_edge > remaining_distance_on_edge:
                 wa.cur_location = self.lrm.locations[end]
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
-                self.soc -= remaining_time_on_edge * inst_consumption
+                self.soc -= self.car_model.consumption(cur_velocity,
+                                                remaining_distance_on_edge)
+                remaining_time_on_edge * inst_consumption
                 consumption_cur_time_step \
-                    += remaining_time_on_edge * inst_consumption
+                    += self.car_model.consumption(cur_velocity,
+                                                remaining_distance_on_edge)
                 distance_travelled_cur_time_step += remaining_distance_on_edge
                 # if next location is final destination
                 if wa.route[-1] == end:
@@ -287,8 +291,8 @@ class CarAgent(Agent):
                     wa.distance_since_last_location = 0.0
             # if next location can not be reached during this timestep 
             else:
-                wa.distance_since_last_location \
-                    += remaining_time * cur_velocity
+                distance_travelled = remaining_time * cur_velocity
+                wa.distance_since_last_location += distance_travelled
                 # determine current coordinates
                 coord_start = self.lrm.locations[start].coordinates()
                 coord_end = self.lrm.locations[end].coordinates()
@@ -299,10 +303,12 @@ class CarAgent(Agent):
                 wa.cur_location_coordinates = \
                     [coord_start[0] + ratio_trvld_on_edge * diff_vct[0],
                      coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
-                self.soc -= remaining_time * inst_consumption
-                consumption_cur_time_step += remaining_time * inst_consumption
-                distance_travelled_cur_time_step \
-                    += remaining_time * cur_velocity
+                self.soc -= self.car_model.consumption(cur_velocity,
+                                                       distance_travelled)
+                consumption_cur_time_step \
+                    += self.car_model.consumption(cur_velocity,
+                                                       distance_travelled)
+                distance_travelled_cur_time_step += distance_travelled
                 remaining_time = 0
         # update position on grid
         relative_position \
@@ -353,28 +359,25 @@ class CarAgent(Agent):
         
         expected_consumption = []
         for i, distance in enumerate(distances):
-            time_on_segment = distance / speed_limits[i]
-            instant_consumption \
-                = self.car_model.instantaneous_consumption(speed_limits[i])
-            expected_consumption.append(instant_consumption * time_on_segment)
+            consumption = self.car_model.consumption(speed_limits[i],
+                                                     distance)
+            expected_consumption.append(consumption)
         # in case agent works in its home area
         if expected_consumption == []:
-            time_on_segment = self.distance_commuted_if_work_and_home_equal \
-                / self.lrm.inner_area_speed_limit
-            instant_consumption \
-                = self.car_model.instantaneous_consumption(\
-                                               self.lrm.inner_area_speed_limit)
-            expected_consumption.append(instant_consumption * time_on_segment)
+            speed_limit = self.lrm.inner_area_speed_limit
+            distance = self.distance_commuted_if_work_and_home_equal
+            consumption = self.car_model.consumption(speed_limit, distance)
+            expected_consumption = [consumption]
         charge_needed = sum(expected_consumption)
         
-        # in case of travel within one area only 
-        if self.house_agent.location == self.company.location:
-            time_travelled = self.distance_commuted_if_work_and_home_equal \
-                / self.lrm.inner_area_speed_limit
-            instant_consumption \
-                = self.car_model.instantaneous_consumption(\
-                                               self.lrm.inner_area_speed_limit)
-            charge_needed = instant_consumption * time_travelled
+        # # in case of travel within one area only 
+        # if self.house_agent.location == self.company.location:
+        #     time_travelled = self.distance_commuted_if_work_and_home_equal \
+        #         / self.lrm.inner_area_speed_limit
+        #     instant_consumption \
+        #         = self.car_model.instantaneous_consumption(\
+        #                                        self.lrm.inner_area_speed_limit)
+        #     charge_needed = instant_consumption * time_travelled
         
         return charge_needed
             
@@ -417,36 +420,52 @@ class CarAgent(Agent):
             if self.emergency_charging == 0.0:
                 # If car agent is at home
                 if cur_activity == self.cp.HOME:
-                    # First try to charge from pv
-                    if self.charge_at_home_from_pv != 0 \
-                        and self.house_agent.cur_pv_excess_supply > 0:
-                        max_from_pv = self.house_agent.cur_pv_excess_supply
-                        charge_up_to = min(self.charge_at_home_from_pv,
-                                           missing_charge, max_from_pv)
-                        received_charge, charging_cost \
-                            = self.house_agent.charge_car(self, charge_up_to)
-                        self.charge_at_home_from_pv -= received_charge
-                        missing_charge -= received_charge
-                        self.house_agent.cur_pv_excess_supply -= received_charge
-                        total_received_charge += received_charge
-                        total_charging_cost += charging_cost
-                    if self.charge_at_home_from_grid > 0:
+                    charge_from_grid = 0
+                    if self.charge_at_home != 0:
+                        # First try to charge from pv
+                        if self.house_agent.cur_pv_excess_supply > 0:
+                            max_from_pv = self.house_agent.cur_pv_excess_supply
+                            charge_up_to = min(self.charge_at_home,
+                                               missing_charge, max_from_pv)
+                            received_charge, charging_cost \
+                                = self.house_agent.charge_car(self,
+                                                              charge_up_to)
+                            self.charge_at_home -= received_charge
+                            missing_charge -= received_charge
+                            self.house_agent.cur_pv_excess_supply \
+                                -= received_charge
+                            total_received_charge += received_charge
+                            total_charging_cost += charging_cost
+                            self.extracted_data["charge_received_pv"] \
+                                += received_charge
+                        # Check if more charge, this time from grid or storage
+                        # is needed                        
+                        max_charge_rate \
+                            = self.house_agent.max_charge_rate(self.car_model)
+                        min_charge_time = self.charge_at_home \
+                            / max_charge_rate * 60
+                        min_charge_time = self.clock.time_step \
+                                * (min_charge_time // self.clock.time_step + 1)
+                        if self.clock.elapsed_time \
+                            <= self.calendar.next_departure_time - min_charge_time\
+                            < self.clock.elapsed_time + self.clock.time_step:
+                            charge_from_grid = self.charge_at_home
+                    if charge_from_grid > 0:
                         charger_capacity_in_time_step \
                             = self.house_agent.max_charge_rate(self.car_model)\
                                 * self.clock.time_step / 60
                         remaining_charger_capacity \
                             = charger_capacity_in_time_step \
                               - total_received_charge
-                        charge_up_to = min(self.charge_at_home_from_grid,
-                                           missing_charge,
+                        charge_up_to = min(charge_from_grid, missing_charge,
                                            remaining_charger_capacity)
                         received_charge, charging_cost \
                             = self.house_agent.charge_car(self, charge_up_to)
-                        self.charge_at_home_from_grid -= received_charge
+                        self.charge_at_home -= received_charge
                         total_received_charge += received_charge
                         total_charging_cost += charging_cost
-                    if self.clock.is_pre_heated:
-                        self.total_charge["home"] += total_received_charge
+                        self.extracted_data["charge_received_grid"] \
+                            += received_charge
                 # if car agent is at work
                 if cur_activity == self.cp.WORK \
                     and self.charge_at_work != 0.0:
@@ -459,8 +478,8 @@ class CarAgent(Agent):
                             self.company.unblock_charger(self)
                         total_received_charge += received_charge
                         total_charging_cost += charging_cost
-                        if self.clock.is_pre_heated:
-                            self.total_charge["work"] += received_charge
+                        self.extracted_data["charge_received_work"] \
+                            += received_charge
                     elif self not in self.company.ccm.charging_que:
                         is_queuing = None
                         if self.queuing_condition == "ALWAYS":
@@ -479,8 +498,8 @@ class CarAgent(Agent):
                     self.emergency_charging -= received_charge
                     total_received_charge += received_charge
                     total_charging_cost += charging_cost
-                    if self.clock.is_pre_heated:
-                        self.total_charge["emergency"] += received_charge
+                    self.extracted_data["charge_received_grid"] \
+                        += received_charge
                 # if car agent is at work
                 elif cur_activity == self.cp.WORK:
                     if self.company.can_charge(self):
@@ -492,8 +511,8 @@ class CarAgent(Agent):
                         total_charging_cost += charging_cost
                         if self.emergency_charging == 0:
                             self.company.unblock_charger(self)
-                        if self.clock.is_pre_heated:
-                            self.total_charge["emergency"] += received_charge
+                        self.extracted_data["charge_received_work"] \
+                            += received_charge
                 # if car agent has to use public charger whilst in between home
                 # and work
                 else:
@@ -507,8 +526,8 @@ class CarAgent(Agent):
                         total_charging_cost += charging_cost
                         if self.emergency_charging == 0:
                             pub_company.unblock_charger(self)
-                        if self.clock.is_pre_heated:
-                            self.total_charge["emergency"] += received_charge
+                        self.extracted_data["charge_received_public"] \
+                            += received_charge
                 if self.emergency_charging == 0:
                     if self.activity_before_emergency_charging \
                         == self.calendar.cur_scheduled_activity:
@@ -516,7 +535,6 @@ class CarAgent(Agent):
                             = self.activity_before_emergency_charging
             
             self.soc += total_received_charge
-            self.extracted_data["charge_received"] = total_received_charge
             self.electricity_cost += total_charging_cost
             
     def initiate_emergency_charging(self, emergency_charge_volume):
@@ -555,8 +573,6 @@ class CarAgent(Agent):
                 # charge at public charger
                 self.whereabouts.cur_location.companies[0].block_charger(self, True)
             self.emergency_charging = emergency_charge_volume
-            self.extracted_data["emergency_charge_instruction"] \
-                = emergency_charge_volume
         else:
             # car agent does not depart because it would run flat
             self.would_run_flat = True
@@ -596,8 +612,7 @@ class CarAgent(Agent):
     def plan_charging(self):
         if self.whereabouts.is_travelling:
             self.charge_at_work = 0
-            self.charge_at_home_from_pv = 0
-            self.charge_at_home_from_grid = 0
+            self.charge_at_home = 0
             return
         
         p_work = self.company.charger_cost_per_kWh
@@ -631,49 +646,21 @@ class CarAgent(Agent):
             else:
                 self.charge_at_work \
                     = max(2*q_one_way+q_res - soc, 0)
-            
-            self.extracted_data["work_charge_instruction"] \
-                = self.charge_at_work            
-        
         if self.whereabouts.destination_activity == self.cp.HOME:
             if pv_cap != 0 and self.house_agent.charger != None:
-                self.charge_at_home_from_pv \
+                self.charge_at_home \
                     = self.parm_cost_fct_charging_at_home_anal(q_one_way,q_res,
                                                                p_feed, p_grid,
                                                                p_em, p_work,
                                                                soc, c, mu, sig)
-                if p_em > p_work and p_em > p_grid:
-                    max_charge_rate \
-                        = self.house_agent.max_charge_rate(self.car_model)
-                    charge_needed \
-                        = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
-                            else max(q_one_way + q_res - soc, 0)
-                    min_charge_time = charge_needed / max_charge_rate * 60
-                    min_charge_time = self.clock.time_step\
-                            * (min_charge_time // self.clock.time_step + 1)
-                    if self.clock.elapsed_time \
-                        <= self.calendar.next_departure_time - min_charge_time\
-                        < self.clock.elapsed_time + self.clock.time_step:
-                        self.charge_at_home_from_grid = charge_needed
-                        if self.charge_at_home_from_grid < 0:    
-                            test = 0
-                else:
-                    msg = "Case p_em <= p_work || p_em <= p_grid not " \
-                        + "implemented!"
-                    raise RuntimeError("car_agent.py: " + msg)
             elif pv_cap == 0 and self.house_agent.charger != None:
-                self.charge_at_home_from_grid \
+                self.charge_at_home \
                     = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
                         else max(q_one_way + q_res - soc, 0)    
             else:
                 charge_needed = max(q_one_way + q_res - soc, 0)
                 if charge_needed != 0:
                     self.initiate_emergency_charging(charge_needed)
-            
-            self.extracted_data["home_pv_charge_instruction"] \
-                = self.charge_at_home_from_pv
-            self.extracted_data["home_grid_charge_instruction"] \
-                = self.charge_at_home_from_grid
         
     
     """
@@ -787,14 +774,14 @@ class CarAgent(Agent):
         return max(0, instruction)
     
     def __repr__(self):
-        msg = "Uid: {}, Residency uid: {}, Employment uid: {} \n".format( \
+        msg = "Uid: {}, Residency uid: {}, Employment uid: {} ".format( \
                 self.uid, self.house_agent.location.uid,
                 self.company.location.uid)
-        msg += "SOC: {}, ".format(self.soc)
-        msg += "Charge Instr. @HomePV: {:.02f}, @HomeGr: {:.02f},\n".format( \
-                self.charge_at_home_from_pv, self.charge_at_home_from_grid)
-        msg += "  @Work: {:.02f}, Emergency: {:.02f}\n".format( \
-                self.charge_at_work, self.emergency_charging)
+        msg += "SOC: {:.01f}\n ".format(self.soc)
+        msg += "Charge Instr. @Home: {:.02f}, @Work: {:.02f}, ".format( \
+                self.charge_at_home, self.charge_at_work)
+        msg += "Emergency: {:.02f}\n".format( \
+                self.emergency_charging)
         # msg += "Latest History: \n"
         # for time_step, hist in list(self.extracted_data_hist.items())[-3:]:
         #     msg += str(time_step) + " | "

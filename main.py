@@ -21,28 +21,39 @@ nbr_of_agents = parameters.get_parameter("nbr_of_agents","int")
 # single run
 cm = charging_model.ChargingModel(nbr_of_agents, parameters)
 for i in range(cm.clock.time_step_limit):
-    if i in [2200, 2400, 2600, 2800, 3000, 3200, 3400]:
-        test = 0;
+    if i == 800:
+        test = 0
     cm.step()
     if draw_agents_on_map:
         od.draw_car_agents(cm, i)
 cm.summarise_simulation()
 
+od.print_route_stats(cm)
 od.print_overall_charging_results(cm)
 
 if plot_extraced_data:
     od.plot_extracted_data(cm)
+    od.evaluate_overall_charge(cm)
 
 
 # parameter scan
-# for price_at_work in np.arange (0.5, 0.45, 0.5):
+# scan_parameters = {"prices_at_work" : np.arange (0.2, 0.21, 0.001)}
+# scan_collected_data = {"charge_home" :[], "charge_work" : [],
+#                        "charge_emergency" : [], "utilisation" : []}
+# for price_at_work in scan_parameters["prices_at_work"]:
+#     print(price_at_work)
 #     parameters.parameters["company_charger_cost_per_kWh"] = price_at_work
 #     cm = charging_model.ChargingModel(nbr_of_agents, parameters)
 #     for i in range(cm.clock.time_step_limit):
 #         cm.step()
-#         if draw_agents_on_map:
-#             od.draw_car_agents(cm, i)
 #     cm.summarise_simulation()
 #     od.print_overall_charging_results(cm)
-#     if plot_extraced_data:
-#         od.plot_extracted_data(cm)
+    
+#     total_charge = cm.total_charge()
+#     scan_collected_data["charge_home"].append(total_charge["home"])
+#     scan_collected_data["charge_work"].append(total_charge["work"])
+#     scan_collected_data["charge_emergency"].append(total_charge["emergency"])
+#     scan_collected_data["utilisation"].append(\
+#                                 cm.lrm.average_company_charger_utilisation())
+
+# od.plot_parameter_scan(scan_parameters, scan_collected_data)

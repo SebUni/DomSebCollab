@@ -13,7 +13,7 @@ class CarModel():
     """
     def __init__(self, uid, car_model_name, car_consumption, drag_coeff,
                  frontal_area, mass, battery_capacity, charger_capacity_ac,
-                 charger_capacity_dc):
+                 charger_capacity_dc, parameters, car_model_manager):
         """
         Parameters
         ----------
@@ -49,7 +49,23 @@ class CarModel():
         self.battery_capacity = battery_capacity
         self.charger_capacity_ac = charger_capacity_ac
         self.charger_capacity_dc = charger_capacity_dc
+        self.consumption_calc_method \
+            = parameters.get_parameter("consumption_calc_method","string")
+        self.cmm = car_model_manager
+        if self.consumption_calc_method not in [self.cmm.MANUFACTURER,
+                                                self.cmm.FORMULA]:
+            raise RuntimeError("car_model.py: consumption_calc_method is " \
+                + "ill defined. '" + self.consumption_calc_method + "' is " \
+                + "not implemented")
         
+    def consumption(self, velocity, distance):
+        if self.consumption_calc_method == self.cmm.FORMULA:
+            time = velocity * distance
+            inst_cons = self.instantaneous_consumption(velocity)
+            return inst_cons * time
+        if self.consumption_calc_method == self.cmm.MANUFACTURER:
+            return self.car_consumption * distance
+    
     def instantaneous_consumption(self, velocity):
         """
         The consumption in kWh of the car model at a given velocity.

@@ -15,7 +15,12 @@ class CarModelManager():
     """
     Stores and holds all car models used in the simulation.
     """
-    def __init__(self):
+    def __init__(self, parameters, location_road_manager):
+        self.MANUFACTURER = "MANUFACTURER"
+        self.FORMULA = "FORMULA"
+        
+        self.parameters = parameters
+        self.lrm = location_road_manager
         self.car_models = dict()
         self.load_car_models()
         
@@ -49,10 +54,12 @@ class CarModelManager():
                 
             cm = CarModel(uid, car_model_name, car_consumption, drag_coeff,
                           frontal_area, mass, battery_capacity,
-                          charger_capacity_ac, charger_capacity_dc)
+                          charger_capacity_ac, charger_capacity_dc, 
+                          self.parameters, self)
             self.car_models[uid] = cm
             
-    def draw_car_model_at_random(self):
+    def draw_car_model_at_random(self, residency_location, employment_location,
+                                 distance_commuted_if_work_and_home_equal):
         """
         Returns a car model which was drawn at Random. Criterias such as
         weights are still to be determined.
@@ -61,8 +68,24 @@ class CarModelManager():
         -------
         CarModel.
         """
-        # TODO determine criteria for draw
-        return random.choice(list(self.car_models.values()))
+        reserve_range = self.parameters.get_parameter("reserve_range","int")
+        reserve_speed = self.parameters.get_parameter("reserve_speed","int")
+        reserve_power = 0
+        commute_distance = None
+        if residency_location != employment_location:
+            commute_distance = self.lrm.calc_route_length(self.lrm.calc_route(\
+                                    residency_location, employment_location))
+        else:
+            commute_distance = distance_commuted_if_work_and_home_equal
+            
+        car_range = 0
+        car_model = None
+        while car_range < commute_distance * 2 + reserve_power * 1.1:
+            car_model = random.choice(list(self.car_models.values()))
+            car_range = car_model.battery_capacity / car_model.car_consumption
+            reserve_power = car_model.consumption(reserve_range, reserve_speed)
+        
+        return car_model
         
     def __repr__(self):
         msg = ""

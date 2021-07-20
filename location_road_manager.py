@@ -243,6 +243,7 @@ class LocationRoadManager():
             if sum_rel_commutes >= rnd:
                 break
         
+        #return list(self.locations.values())[0]
         return location_of_employment
     
     def relative_location_position(self, location):
@@ -321,17 +322,15 @@ class LocationRoadManager():
             self.traffic_network.edges[edge]['cur_speed'] \
                 = max(min(cur_speed_flow, \
                       self.traffic_network.edges[edge]['speed_limit']),
-                      self.traffic_jam_velocity)
-                    
-    def average_company_charger_utilisation(self):
-        all_individual_location_averages = []
+                      self.traffic_jam_velocity) 
+                
+    def company_charger_utilisation(self):
+        company_charger_utilisations_at_location = []
         for location in self.locations.values():
-            value = location.average_company_charger_utilisation()
-            if math.isnan(value) == False:
-                all_individual_location_averages.append(value)
-        
-        return sum(all_individual_location_averages) \
-                / len(all_individual_location_averages)        
+            company_charger_utilisations_at_location \
+                += location.company_charger_utilisations()
+
+        return company_charger_utilisations_at_location       
         
     def print_locations(self):
         """

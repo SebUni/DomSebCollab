@@ -47,8 +47,8 @@ class Location():
         
         return occupants
     
-    def draw_pv_capacity_at_random(self):
-        if random.random() <= self.pv_density:
+    def draw_pv_capacity_on_owned_house_at_random(self):
+        if random.random() <= self.pv_density / self.chance_house_is_owned:
             return self.pv_avg_capacity
         else:
             return 0
@@ -92,22 +92,12 @@ class Location():
         """
         return [self.longitude, self.latitude]   
     
-    def average_company_charger_utilisation(self):
-        all_individual_company_averages = []
-        for it, company in enumerate(self.companies):
-            if it != 0:
-                all_individual_company_averages.append( \
-                                            sum(company.charger_utilisation) \
-                                            / len(company.charger_utilisation))
-        if len(all_individual_company_averages) != 0:
-            return sum(all_individual_company_averages) \
-                / len(all_individual_company_averages)
-        else:
-            return float('nan')
+    def company_charger_utilisations(self):
+        return [company.charger_utilisation for company in self.companies[1:]]
         
     def __repr__(self):
-        msg = "Id: " + str(self.uid) + ", "
-        msg += "Name: " + str(self.name) # + ", "
+        msg = "Id: {}, Name: {}".format(self.uid, self.name)
+        # + ", "
         # msg += "Pop: " + str(self.population) + ", "
         # msg += "Coord: " + str(self.latitude) + " " + str(self.longitude) +"\n"
         # msg += "Occupants: " + str(self.occupant_values) + " : " + \

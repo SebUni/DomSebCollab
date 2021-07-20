@@ -26,6 +26,8 @@ class Parameters():
                 sys.exit("Parameter " + key \
                          + " is defined twice in parameters.csv")
             self.parameters[key] = value
+        self.uid_to_check = -1
+        self.next_stop = -1
     
     def get_parameter(self, parameter_name, parameter_type):
         """
