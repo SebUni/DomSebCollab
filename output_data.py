@@ -113,24 +113,6 @@ class OutputData():
         for line in out:
             f.writelines(line + "\n")
         f.close()
-        
-    def plot_extracted_data(self, model):
-        extr_data = model.extracted_car_data
-        time_steps = [time_step for time_step in extr_data.keys()]
-        data_elements_per_agent \
-            = list(next(iter(next(iter(extr_data.values())).values())).keys())
-        lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
-        
-        for element in data_elements_per_agent:
-            fig, ax = plt.subplots()
-            for agent in next(iter(extr_data.values())):
-                soc = [time_step[agent][element] \
-                       for time_step in extr_data.values()]
-                plt.xticks(lbl_time_steps, lbl_hour_steps)
-                plt.grid(axis='x', color='0.95')
-                ax.plot(time_steps, soc)
-            ax.set(xlabel='time in hours', ylabel=element)
-            plt.show()
             
     def print_overall_charging_results(self, model):
         charge_sets = ["charge_received_work", "charge_received_pv",
@@ -155,6 +137,40 @@ class OutputData():
             sum(average_company_charger_utilisation) * 100 \
             / len(average_company_charger_utilisation)))
         
+    def print_route_stats(self, model):
+        route_lengths = []
+        for agent in model.schedule_cars.agents:
+            home = agent.house_agent.location
+            work = agent.company.location
+            route = model.lrm.calc_route(home, work)
+            length = None
+            if len(route) >= 2:
+                length = model.lrm.calc_route_length(route)
+            else:
+                length = agent.distance_commuted_if_work_and_home_equal
+            route_lengths.append(length)
+        print("Route (min / avg / max) = {:.1f} km / {:.1f} km / {:.1f} km".format(\
+            min(route_lengths), sum(route_lengths)/len(route_lengths),
+            max(route_lengths)))
+        
+    def plot_extracted_data(self, model):
+        extr_data = model.extracted_car_data
+        time_steps = [time_step for time_step in extr_data.keys()]
+        data_elements_per_agent \
+            = list(next(iter(next(iter(extr_data.values())).values())).keys())
+        lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
+        
+        for element in data_elements_per_agent:
+            fig, ax = plt.subplots()
+            for agent in next(iter(extr_data.values())):
+                soc = [time_step[agent][element] \
+                       for time_step in extr_data.values()]
+                ax.plot(time_steps, soc)
+            ax.set(xlabel='time in hours', ylabel=element)
+            plt.xticks(lbl_time_steps, lbl_hour_steps)
+            plt.grid(axis='x', color='0.95')
+            plt.show()
+        
     def plot_parameter_scan(self, scan_parameters, scan_collected_data):
         if len(scan_parameters) == 1:
             fig, ax = plt.subplots()
@@ -176,6 +192,7 @@ class OutputData():
         charge_sets = ["charge_received_work", "charge_received_pv",
                        "charge_received_grid", "charge_received_public"]
         time_steps = [time_step for time_step in model.extracted_car_data.keys()]
+        lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
         charges = dict()
         for charge_set in charge_sets:
             charges[charge_set] = []
@@ -189,6 +206,8 @@ class OutputData():
         for name, charge in charges.items():
             ax.plot(time_steps, charge, label=name)
         ax.set(xlabel="time in minutes")
+        plt.xticks(lbl_time_steps, lbl_hour_steps)
+        plt.grid(axis='x', color='0.95')
         plt.legend()
         plt.show()
         
@@ -196,6 +215,8 @@ class OutputData():
         fig, ax = plt.subplots()
         ax.plot(time_steps, model.extracted_company_data["Charger utilisation"])
         ax.set(xlabel="time in minutes", ylabel="Charger utilisation")
+        plt.xticks(lbl_time_steps, lbl_hour_steps)
+        plt.grid(axis='x', color='0.95')
         plt.show()
         
         fig, ax = plt.subplots()
@@ -204,20 +225,6 @@ class OutputData():
                in model.extracted_company_data["Charger utilisation"]]
         ax.plot(time_steps, average_company_charger_utilisation)
         ax.set(xlabel="time in minutes", ylabel="Average charger utilisation")
+        plt.xticks(lbl_time_steps, lbl_hour_steps)
+        plt.grid(axis='x', color='0.95')
         plt.show()
-        
-    def print_route_stats(self, model):
-        route_lengths = []
-        for agent in model.schedule_cars.agents:
-            home = agent.house_agent.location
-            work = agent.company.location
-            route = model.lrm.calc_route(home, work)
-            length = None
-            if len(route) >= 2:
-                length = model.lrm.calc_route_length(route)
-            else:
-                length = agent.distance_commuted_if_work_and_home_equal
-            route_lengths.append(length)
-        print("Route (min / avg / max) = {:.1f} km / {:.1f} km / {:.1f} km".format(\
-            min(route_lengths), sum(route_lengths)/len(route_lengths),
-            max(route_lengths)))

@@ -70,6 +70,9 @@ class CarModelManager():
         """
         reserve_range = self.parameters.get_parameter("reserve_range","int")
         reserve_speed = self.parameters.get_parameter("reserve_speed","int")
+        minimum_relative_state_of_charge \
+            = self.parameters.get_parameter("minimum_relative_state_of_charge",
+                                            "float")
         reserve_power = 0
         commute_distance = None
         if residency_location != employment_location:
@@ -83,7 +86,10 @@ class CarModelManager():
         while car_range < commute_distance * 2 + reserve_power * 1.1:
             car_model = random.choice(list(self.car_models.values()))
             car_range = car_model.battery_capacity / car_model.car_consumption
-            reserve_power = car_model.consumption(reserve_range, reserve_speed)
+            reserve_power = max(car_model.consumption(reserve_range,
+                                                      reserve_speed),
+                                car_model.battery_capacity \
+                                * minimum_relative_state_of_charge)
         
         return car_model
         
