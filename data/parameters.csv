@@ -1,9 +1,9 @@
 #parameter_name,parameter_value,description
-season,1,Season of the year: 0-Spring 1-Summer 2-Autumn 3-Winter
+season,3,Season of the year: 0-Spring 1-Summer 2-Autumn 3-Winter
 time_step,5,Length of each time step in minutes
 time_step_limit,4032,Amount of time steps executed before simulation termination (288 is 1 day in 5 min steps).
 forecast_horizon,1440,Time for solar forecast
-company_charger_cost_per_kWh,0.1,Price charged by companies per kWh charged
+company_charger_cost_per_kWh,0.3,Price charged by companies per kWh charged
 public_charger_cost_per_kWh,1,Price charged while using public chargers per kWh charged
 employees_per_charger,5,Amount of employees sharing one charger at a company
 arrival_time_reserve,10,Time a car_agent tires to be early to accomodate for traffic and other delays

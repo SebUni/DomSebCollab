@@ -44,7 +44,7 @@ class HouseAgent(Agent):
                 self.pv_capacity \
                     = residency_location.draw_pv_capacity_on_owned_house_at_random()
                 #self.pv_capacity \
-                #    = residency_location.pv_avg_capacity
+                    #= residency_location.pv_avg_capacity
         # TODO check how electricity plan is chosen
         electricity_plan_uid \
             = random.choice(electricity_plan_manager.residential_plan_uids)

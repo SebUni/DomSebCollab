@@ -80,16 +80,26 @@ class CarModelManager():
                                     residency_location, employment_location))
         else:
             commute_distance = distance_commuted_if_work_and_home_equal
-            
-        car_range = 0
+        
+        if commute_distance > 55:
+            test = 0
+        
+        battery_capacity = 0
+        commute_consumption = 0
         car_model = None
-        while car_range < commute_distance * 2 + reserve_power * 1.1:
+        while battery_capacity * 0.6 <= commute_consumption * 2:
             car_model = random.choice(list(self.car_models.values()))
-            car_range = car_model.battery_capacity / car_model.car_consumption
-            reserve_power = max(car_model.consumption(reserve_range,
-                                                      reserve_speed),
-                                car_model.battery_capacity \
-                                * minimum_relative_state_of_charge)
+            battery_capacity = car_model.battery_capacity
+            commute_consumption = commute_distance * car_model.car_consumption
+        #                         * minimum_relative_state_of_charge)
+        # while battery_capacity <= commute_consumption * 2 + reserve_power *1.1:
+        #     car_model = random.choice(list(self.car_models.values()))
+        #     battery_capacity = car_model.battery_capacity
+        #     commute_consumption = commute_distance * car_model.car_consumption
+        #     reserve_power = max(car_model.consumption(reserve_speed,
+        #                                               reserve_range),
+        #                         car_model.battery_capacity \
+        #                         * minimum_relative_state_of_charge)
         
         return car_model
         

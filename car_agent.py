@@ -236,8 +236,6 @@ class CarAgent(Agent):
             remaining_distance_on_edge \
                 = edge_distance - wa.distance_since_last_location
             remaining_time_on_edge = remaining_distance_on_edge / cur_velocity
-            inst_consumption \
-                = self.car_model.instantaneous_consumption(cur_velocity)
             # in case of departure from a location check if next location can
             # be reached
             if wa.distance_since_last_location == 0:
@@ -274,7 +272,6 @@ class CarAgent(Agent):
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
                 self.soc -= self.car_model.consumption(cur_velocity,
                                                 remaining_distance_on_edge)
-                remaining_time_on_edge * inst_consumption
                 consumption_cur_time_step \
                     += self.car_model.consumption(cur_velocity,
                                                 remaining_distance_on_edge)
