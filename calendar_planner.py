@@ -64,7 +64,7 @@ class CalendarPlanner():
         """
         calendar = dict()
         
-        starts, ends = self.generate_schedule(hours_worked_per_week)
+        starts, ends = self.generate_schedule(hours_worked_per_week, 8)
         starts_org, ends_orgs = starts, ends
         init_start = starts[0]
         for time_slot in range(0, 60*24*7, self.clock.time_step):
@@ -155,9 +155,14 @@ class CalendarPlanner():
                                  hour_share * self.total_hours_worked_per_week)
             self.assigned_hour_share.append(0)
     
-    def generate_schedule(self, hours_worked_per_week):
+    def generate_schedule(self, hours_worked_per_week, min_shift_length):
+        # parameters
         rest_between_shifts = 10
         max_shift_lengh = 12
+        # adjust input if needed
+        max_shift_length_limit = max_shift_lengh / 2
+        min_shift_length = min(min_shift_length, hours_worked_per_week,
+                               max_shift_length_limit)
         peak_distance = rest_between_shifts + max_shift_lengh
         selected_peaks = []
         # creates a list which sorts all hours of the week according to the
@@ -209,6 +214,13 @@ class CalendarPlanner():
         cur_hour = 0
         while cur_hour < hours_worked_per_week:
             scheduled_hour_successul = False
+            hours_needed_for_cur_shifts \
+                = sum([max(min_shift_length-(ends[shift]-starts[shift])%168,0)\
+                       for shift in range(len(starts))])
+            remaining_hours_for_shift_extenstion \
+                = sum([max_shift_lengh-(ends[shift] - starts[shift]) % 168 \
+                       for shift in range(len(starts))])
+            remaining_hours_for_agent = hours_worked_per_week - cur_hour
             # scan through all shifts to find the best places to start a shift
             # earlier and end a shift later
             best_start_main = 0 # = best_shift_to_start_earlier_rel_coverage
@@ -229,7 +241,11 @@ class CalendarPlanner():
                 distance_to_prev_shift = (starts[shift] - ends[prev_shift])%168
                 distance_to_next_shift = (starts[next_shift] - ends[shift])%168
                 shift_length = (ends[shift] - starts[shift]) % 168
-                
+                if remaining_hours_for_shift_extenstion \
+                    < remaining_hours_for_agent: break
+                if shift_length >= min_shift_length \
+                    and hours_needed_for_cur_shifts == remaining_hours_for_agent:
+                    continue
                 assigned_hour_share \
                     = self.assigned_hour_share[(starts[shift] - 1) % 168]
                 distribution_weekly_work_hours \
@@ -262,6 +278,13 @@ class CalendarPlanner():
             best_new_aux = 0    # = best_hour_to_start_a_new_shift_rel_work_hours
             best_new_it = -1    # = best_hour_to_start_a_new_shift
             for cur_spawn_pos in selected_peaks:
+                # only spawn new shift if there is enough hours remaining to 
+                # ensure minimum shift length
+                if remaining_hours_for_agent < min_shift_length: break
+                #  
+                if remaining_hours_for_agent \
+                    < hours_needed_for_cur_shifts + min_shift_length: break
+                # ensure new shift does not get to close to existing shifts
                 violates_dist_to_near_shifts = False
                 for shift in range(len(starts)):
                     prev_shift = (shift - 1) % len(ends)
