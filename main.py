@@ -21,7 +21,7 @@ nbr_of_agents = parameters.get_parameter("nbr_of_agents","int")
 # single run
 cm = charging_model.ChargingModel(nbr_of_agents, parameters)
 for i in range(cm.clock.time_step_limit):
-    if i == 800:
+    if i == 2016:
         test = 0
     cm.step()
     if draw_agents_on_map:

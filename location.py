@@ -33,6 +33,8 @@ class Location():
         self.chance_dwelling_is_a_house \
             = houses_total / (flats_total + houses_total)
         self.chance_house_is_owned = houses_owned / houses_total
+        self.total_charge_delivered = 0
+        self.total_feed_in = 0
         
     def draw_occupants_at_random(self):
         total = sum(self.occupant_distribution)

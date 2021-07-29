@@ -58,13 +58,14 @@ class CalendarPlanner():
         self.WORK = 2
         self.EMERGENCY_CHARGING = 3
         
-    def create_calendar(self, hours_worked_per_week):
+    def create_calendar(self, hours_worked_per_week, min_shift_length):
         """
         Calculates the entries for one agent in self.event_distribution.
         """
         calendar = dict()
         
-        starts, ends = self.generate_schedule(hours_worked_per_week, 8)
+        starts, ends = self.generate_schedule(hours_worked_per_week,
+                                              min_shift_length)
         starts_org, ends_orgs = starts, ends
         init_start = starts[0]
         for time_slot in range(0, 60*24*7, self.clock.time_step):

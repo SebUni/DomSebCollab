@@ -85,6 +85,8 @@ class HouseAgent(Agent):
         max_charge_rate = self.max_charge_rate(car_agent.car_model)
         delivered_charge = min([self.clock.time_step / 60 * max_charge_rate,
                                 charge_up_to])
+        if self.clock.is_pre_heated:
+            self.location.total_charge_delivered += delivered_charge
         charging_cost \
              = self.electricity_plan.cost_of_use(delivered_charge,
                                                  self.clock.time_of_day)
@@ -92,10 +94,13 @@ class HouseAgent(Agent):
         return delivered_charge, charging_cost
     
     def max_charge_rate(self, car_model):
-        return max(min(car_model.charger_capacity_ac,
-                       self.charger.charger_model.power_ac),
-                   min(car_model.charger_capacity_dc,
-                       self.charger.charger_model.power_dc))
+        if self.charger != None:
+            return max(min(car_model.charger_capacity_ac,
+                           self.charger.charger_model.power_ac),
+                       min(car_model.charger_capacity_dc,
+                           self.charger.charger_model.power_dc))
+        else:
+            return 0
         
     def step(self):
         # 1) Calculate house consumption

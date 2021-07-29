@@ -77,27 +77,12 @@ class Clock():
     def calc_time_of_day(self):
         """ Calculates how many minutes have elapsed since the most recent
         mid-night. """
-        
-        minutes_in_a_day = 60*24
-        time_of_day = self.elapsed_time
-        if time_of_day < 0:
-            time_of_day += minutes_in_a_day
-        time_of_day = time_of_day % minutes_in_a_day
-            
-            
-        return time_of_day
+        return self.elapsed_time % (60*24)
     
     def calc_time_of_week(self):
         """ Calculates how many minutes have elapsed since the most recent
         Sunday to Monday mid-night. """
-        
-        minutes_in_a_week = 60*24*7
-        time_of_week = self.elapsed_time
-        if time_of_week < 0:
-            time_of_week += minutes_in_a_week
-        time_of_week = time_of_week % minutes_in_a_week
-            
-        return time_of_week
+        return self.elapsed_time % (60*24*7)
         
     def step(self):
         """
@@ -109,11 +94,11 @@ class Clock():
 
         """
         self.cur_time_step += 1
+        if self.cur_time_step >= self.pre_heat_steps:
+            self.is_pre_heated = True
         if not self.first_step_call:
             self.elapsed_time += self.time_step
             self.time_of_day = self.calc_time_of_day()
             self.time_of_week = self.calc_time_of_week()
-            if self.cur_time_step >= self.pre_heat_steps:
-                self.is_pre_heated = True
         else:
             self.first_step_call = False

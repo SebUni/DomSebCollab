@@ -53,8 +53,10 @@ class Cal():
         self.next_activity_start_time = None
         self.next_route, self.next_route_length = None, None
     
-    def generate_schedule(self):
-        self.calendar, self.starts, self.ends = self.cp.create_calendar(self.hours_worked_per_week)
+    def generate_schedule(self, min_shift_lengh):
+        self.calendar, self.starts, self.ends \
+            = self.cp.create_calendar(self.hours_worked_per_week,
+                                      min_shift_lengh)
         self.cur_scheduled_activity = self.calendar[self.clock.elapsed_time]
         if self.cur_scheduled_activity == self.cp.HOME:
             self.cur_scheduled_location = self.residency_location
@@ -147,6 +149,39 @@ class Cal():
             self.next_route, self.next_route_length = self.find_next_route()
             self.next_departure_time = self.find_next_departure_time()
             
+    def find_next_departure_from_activity(self, activity):
+        has_startet_activity = False
+        test_time_of_week = self.clock.elapsed_time % (60*24*7)
+        cur_location = None
+        next_location = None
+        while has_startet_activity == False \
+            or self.calendar[test_time_of_week] == activity:
+            test_time_of_week \
+                = (test_time_of_week + self.clock.time_step) % (60*24*7)
+            if self.calendar[test_time_of_week] == activity:
+                has_startet_activity = True
+                cur_location = self.location_from_activity(activity)
+        
+        if self.whereabouts.destination_activity == self.cp.HOME:
+            next_activity = self.calendar[test_time_of_week]
+            next_location = self.location_from_activity(next_activity)
+            travel_time = self.lrm.estimated_travel_time_between_locations(
+                                                cur_location, next_location)
+            test_time_of_week -= travel_time + self.time_reserve
+            test_time_of_week = (test_time_of_week // self.clock.time_step) \
+                * self.clock.time_step
+                
+        return test_time_of_week
+    
+    def location_from_activity(self, activity):
+        if activity == self.cp.HOME:
+            return self.residency_location
+        if activity == self.cp.WORK:
+            return self.employment_location
+        
+        raise RuntimeError("cal.py: activity is not linked to a location!")
+        return None
+        
     def __repr__(self):
         msg = ""
         

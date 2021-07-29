@@ -85,11 +85,14 @@ class CarModelManager():
             test = 0
         
         battery_capacity = 0
+        work_charging_rate = 0
         commute_consumption = 0
         car_model = None
-        while battery_capacity * 0.6 <= commute_consumption * 2:
+        while battery_capacity * 0.6 <= commute_consumption * 2 \
+            or work_charging_rate * 6 < commute_consumption:
             car_model = random.choice(list(self.car_models.values()))
             battery_capacity = car_model.battery_capacity
+            work_charging_rate = car_model.charger_capacity_ac
             commute_consumption = commute_distance * car_model.car_consumption
         #                         * minimum_relative_state_of_charge)
         # while battery_capacity <= commute_consumption * 2 + reserve_power *1.1:

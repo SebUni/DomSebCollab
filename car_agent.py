@@ -5,12 +5,12 @@ Created on Mon Dec 14 13:06:27 2020
 @author: S3739258
 """
 import math
-import scipy.special
-from scipy.special import erf, erfinv
 
 from mesa import Agent
 
+from charging_strategy import ChargingStrategy
 from cal import Cal
+
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
@@ -109,8 +109,8 @@ class CarAgent(Agent):
                         + str(self.departure_condition) + " is ill defined!")
         self.reserve_range = parameters.get_parameter("reserve_range","int")
         self.reserve_speed = parameters.get_parameter("reserve_speed","int")
-        self.reserve_power = self.car_model.consumption(self.reserve_range,
-                                                        self.reserve_speed)
+        self.reserve_power = self.car_model.consumption(self.reserve_speed,
+                                                        self.reserve_range)
         self.emergency_charging = 0.0 # in kWh
         self.queuing_condition = parameters.get_parameter("queuing_condition",
                                                           "string")
@@ -122,7 +122,9 @@ class CarAgent(Agent):
                                             "float")
         self.minimum_absolute_state_of_charge \
             = self.car_model.battery_capacity*minimum_relative_state_of_charge
-                
+        
+        self.charging_strategy = ChargingStrategy(self)
+        
         self.would_run_flat = False
         #self.extracted_data_hist = dict()
         #self.extracted_data_hist_list = []
@@ -140,6 +142,8 @@ class CarAgent(Agent):
         self.extracted_data["charge_received_grid"] = 0
         self.extracted_data["charge_received_work"] = 0
         self.extracted_data["charge_received_public"] = 0
+        self.extracted_data["grid_charge_instruction"] = 0
+        self.extracted_data["next_departure_time"] = 0
         self.extracted_data["soc"] = 0
         #self.extracted_data["mu"], self.extracted_data["sig"] \
         self.extracted_data["mu"], _ \
@@ -149,6 +153,8 @@ class CarAgent(Agent):
         self.calendar.step()
         self.plan()
         self.move()
+        self.extracted_data["next_departure_time"] \
+            = self.calendar.next_departure_time
         self.extracted_data["work_charge_instruction"] = self.charge_at_work    
         self.extracted_data["home_charge_instruction"] = self.charge_at_home
         self.extracted_data["emergency_charge_instruction"] \
@@ -182,8 +188,9 @@ class CarAgent(Agent):
                 self.whereabouts.set_destination(self.whereabouts.destination_activity,
                                                  self.whereabouts.destination_location,
                                                  self.whereabouts.destination_activity_start_time)        
-        # Decide on when to charge
-        # self.plan_charging()
+        # provide initial charging instructions
+        if self.clock.cur_time_step==1 and not self.whereabouts.is_travelling:
+            self.plan_charging()
     
     def move(self):
         """ Process agent's movement, incl. departure- and queuing conditions
@@ -402,8 +409,11 @@ class CarAgent(Agent):
             power_required = route_power + self.reserve_power
         
         return power_required
-            
-        
+    
+    def plan_charging(self):
+        self.charge_at_home, self.charge_at_work \
+           = self.charging_strategy.determine_charge_instructions(self.soc)
+               
     def charge(self):
         """ Charges the EV. """
         if not self.whereabouts.is_travelling \
@@ -418,7 +428,7 @@ class CarAgent(Agent):
                 # If car agent is at home
                 if cur_activity == self.cp.HOME:
                     charge_from_grid = 0
-                    if self.charge_at_home != 0:
+                    if self.charge_at_home > 0:
                         # First try to charge from pv
                         if self.house_agent.cur_pv_excess_supply > 0:
                             max_from_pv = self.house_agent.cur_pv_excess_supply
@@ -427,6 +437,8 @@ class CarAgent(Agent):
                             received_charge, charging_cost \
                                 = self.house_agent.charge_car(self,
                                                               charge_up_to)
+                            if received_charge < 0:
+                                test = 0
                             self.charge_at_home -= received_charge
                             missing_charge -= received_charge
                             self.house_agent.cur_pv_excess_supply \
@@ -443,10 +455,11 @@ class CarAgent(Agent):
                             / max_charge_rate * 60
                         min_charge_time = self.clock.time_step \
                                 * (min_charge_time // self.clock.time_step + 1)
-                        if self.clock.elapsed_time \
-                            <= self.calendar.next_departure_time - min_charge_time\
-                            < self.clock.elapsed_time + self.clock.time_step:
+                        if self.calendar.next_departure_time - min_charge_time\
+                            <= self.clock.elapsed_time:
                             charge_from_grid = self.charge_at_home
+                            self.extracted_data["grid_charge_instruction"] \
+                                += charge_from_grid
                     if charge_from_grid > 0:
                         charger_capacity_in_time_step \
                             = self.house_agent.max_charge_rate(self.car_model)\
@@ -530,6 +543,7 @@ class CarAgent(Agent):
                         == self.calendar.cur_scheduled_activity:
                         self.whereabouts.cur_activity \
                             = self.activity_before_emergency_charging
+                        self.plan_charging()
             
             self.soc += total_received_charge
             self.electricity_cost += total_charging_cost
@@ -592,7 +606,16 @@ class CarAgent(Agent):
             return False           
         
     def generate_calendar_entries(self):
-        self.calendar.generate_schedule()
+        commute_consumption = self.charge_needed_for_route(\
+            self.lrm.calc_route(self.house_agent.location,
+                                self.company.location))
+        charge_time_at_work \
+            = commute_consumption / self.car_model.charger_capacity_ac
+        # round up
+        if not charge_time_at_work.is_integer():
+            charge_time_at_work = charge_time_at_work // 1 + 1
+        self.min_shift_length = charge_time_at_work # jup, just for readability
+        self.calendar.generate_schedule(self.min_shift_length)
         
     def calc_total_forcast_mean_and_std_dev(self):
         mu_supply, sig_supply \
@@ -605,170 +628,6 @@ class CarAgent(Agent):
         mu = mu_supply - mu_demand
         sig = math.sqrt(sig_supply**2 + sig_demand**2)
         return mu, sig
-    
-    def plan_charging(self):
-        if self.whereabouts.is_travelling:
-            self.charge_at_work = 0
-            self.charge_at_home = 0
-            return
-        
-        p_work = self.company.charger_cost_per_kWh
-        p_feed = self.house_agent.electricity_plan.feed_in_tariff
-        p_grid = self.house_agent.electricity_plan.cost_of_use(1, 
-                                                        self.clock.time_of_day)
-        
-        p_em = self.parameters.get_parameter("public_charger_cost_per_kWh",
-                                             "float")
-        
-        soc = self.soc
-        q_one_way = self.charge_needed_for_route(self.calendar.next_route)
-        q_res = max(self.reserve_power, self.minimum_absolute_state_of_charge)
-        
-        c = self.parameters.get_parameter("confidence", "float")
-        mu, sig = self.calc_total_forcast_mean_and_std_dev()
-        
-        pv_cap = self.house_agent.pv_capacity
-        
-        if self.whereabouts.destination_activity == self.cp.WORK:
-            if pv_cap != 0 and self.house_agent.charger != None:
-                self.charge_at_work \
-                    = self.parm_cost_fct_charging_at_work_anal(q_one_way,q_res,
-                                                               p_feed, p_grid,
-                                                               p_em, p_work,
-                                                               soc, c, mu, sig)
-            elif pv_cap == 0 and self.house_agent.charger != None:
-                self.charge_at_work \
-                    = max(2*q_one_way+q_res - soc, 0) if p_grid > p_work \
-                        else max(q_one_way + q_res - soc, 0)
-            else:
-                self.charge_at_work \
-                    = max(2*q_one_way+q_res - soc, 0)
-        if self.whereabouts.destination_activity == self.cp.HOME:
-            if pv_cap != 0 and self.house_agent.charger != None:
-                self.charge_at_home \
-                    = self.parm_cost_fct_charging_at_home_anal(q_one_way,q_res,
-                                                               p_feed, p_grid,
-                                                               p_em, p_work,
-                                                               soc, c, mu, sig)
-            elif pv_cap == 0 and self.house_agent.charger != None:
-                self.charge_at_home \
-                    = max(2*q_one_way+q_res - soc, 0) if p_grid <= p_work \
-                        else max(q_one_way + q_res - soc, 0)    
-            else:
-                charge_needed = max(q_one_way + q_res - soc, 0)
-                if charge_needed != 0:
-                    self.initiate_emergency_charging(charge_needed)
-        
-    
-    """
-    PARAMETER EXPLANATION
-    
-    q_h (q_home) 
-        quantity charged at home
-    q_ow (q_one_way)
-        charge needed to reach next destination
-    q_r (q_real)
-        realisation of the house demand-supply-'balance'
-    q_w (q_work)
-        quantity charged at work
-    p_w (p_work)
-        price paid per kWh at work
-    p_f (p_feed)
-        price received for feeding rooftop pv into grid
-    p_g (p_grid)
-        price paid per kWh at home
-    p_em (p_emergency)
-        most expensive price paid on the road to next to charging in case of
-        emergency charging
-    soc
-        state of charge of the EV's battery
-    c
-        confidence with which best cases are expected
-    mu
-        mean for predicition of rooftop pv output
-    sig
-        standard deviation for predicition of rooftop pv output
-    phi
-        value at risk
-    """
-    
-    # TODO update in draw.io ClassDiagram
-    
-    def parm_cost_fct_charging_at_home_anal(self, q_ow, q_res, p_f, p_g, p_em,
-                                            p_w, soc, c, mu, sig):
-        q_tw, q_th = q_ow + q_res, q_ow
-        sqrt2sig = math.sqrt(2) * sig
-        # performance helper
-        thresh = mu + sqrt2sig * erfinv(1 - 2*c)
-        # shorthands
-        dp = p_g - p_f
-        dp_div = dp / (2 * (1 - c))
-        
-        instruction = 0
-        if thresh < q_tw - soc:
-            if p_g < p_w:
-                instruction = q_tw + q_th - soc
-            elif p_g == p_w:
-                instruction = q_tw - soc
-            else:
-                instruction = q_tw - soc
-        elif q_tw + q_th - soc < thresh:
-            if p_w <= p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1):
-                instruction = q_tw - soc
-            elif p_w >= p_f + dp_div * (erf((q_tw + q_th - soc - mu) / sqrt2sig) + 1):
-                instruction = q_tw + q_th - soc
-            else:
-                instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
-        else:
-            if p_w > p_g:
-                instruction = q_tw + q_th - soc
-            elif p_w == p_g:
-                instruction = q_tw + q_th - soc
-            elif p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1) < p_w < p_g:
-                instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
-            else:
-                instruction = q_tw - soc
-                
-        return max(0, instruction)
-    
-    def parm_cost_fct_charging_at_work_anal(self, q_ow, q_res, p_f, p_g, p_em, 
-                                            p_w, soc, c, mu, sig):
-        q_tw, q_th = q_ow, q_ow + q_res
-        sqrt2sig = math.sqrt(2) * sig
-        # performance helper
-        thresh = mu + sqrt2sig * erfinv(1 - 2*c)
-        # shorthands
-        dp = p_g - p_f
-        dp_div = dp / (2 * (1 - c))
-        
-        instruction = 0
-        if q_tw < thresh:
-            if p_w >= p_f + dp_div * (erf((q_tw - mu) / sqrt2sig) + 1):
-                instruction = q_th - soc
-            elif p_w <= p_f + dp_div * (1 - erf(mu / sqrt2sig)):
-                instruction = q_th + q_tw - soc
-            else:
-                instruction = q_th + q_tw - soc - mu \
-                    - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
-        elif thresh < 0:
-            if p_g < p_w:
-                instruction = q_th - soc
-            elif p_g == p_w:
-                instruction = q_th - soc
-            else:
-                instruction = q_th + q_tw - soc
-        else:
-            if p_w < p_g:
-                instruction = q_th + q_tw - soc
-            elif p_w == p_g:
-                instruction = q_th - soc
-            elif p_f + dp_div * (erf(q_tw - mu) / sqrt2sig + 1) > p_w > p_g:
-                instruction = q_th + q_tw - soc - mu \
-                    - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
-            else:
-                instruction = q_th - soc
-                
-        return max(0, instruction)
     
     def __repr__(self):
         msg = "Uid: {}, Residency uid: {}, Employment uid: {} ".format( \

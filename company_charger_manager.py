@@ -116,6 +116,12 @@ class CompanyChargerManager():
     def remove_from_charging_que(self, car_agent):
         if car_agent in self.charging_que:
             self.charging_que.remove(car_agent)
+    
+    def max_charge_rate(self, car_model):
+        return max(min(car_model.charger_capacity_ac,
+                       self.charger_model.power_ac),
+                   min(car_model.charger_capacity_dc,
+                       self.charger_model.power_dc))
                 
     def history(self):
         hist = dict()

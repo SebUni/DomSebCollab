@@ -62,13 +62,12 @@ class ChargingModel(Model):
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
-            #residency_location = self.lrm.locations[21002]
-            #employment_location = self.lrm.locations[21402]
+            # residency_location = self.lrm.locations[21002]
+            # employment_location = self.lrm.locations[21402]
             company = self.cpm.add_employee_to_location(employment_location)
             
-            # actual location is assigned once calendars have been generated
-            cur_activity = self.cp.HOME
-            cur_location = residency_location 
+            cur_activity = self.cp.HOME       # actually assigned once
+            cur_location = residency_location # calendars are generated
             pos = self.lrm.relative_location_position(cur_location)
             
             house_agent = HouseAgent(agent_uid, self, self.clock,
@@ -84,28 +83,31 @@ class ChargingModel(Model):
         
         self.co.t_print("Agent creation complete")
         self.co.t_print("Create agent's work schedule")
+        self.co.startProgress("calendar_creation", 0,
+                              len(self.schedule_cars.agents))
         self.cp.prepare_schedule_generation()
-        for car_agent in self.schedule_cars.agents:
+        for it, car_agent in enumerate(self.schedule_cars.agents):
+            self.co.progress("calendar_creation", it)
             car_agent.generate_calendar_entries()
             car_agent.whereabouts.set_activity_and_location( \
                                     car_agent.calendar.cur_scheduled_activity,
                                     car_agent.calendar.cur_scheduled_location)
-        self.co.t_print("Completed agent's work schedule")
+        self.co.endProgress("calendar_creation",
+                            "Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
         self.co.t_print("INITIALISATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("COMMENCING STEP CALCULATION")
+        self.co.startProgress("simulation_step", self.clock.cur_time_step,
+                              self.clock.time_step_limit)
         
     def step(self):
         '''Advance the model by one step.'''
-        self.co.t_print("Now calculating time step #" \
-                        + str(self.clock.cur_time_step))
+        self.co.progress("simulation_step", self.clock.cur_time_step)
         
         if self.clock.cur_time_step == self.parameters.next_stop:
             test = 0
-            
-        #agents = self.schedule_cars.agents
-        #ccm = self.lrm.locations[20601].companies[1].ccm
+        
         self.clock.step()
         self.hcm.step()
         self.hgm.step()
@@ -115,8 +117,6 @@ class ChargingModel(Model):
         for house_agent in self.schedule_houses.agents:
             house_agent.step_late()
         self.cpm.step()
-        #ccm = self.lrm.locations[20601].companies[1].ccm
-        #print(ccm)
         
         if self.clock.is_pre_heated:
             self.extracted_company_data["Charger utilisation"].append( \
@@ -127,7 +127,7 @@ class ChargingModel(Model):
                     = car_agent.extracted_data
             
     def summarise_simulation(self):
-        self.co.t_print("STEP CALCULATION COMPLETE")
+        self.co.endProgress("simulation_step", "STEP CALCULATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("Summary")
         

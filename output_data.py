@@ -6,7 +6,9 @@ Created on Wed Jul 14 15:01:29 2021
 """
 
 import os
+import fiona
 import matplotlib.pyplot as plt
+import matplotlib.patches
 
 def time_stamp(i, time_step):
     days = i * time_step // 60 // 24
@@ -33,7 +35,14 @@ def time_axis_labels(time_steps):
                 lbl_hour_steps.append(hour)
     
     return lbl_time_steps, lbl_hour_steps
-    
+
+def get_color(value, min_value, max_value):
+    _max = max(abs(min_value), max_value)
+    rel_value = value / _max
+    if rel_value <= 0:
+        return [1+rel_value,1+rel_value,1]
+    else:
+        return [1,1-rel_value,1-rel_value]    
 
 class OutputData():
     def __init__(self, parameters):
@@ -129,9 +138,12 @@ class OutputData():
             print("{}: {:.01f} kWh".format(charge_set,
                                            sum(charges[charge_set])))
         
+        charger_utilisations \
+            = [list(time_step.values()) for time_step in \
+               model.extracted_company_data["Charger utilisation"]]
         average_company_charger_utilisation \
             = [sum(time_step_data) / len(time_step_data) for time_step_data \
-               in model.extracted_company_data["Charger utilisation"]]
+               in charger_utilisations]
                 
         print("Company Charger Utilisation: {:.02f}%".format( \
             sum(average_company_charger_utilisation) * 100 \
@@ -212,8 +224,11 @@ class OutputData():
         plt.show()
         
         # show all individual company utilisation
+        charger_utilisations \
+            = [list(time_step.values()) for time_step in \
+               model.extracted_company_data["Charger utilisation"]]
         fig, ax = plt.subplots()
-        ax.plot(time_steps, model.extracted_company_data["Charger utilisation"])
+        ax.plot(time_steps, charger_utilisations)
         ax.set(xlabel="time in minutes", ylabel="Charger utilisation")
         plt.xticks(lbl_time_steps, lbl_hour_steps)
         plt.grid(axis='x', color='0.95')
@@ -221,10 +236,90 @@ class OutputData():
         
         fig, ax = plt.subplots()
         average_company_charger_utilisation \
-            = [sum(time_step_data) / len(time_step_data) for time_step_data \
-               in model.extracted_company_data["Charger utilisation"]]
+            = [sum(time_step) / len(time_step) for time_step \
+               in charger_utilisations]
         ax.plot(time_steps, average_company_charger_utilisation)
         ax.set(xlabel="time in minutes", ylabel="Average charger utilisation")
         plt.xticks(lbl_time_steps, lbl_hour_steps)
         plt.grid(axis='x', color='0.95')
+        plt.show()
+        
+    def evaluate_geographic_charge_distribution(self, model):
+        # parameters to retrieve area border gps data
+        SA4_regions_to_include = [206,207,208,209,210,211,212,213,214]
+        export_SA_level = model.parameters.get_parameter("sa_level","int")
+        _layer = "Statistical_Area_Level_" + str(export_SA_level) + "_2016"
+        _code = None
+        _name = "SA" + str(export_SA_level) + "_NAME_2016"
+        if 3 <= export_SA_level <= 4:
+            _code = "SA" + str(export_SA_level) + "_CODE_2016"
+        elif export_SA_level == 2:
+            _code = "SA" + str(export_SA_level) + "_MAINCODE_2016"
+        elif export_SA_level == 1:
+            raise RuntimeError("SA code not implemented!")
+        else:
+            raise RuntimeError("Ill defined SA code!")
+        # extract data from model
+        min_charge_delivered = 0
+        max_charge_delivered = 0
+        for location in model.lrm.locations.values():
+            charge_delivered = location.total_charge_delivered
+            min_charge_delivered = min(min_charge_delivered, charge_delivered)
+            max_charge_delivered = max(max_charge_delivered, charge_delivered)
+        
+        # Check if retreived data fits map data
+        # data retrieved from
+        # https://data.gov.au/data/dataset/asgs-2016-edition-boundaries
+        _file_name = "asgs2016absstructuresmainstructureandgccsa.gpkg"
+        _file_path \
+            = "data\\generators\\locations\\sa_code, sa_names, cooridnates\\"
+        # export_level_region_names = dict()
+        # with fiona.open(_file_path + _file_name, layer=_layer) as layer:
+        #     for export_level_region in layer:
+        #         elr = export_level_region
+        #         is_in_selected_SA4_region = False
+        #         for SA4_region in SA4_regions_to_include:
+        #             if str(SA4_region) \
+        #                 == elr['properties'][_code][:len(str(SA4_region))]:
+        #                 is_in_selected_SA4_region = True
+        #                 break
+        #         if is_in_selected_SA4_region:
+        #             elr_code = elr['properties'][_code]
+        #             export_level_region_names[elr_code] \
+        #                 = elr['properties'][_name]
+        
+        # if len(export_level_region_names) != len(charge_values):
+        #     raise RuntimeError("draw_consumption.py: # of pbc values "\
+        #                        + "doesn't match # of Stat. Areas!")
+        
+        # plot data
+        fig = plt.figure(figsize=(13,13))
+        ax = fig.add_subplot(111)
+        with fiona.open(_file_path + _file_name, layer=_layer) as layer:
+            nbr_of_drawn_sas = 0
+            for export_level_region in layer:
+                elr = export_level_region
+                is_in_selected_SA4_region = False
+                for SA4_region in SA4_regions_to_include:
+                    if str(SA4_region) \
+                        == elr['properties'][_code][:len(str(SA4_region))]:
+                        is_in_selected_SA4_region = True
+                        break
+                if is_in_selected_SA4_region:
+                    elr_code = int(elr['properties'][_code])
+                    charge_value \
+                        = model.lrm.locations[elr_code].total_charge_delivered
+                    color_data = get_color(charge_value, min_charge_delivered,
+                                           max_charge_delivered)
+                    for patch_data in elr['geometry']['coordinates']:
+                        x = [data[0] for data in patch_data[0]]
+                        y = [data[1] for data in patch_data[0]]
+                        p = matplotlib.patches.Polygon(patch_data[0],
+                                                       facecolor=color_data)
+                        ax.add_patch(p)
+                        ax.plot(x, y, color='black', linewidth=1)    
+                    nbr_of_drawn_sas += 1
+        
+        ax.margins(0.1)
+        ax.axis('off')
         plt.show()

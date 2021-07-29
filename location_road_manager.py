@@ -325,10 +325,12 @@ class LocationRoadManager():
                       self.traffic_jam_velocity) 
                 
     def company_charger_utilisation(self):
-        company_charger_utilisations_at_location = []
+        company_charger_utilisations_at_location = dict()
         for location in self.locations.values():
-            company_charger_utilisations_at_location \
-                += location.company_charger_utilisations()
+            for it, company in enumerate(location.companies):
+                if it == 0: continue
+                company_charger_utilisations_at_location[company.uid] \
+                    = company.charger_utilisation
 
         return company_charger_utilisations_at_location       
         
