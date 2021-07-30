@@ -63,6 +63,8 @@ class Whereabouts():
         self.cur_location = location
         self.cur_edge = (location.uid, location.uid)
         self.cur_location_coordinates = location.coordinates()
+        self.destination_activity = activity
+        self.destination_location = location
         
     
     def __repr__(self):

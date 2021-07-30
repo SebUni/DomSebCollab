@@ -25,9 +25,9 @@ class HouseAgent(Agent):
         self.location = residency_location
         
         self.is_house = residency_location.draw_shall_new_dwelling_be_a_house()
-        #self.is_house = True
+        # self.is_house = True
         self.is_house_owned = residency_location.draw_shall_new_house_be_owned()
-        #self.is_house_owned = True
+        # self.is_house_owned = False
         self.occupants = residency_location.draw_occupants_at_random()
         # TODO check how charger is chosen
         # if there is no charger assign "None"

@@ -66,6 +66,9 @@ class CalendarPlanner():
         
         starts, ends = self.generate_schedule(hours_worked_per_week,
                                               min_shift_length)
+        # starts = [1,25,58,80,109,133,159]
+        # ends = [2,37,64,89,113,134,160]
+        
         starts_org, ends_orgs = starts, ends
         init_start = starts[0]
         for time_slot in range(0, 60*24*7, self.clock.time_step):

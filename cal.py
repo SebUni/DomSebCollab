@@ -42,7 +42,7 @@ class Cal():
         self.time_reserve = calendar_planer.arrival_time_reserve
         self.hours_worked_per_week \
             = calendar_planer.draw_hours_worked_per_week_at_random()
-        #self.hours_worked_per_week = 40
+        # self.hours_worked_per_week = 3
         
         self.cur_scheduled_activity = cur_activity
         self.cur_scheduled_location = cur_location
@@ -183,22 +183,15 @@ class Cal():
         return None
         
     def __repr__(self):
-        msg = ""
+        msg = "hours_worked_per_week: {}\n".format(self.hours_worked_per_week)
+        msg += "Starts: {}, Ends: {}\n".format(self.starts, self.ends)
         
-        prev_location = None
-        start_time = None
-        last_time = None
-        for key in self.calendar:
-            if prev_location == None:
-                start_time = key
-                prev_location = self.calendar[key]
-            elif not self.calendar[key] == prev_location:
-                msg += "From " + str(start_time) + " to " + str(last_time) \
-                        + " @ " + prev_location.name + "\n"
-                start_time = key
-                prev_location = self.calendar[key]
-            last_time = key
-        msg += "From " + str(start_time) + " to " + str(last_time) \
-                + " @ " + prev_location.name
-                
+        msg += "cur_sch_act/start_time: {} / {}\n".format(\
+                                        self.cur_scheduled_activity,
+                                        self.cur_scheduled_activity_start_time)
+        msg += "next_act/start_time: {} / {}\n".format(self.next_activity,
+                                                self.next_activity_start_time)
+        msg += "next_dept_time: {}\n".format(self.next_departure_time)
+        msg += "next_route: {}\n".format(self.next_route)
+        msg += "next_route_length: {:.02f}".format(self.next_route_length)
         return msg

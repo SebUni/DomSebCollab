@@ -86,6 +86,7 @@ class CarAgent(Agent):
         self.car_model \
             = car_model_manager.draw_car_model_at_random(house_agent.location,
             company.location, self.distance_commuted_if_work_and_home_equal)
+        # self.car_model = car_model_manager.car_models[10]
         self.whereabouts = whereabouts_manager.track_new_agent(uid,
                                                                cur_activity,
                                                                cur_location)
@@ -143,7 +144,6 @@ class CarAgent(Agent):
         self.extracted_data["charge_received_work"] = 0
         self.extracted_data["charge_received_public"] = 0
         self.extracted_data["grid_charge_instruction"] = 0
-        self.extracted_data["next_departure_time"] = 0
         self.extracted_data["soc"] = 0
         #self.extracted_data["mu"], self.extracted_data["sig"] \
         self.extracted_data["mu"], _ \
@@ -153,8 +153,6 @@ class CarAgent(Agent):
         self.calendar.step()
         self.plan()
         self.move()
-        self.extracted_data["next_departure_time"] \
-            = self.calendar.next_departure_time
         self.extracted_data["work_charge_instruction"] = self.charge_at_work    
         self.extracted_data["home_charge_instruction"] = self.charge_at_home
         self.extracted_data["emergency_charge_instruction"] \
@@ -235,6 +233,8 @@ class CarAgent(Agent):
         while remaining_time > 0:
             # short hand critical parameters
             (start, end) = wa.cur_edge
+            if start == end:
+                print("\nRoute not valid for Agent {}".format(self.uid))
             # correct edge
             cur_velocity = tn[start][end]['current_velocity']
             speed_limit = tn[start][end]['speed_limit']
@@ -540,7 +540,7 @@ class CarAgent(Agent):
                             += received_charge
                 if self.emergency_charging == 0:
                     if self.activity_before_emergency_charging \
-                        == self.calendar.cur_scheduled_activity:
+                        == self.whereabouts.destination_activity:
                         self.whereabouts.cur_activity \
                             = self.activity_before_emergency_charging
                         self.plan_charging()
