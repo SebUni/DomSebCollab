@@ -50,11 +50,11 @@ class LocationRoadManager():
         self.cpm = company_manager
         self.clock = clock
         self.traffic_jam_velocity \
-            = self.parameters.get_parameter("traffic_jam_velocity","float")
-        self.k_jam = self.parameters.get_parameter("k_jam","float")
-        self.pcu_length = self.parameters.get_parameter("pcu_length","float")
+            = self.parameters.get("traffic_jam_velocity","float")
+        self.k_jam = self.parameters.get("k_jam","float")
+        self.pcu_length = self.parameters.get("pcu_length","float")
         self.inner_area_speed_limit \
-            = self.parameters.get_parameter("inner_area_speed_limit","float")
+            = self.parameters.get("inner_area_speed_limit","float")
         
         self.load_locations()
         self.load_connections()
@@ -96,7 +96,7 @@ class LocationRoadManager():
         Reads information on individual suburbs from locations.csv.
         """
         cast = Cast("Location")
-        sa_level = self.parameters.get_parameter("sa_level","int")
+        sa_level = self.parameters.get("sa_level","int")
         self.locations = {}
         csv_helper = CSVHelper("data/SA" + str(sa_level),"locations.csv")
         for row in csv_helper.data:
@@ -137,7 +137,7 @@ class LocationRoadManager():
         Reads information on suburb connection from connections.csv.
         """
         cast = Cast("Connection")
-        sa_level = self.parameters.get_parameter("sa_level","int")
+        sa_level = self.parameters.get("sa_level","int")
         self.traffic_network = nx.DiGraph()
         # add locations
         for location in self.locations.values():
@@ -171,7 +171,7 @@ class LocationRoadManager():
             
     def load_commutes(self):
         cast = Cast("Commutes")
-        sa_level = self.parameters.get_parameter("sa_level","int")
+        sa_level = self.parameters.get("sa_level","int")
         self.commutes = dict()
         work_locations = dict()
         csv_helper = CSVHelper("data/SA" + str(sa_level),"commutes.csv",False)

@@ -50,7 +50,7 @@ class CarModel():
         self.charger_capacity_ac = charger_capacity_ac
         self.charger_capacity_dc = charger_capacity_dc
         self.consumption_calc_method \
-            = parameters.get_parameter("consumption_calc_method","string")
+            = parameters.get("consumption_calc_method","string")
         self.cmm = car_model_manager
         if self.consumption_calc_method not in [self.cmm.MANUFACTURER,
                                                 self.cmm.FORMULA]:

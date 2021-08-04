@@ -54,16 +54,13 @@ class CompanyManager():
         charger_cost_per_kWh, employees_per_charger = 0, 0
         if is_public_facility:
             charger_cost_per_kWh \
-                = self.parameters.get_parameter("public_charger_cost_per_kWh",
-                                                "float")
+                = self.parameters.get("public_charger_cost_per_kWh", "float")
             employees_per_charger = 1
         else:                      # if company provides charging for employees
             charger_cost_per_kWh \
-                = self.parameters.get_parameter("company_charger_cost_per_kWh",
-                                                "float")
+                = self.parameters.get("company_charger_cost_per_kWh", "float")
             employees_per_charger \
-                = self.parameters.get_parameter("employees_per_charger",
-                                                    "positive_int") 
+                = self.parameters.get("employees_per_charger", "positive_int") 
             
         if len(self.charger_manager.charger_models) == 0:
             sys.exit("CompanyManager: No charger models to to choose from")
@@ -87,8 +84,7 @@ class CompanyManager():
         # add chargers to public charging company
         if is_public_facility:
             number_of_public_chargers \
-                = self.parameters.get_parameter("number_of_public_chargers",
-                                                "int")
+                = self.parameters.get("number_of_public_chargers", "int")
             for i in range(number_of_public_chargers):
                 company.ccm.add_charger()
         

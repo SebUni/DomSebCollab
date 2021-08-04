@@ -23,6 +23,7 @@ from company_manager import CompanyManager
 from calendar_planner import CalendarPlanner
 from house_consumption_manager import HouseConsumptionManager
 from house_generation_manager import HouseGenerationManager
+from charging_strategy import ChargingStrategy
 
 class ChargingModel(Model):
     """The charging model with N agents."""
@@ -56,24 +57,37 @@ class ChargingModel(Model):
         self.extracted_company_data = {"Charger utilisation": []}
         self.extracted_car_data = dict()
         
+        msg="Selected number of agents / season / time step: {} / {} / {} min"
+        self.co.t_print(msg.format(nbr_of_agents,
+                                   self.clock.season_names[self.clock.season],
+                                   self.clock.time_step))
+        msg="Selected charging strategy: {}"
+        cs = ChargingStrategy(parameters)
+        self.co.t_print(msg.format(cs.charging_model_names[cs.charging_model]))
+        msg="Selected work charge price / employees per charger: {} $/kWh / {}"
+        self.co.t_print(msg.format(\
+            parameters.get("company_charger_cost_per_kWh", "float"),
+            parameters.get("employees_per_charger", "int")))
+        
+        del msg, cs
+        
         # create agents
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
-            # residency_location = self.lrm.locations[21002]
-            # employment_location = self.lrm.locations[21402]
+            # residency_location = self.lrm.locations[21305]
+            # employment_location = self.lrm.locations[20901]
             company = self.cpm.add_employee_to_location(employment_location)
             
             cur_activity = self.cp.HOME       # actually assigned once
             cur_location = residency_location # calendars are generated
             pos = self.lrm.relative_location_position(cur_location)
             
-            house_agent = HouseAgent(agent_uid, self, self.clock,
-                                     residency_location, company, self.chm,
-                                     self.epm, self.hcm, self.hgm,
-                                     self.parameters)
+            house_agent = HouseAgent(agent_uid, self, self.parameters,
+                                     self.clock, residency_location, company,
+                                     self.chm, self.epm, self.hcm, self.hgm)
             car_agent = CarAgent(agent_uid, self, self.clock, cur_activity,
                                  cur_location, house_agent, company, self.lrm,
                                  self.cmm, self.wm, self.cp, self.parameters)
@@ -86,12 +100,19 @@ class ChargingModel(Model):
         self.co.startProgress("calendar_creation", 0,
                               len(self.schedule_cars.agents))
         self.cp.prepare_schedule_generation()
-        for it, car_agent in enumerate(self.schedule_cars.agents):
-            self.co.progress("calendar_creation", it)
-            car_agent.generate_calendar_entries()
+        car_it = 0
+        while car_it < len(self.schedule_cars.agents):
+            car_agent = self.schedule_cars.agents[car_it]
+            self.co.progress("calendar_creation", car_it)
+            success = car_agent.generate_calendar_entries()
+            if not success:
+                self.co.t_print("Calendar creation reseted!")
+                self.cp.prepare_schedule_generation()
+                car_it = 0
             car_agent.whereabouts.set_activity_and_location( \
                                     car_agent.calendar.cur_scheduled_activity,
                                     car_agent.calendar.cur_scheduled_location)
+            car_it += 1
         self.co.endProgress("calendar_creation",
                             "Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
@@ -123,6 +144,31 @@ class ChargingModel(Model):
                                         self.lrm.company_charger_utilisation())
             self.extracted_car_data[self.clock.elapsed_time] = dict()
             for car_agent in self.schedule_cars.agents:
+                car_agent.extracted_data["electricity_cost_apartment"] = 0
+                car_agent.extracted_data["electricity_cost_house_w_pv"] = 0
+                car_agent.extracted_data["electricity_cost_house_wo_pv"] = 0
+                car_agent.extracted_data["distance_travelled_apartment"] = 0
+                car_agent.extracted_data["distance_travelled_house_w_pv"] = 0
+                car_agent.extracted_data["distance_travelled_house_wo_pv"] = 0
+                # total_electricity_cost = car_agent.cur_electricity_cost \
+                #         + car_agent.house_agent.cur_electricity_cost
+                total_electricity_cost = car_agent.cur_electricity_cost
+                if not car_agent.house_agent.is_house:
+                    car_agent.extracted_data["electricity_cost_apartment"] \
+                        = total_electricity_cost
+                    car_agent.extracted_data["distance_travelled_apartment"] \
+                        = car_agent.distance_travelled
+                elif car_agent.house_agent.pv_capacity != 0:
+                    car_agent.extracted_data["electricity_cost_house_w_pv"] \
+                        = total_electricity_cost
+                    car_agent.extracted_data["distance_travelled_house_w_pv"] \
+                        = car_agent.distance_travelled
+                else:
+                    car_agent.extracted_data["electricity_cost_house_wo_pv"] \
+                        = total_electricity_cost
+                    car_agent.extracted_data["distance_travelled_house_wo_pv"] \
+                        = car_agent.distance_travelled
+
                 self.extracted_car_data[self.clock.elapsed_time][car_agent.uid]\
                     = car_agent.extracted_data
             

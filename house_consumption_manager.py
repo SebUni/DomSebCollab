@@ -38,7 +38,7 @@ class HouseConsumptionManager():
         
         # load deviation data for consumption
         cast = Cast("Consumption Deviation")
-        sa_level = self.parameters.get_parameter("sa_level","int")
+        sa_level = self.parameters.get("sa_level","int")
         self.consumption_deviation = dict()
         csv_helper = CSVHelper("data/SA" + str(sa_level),
                                "consumption_deviation.csv")
@@ -77,10 +77,10 @@ class HouseConsumptionManager():
                                    + " not implemented")
         
         cur_mu, cur_sig_sqr = 0, 0
-        for time_it in range(0, self.clock.forecast_horizon,self.clock.time_step):
-            time = time_it % (24 * 60 * 7)
-            cur_mu += self.forecast_parameters[time_it][0]
-            cur_sig_sqr += self.forecast_parameters[time_it][0]**2
+        for time in range(0, self.clock.forecast_horizon,self.clock.time_step):
+            time = time % (24 * 60 * 7)
+            cur_mu += self.forecast_parameters[time][0]
+            cur_sig_sqr += self.forecast_parameters[time][1]
             
         self.forecast_mu, self.forecast_sig = cur_mu, math.sqrt(cur_sig_sqr)
         
@@ -112,17 +112,41 @@ class HouseConsumptionManager():
                 = ( (cur_time + horizon) // time_step  \
                     -((cur_time + horizon) % time_step == 0) * 1 ) \
                   * time_step % (7 * 24 * 60)
-                
+            if self.clock.cur_time_step == 166:
+                test = 0
             pf_prm = self.forecast_parameters[prev_forecast_horizon_time_step]
             nf_prm = self.forecast_parameters[next_forecast_horizon_time_step]
             self.forecast_mu += - pf_prm[0] + nf_prm[0]
             self.mu_fc.append(self.forecast_mu)
+            if self.forecast_sig**2 - pf_prm[1] + nf_prm[1] < 0:
+                test = 0
             self.forecast_sig = math.sqrt(self.forecast_sig**2 - pf_prm[1] \
                                            + nf_prm[1])
         
-    def consumption_forecast_distribution_parameters(self,location,occupants):
+    def consumption_forecast_distribution_parameters(self, location, occupants,
+                                                     forecast_begin,
+                                                     forecast_end):
         # adapt consumption for location and occupants
         occupants_it = min(occupants, 5)
         deviation = self.consumption_deviation[location.uid][occupants_it]
         
-        return self.forecast_mu  * deviation, self.forecast_sig * deviation
+        # cur_mu, cur_sig_sqr = 0, 0
+        # for time in range(int(forecast_begin),
+        #                   int(forecast_end + self.clock.time_step),
+        #                      self.clock.time_step):
+        #     time = time % (7 * 24 * 60)
+        #     cur_mu += self.forecast_parameters[time][0]
+        #     cur_sig_sqr += self.forecast_parameters[time][1]**2
+        
+        # forecast_mu, forecast_sig = cur_mu, math.sqrt(cur_sig_sqr)
+        
+        # return forecast_mu  * deviation, forecast_sig * deviation
+        
+        return [self.forecast_parameters[time % (7 * 24 * 60)][0] * deviation \
+                for time in range(int(forecast_begin),
+                                  int(forecast_end + self.clock.time_step),
+                                  self.clock.time_step)], \
+               [math.sqrt(self.forecast_parameters[time% (7 * 24 * 60)][1]) * deviation \
+                for time in range(int(forecast_begin),
+                                  int(forecast_end + self.clock.time_step),
+                                  self.clock.time_step)]

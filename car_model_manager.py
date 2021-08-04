@@ -68,11 +68,10 @@ class CarModelManager():
         -------
         CarModel.
         """
-        reserve_range = self.parameters.get_parameter("reserve_range","int")
-        reserve_speed = self.parameters.get_parameter("reserve_speed","int")
+        reserve_range = self.parameters.get("reserve_range","int")
+        reserve_speed = self.parameters.get("reserve_speed","int")
         minimum_relative_state_of_charge \
-            = self.parameters.get_parameter("minimum_relative_state_of_charge",
-                                            "float")
+            = self.parameters.get("minimum_relative_state_of_charge", "float")
         reserve_power = 0
         commute_distance = None
         if residency_location != employment_location:

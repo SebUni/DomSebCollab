@@ -86,45 +86,44 @@ class CarAgent(Agent):
         self.car_model \
             = car_model_manager.draw_car_model_at_random(house_agent.location,
             company.location, self.distance_commuted_if_work_and_home_equal)
-        # self.car_model = car_model_manager.car_models[10]
+        # self.car_model = car_model_manager.car_models[14]
         self.whereabouts = whereabouts_manager.track_new_agent(uid,
                                                                cur_activity,
                                                                cur_location)
         self.soc = self.car_model.battery_capacity \
-            * self.parameters.get_parameter("start_soc","float")# soc in kWh
+            * self.parameters.get("start_soc","float")# soc in kWh
         self.charge_at_home = 0.0
         self.charge_at_work = 0.0
         
         self.electricity_cost = 0 # in $ i guess ^^
+        self.cur_electricity_cost = 0
         self.cp = calendar_planer
         self.calendar = Cal(self.clock, self.lrm, calendar_planer,
                             self.whereabouts, house_agent.location,
                             company.location, cur_activity, cur_location,
                             self.distance_commuted_if_work_and_home_equal)
         
-        self.departure_condition \
-            = parameters.get_parameter("departure_condition","string")
+        self.departure_condition = parameters.get("departure_condition",
+                                                  "string")
         if self.departure_condition not in {"ROUND_TRIP", "ONE_WAY_TRIP", 
                                             "NEXT_NODE"}:
             raise RuntimeError("car_agent.py: Departure condition: " \
                         + str(self.departure_condition) + " is ill defined!")
-        self.reserve_range = parameters.get_parameter("reserve_range","int")
-        self.reserve_speed = parameters.get_parameter("reserve_speed","int")
+        self.reserve_range = parameters.get("reserve_range","int")
+        self.reserve_speed = parameters.get("reserve_speed","int")
         self.reserve_power = self.car_model.consumption(self.reserve_speed,
                                                         self.reserve_range)
         self.emergency_charging = 0.0 # in kWh
-        self.queuing_condition = parameters.get_parameter("queuing_condition",
-                                                          "string")
+        self.queuing_condition = parameters.get("queuing_condition", "string")
         if self.queuing_condition not in {"ALWAYS", "WHEN_NEEDED"}:
             raise RuntimeError("car_agent.py: Queuing condition: " \
                 + str(self.queuing_condition) + " is ill defined!")
         minimum_relative_state_of_charge \
-            = self.parameters.get_parameter("minimum_relative_state_of_charge",
-                                            "float")
+            = self.parameters.get("minimum_relative_state_of_charge", "float")
         self.minimum_absolute_state_of_charge \
             = self.car_model.battery_capacity*minimum_relative_state_of_charge
         
-        self.charging_strategy = ChargingStrategy(self)
+        self.charging_strategy = ChargingStrategy(parameters, self)
         
         self.would_run_flat = False
         #self.extracted_data_hist = dict()
@@ -132,22 +131,25 @@ class CarAgent(Agent):
         self.extracted_data = dict()
         self.last_charge_at_work = 0
         self.activity_before_emergency_charging = None
+        self.distance_travelled = 0
         
     def step(self):
         if self.uid == self.parameters.uid_to_check:
             test = 0
         # initialise extraction data
+        self.distance_travelled = 0
         self.extracted_data = dict()
         self.extracted_data["cur_activity"] = 0
         self.extracted_data["charge_received_pv"] = 0
         self.extracted_data["charge_received_grid"] = 0
         self.extracted_data["charge_received_work"] = 0
         self.extracted_data["charge_received_public"] = 0
-        self.extracted_data["grid_charge_instruction"] = 0
+        self.extracted_data["charge_consumed"] = 0
         self.extracted_data["soc"] = 0
         #self.extracted_data["mu"], self.extracted_data["sig"] \
-        self.extracted_data["mu"], _ \
-            = self.calc_total_forcast_mean_and_std_dev()
+        # self.extracted_data["mu"], _ \
+        #     = self.calc_total_forcast_mean_and_std_dev()
+        self.cur_electricity_cost = 0
         
         # Writing this while I should be celebrating christmas, fuck COVID
         self.calendar.step()
@@ -197,8 +199,6 @@ class CarAgent(Agent):
         # short hands
         tn = self.lrm.traffic_network
         wa = self.whereabouts
-        distance_travelled_cur_time_step = 0
-        consumption_cur_time_step = 0
         
         # for wa.is_travelling to be True, cur_loc != scheduled_loc and no
         # emergency charing is required therefore if clauses are omitted
@@ -224,7 +224,10 @@ class CarAgent(Agent):
         if self.house_agent.location == self.company.location:
             velocity = self.lrm.inner_area_speed_limit
             distance = self.distance_commuted_if_work_and_home_equal
-            self.soc -= self.car_model.consumption(velocity, distance)
+            consumption = self.car_model.consumption(velocity, distance)
+            self.distance_travelled  += distance
+            self.extracted_data["charge_consumed"] += consumption
+            self.soc -= consumption
             self.arrival_at_destination()
             return
         
@@ -277,12 +280,11 @@ class CarAgent(Agent):
             if possible_distance_on_edge > remaining_distance_on_edge:
                 wa.cur_location = self.lrm.locations[end]
                 wa.cur_location_coordinates = wa.cur_location.coordinates()
-                self.soc -= self.car_model.consumption(cur_velocity,
+                consumption = self.car_model.consumption(cur_velocity,
                                                 remaining_distance_on_edge)
-                consumption_cur_time_step \
-                    += self.car_model.consumption(cur_velocity,
-                                                remaining_distance_on_edge)
-                distance_travelled_cur_time_step += remaining_distance_on_edge
+                self.distance_travelled += remaining_distance_on_edge
+                self.extracted_data["charge_consumed"] += consumption
+                self.soc -= consumption
                 # if next location is final destination
                 if wa.route[-1] == end:
                     remaining_time = 0
@@ -296,6 +298,7 @@ class CarAgent(Agent):
             # if next location can not be reached during this timestep 
             else:
                 distance_travelled = remaining_time * cur_velocity
+                self.distance_travelled  += distance_travelled
                 wa.distance_since_last_location += distance_travelled
                 # determine current coordinates
                 coord_start = self.lrm.locations[start].coordinates()
@@ -307,12 +310,10 @@ class CarAgent(Agent):
                 wa.cur_location_coordinates = \
                     [coord_start[0] + ratio_trvld_on_edge * diff_vct[0],
                      coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
-                self.soc -= self.car_model.consumption(cur_velocity,
+                consumption = self.car_model.consumption(cur_velocity,
                                                        distance_travelled)
-                consumption_cur_time_step \
-                    += self.car_model.consumption(cur_velocity,
-                                                       distance_travelled)
-                distance_travelled_cur_time_step += distance_travelled
+                self.extracted_data["charge_consumed"] += consumption
+                self.soc -= consumption
                 remaining_time = 0
         # update position on grid
         relative_position \
@@ -427,55 +428,23 @@ class CarAgent(Agent):
             if self.emergency_charging == 0.0:
                 # If car agent is at home
                 if cur_activity == self.cp.HOME:
-                    charge_from_grid = 0
                     if self.charge_at_home > 0:
-                        # First try to charge from pv
-                        if self.house_agent.cur_pv_excess_supply > 0:
-                            max_from_pv = self.house_agent.cur_pv_excess_supply
-                            charge_up_to = min(self.charge_at_home,
-                                               missing_charge, max_from_pv)
-                            received_charge, charging_cost \
-                                = self.house_agent.charge_car(self,
-                                                              charge_up_to)
-                            if received_charge < 0:
-                                test = 0
-                            self.charge_at_home -= received_charge
-                            missing_charge -= received_charge
-                            self.house_agent.cur_pv_excess_supply \
-                                -= received_charge
-                            total_received_charge += received_charge
-                            total_charging_cost += charging_cost
-                            self.extracted_data["charge_received_pv"] \
-                                += received_charge
-                        # Check if more charge, this time from grid or storage
-                        # is needed                        
-                        max_charge_rate \
-                            = self.house_agent.max_charge_rate(self.car_model)
-                        min_charge_time = self.charge_at_home \
-                            / max_charge_rate * 60
-                        min_charge_time = self.clock.time_step \
-                                * (min_charge_time // self.clock.time_step + 1)
-                        if self.calendar.next_departure_time - min_charge_time\
-                            <= self.clock.elapsed_time:
-                            charge_from_grid = self.charge_at_home
-                            self.extracted_data["grid_charge_instruction"] \
-                                += charge_from_grid
-                    if charge_from_grid > 0:
-                        charger_capacity_in_time_step \
-                            = self.house_agent.max_charge_rate(self.car_model)\
-                                * self.clock.time_step / 60
-                        remaining_charger_capacity \
-                            = charger_capacity_in_time_step \
-                              - total_received_charge
-                        charge_up_to = min(charge_from_grid, missing_charge,
-                                           remaining_charger_capacity)
-                        received_charge, charging_cost \
-                            = self.house_agent.charge_car(self, charge_up_to)
+                        charge_up_to \
+                            = min(self.charge_at_home, missing_charge)
+                        received_charge_pv, received_charge_grid, \
+                            charging_cost \
+                            = self.house_agent.charge_car(self,
+                                                          charge_up_to)
+                        received_charge \
+                            = received_charge_pv + received_charge_grid
                         self.charge_at_home -= received_charge
+                        missing_charge -= received_charge
                         total_received_charge += received_charge
                         total_charging_cost += charging_cost
+                        self.extracted_data["charge_received_pv"] \
+                            += received_charge_pv
                         self.extracted_data["charge_received_grid"] \
-                            += received_charge
+                            += received_charge_grid
                 # if car agent is at work
                 if cur_activity == self.cp.WORK \
                     and self.charge_at_work != 0.0:
@@ -546,6 +515,7 @@ class CarAgent(Agent):
                         self.plan_charging()
             
             self.soc += total_received_charge
+            self.cur_electricity_cost = total_charging_cost
             self.electricity_cost += total_charging_cost
             
     def initiate_emergency_charging(self, emergency_charge_volume):
@@ -615,19 +585,27 @@ class CarAgent(Agent):
         if not charge_time_at_work.is_integer():
             charge_time_at_work = charge_time_at_work // 1 + 1
         self.min_shift_length = charge_time_at_work # jup, just for readability
-        self.calendar.generate_schedule(self.min_shift_length)
+        return self.calendar.generate_schedule(self.min_shift_length)
         
-    def calc_total_forcast_mean_and_std_dev(self):
+    def calc_forcast_mean_and_std_dev(self, begin_forecast, end_forecast):
         mu_supply, sig_supply \
             = self.house_agent.hgm.generation_forecast_distribution_parameter(\
-                                                  self.house_agent.pv_capacity)
+                    self.house_agent.pv_capacity, begin_forecast, end_forecast)
         mu_demand, sig_demand \
             = self.house_agent.hcm.consumption_forecast_distribution_parameters(\
-                        self.house_agent.location, self.house_agent.occupants)
+                        self.house_agent.location, self.house_agent.occupants,
+                        begin_forecast, end_forecast)
         
-        mu = mu_supply - mu_demand
-        sig = math.sqrt(sig_supply**2 + sig_demand**2)
-        return mu, sig
+        # mu = mu_supply - mu_demand
+        # sig = math.sqrt(sig_supply**2 + sig_demand**2)
+        mu, sig_sqr = 0, 0
+        for it in range(len(mu_supply)):
+            balance = mu_supply[it] - mu_demand[it]
+            if mu_supply[it] - mu_demand[it] >= 0:
+                mu += balance
+                sig_sqr += sig_supply[it]**2 + sig_demand[it]**2
+        
+        return mu, math.sqrt(sig_sqr)
     
     def __repr__(self):
         msg = "Uid: {}, Residency uid: {}, Employment uid: {} ".format( \

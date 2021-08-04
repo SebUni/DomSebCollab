@@ -10,6 +10,8 @@ import fiona
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
+from console_output import ConsoleOutput
+
 def time_stamp(i, time_step):
     days = i * time_step // 60 // 24
     day_of_week = round(int(days % 7)+1)
@@ -122,8 +124,9 @@ class OutputData():
         for line in out:
             f.writelines(line + "\n")
         f.close()
-            
-    def print_overall_charging_results(self, model):
+    
+    def calc_overall_charging_results(self, model):
+        charge_pv, charge_work, charge_grid, charge_emergency = 0, 0, 0, 0
         charge_sets = ["charge_received_work", "charge_received_pv",
                        "charge_received_grid", "charge_received_public"]
         time_steps = [time_step for time_step in model.extracted_car_data.keys()]
@@ -135,8 +138,14 @@ class OutputData():
                 for agent in time_step_data.values():
                     charge += agent[charge_set]
                 charges[charge_set].append(charge)
-            print("{}: {:.01f} kWh".format(charge_set,
-                                           sum(charges[charge_set])))
+            if charge_set == "charge_received_work":
+                charge_work = sum(charges[charge_set])
+            if charge_set == "charge_received_pv":
+                charge_pv = sum(charges[charge_set])
+            if charge_set == "charge_received_grid":
+                charge_grid = sum(charges[charge_set])
+            if charge_set == "charge_received_public":
+                charge_emergency = sum(charges[charge_set])
         
         charger_utilisations \
             = [list(time_step.values()) for time_step in \
@@ -144,12 +153,115 @@ class OutputData():
         average_company_charger_utilisation \
             = [sum(time_step_data) / len(time_step_data) for time_step_data \
                in charger_utilisations]
-                
-        print("Company Charger Utilisation: {:.02f}%".format( \
-            sum(average_company_charger_utilisation) * 100 \
-            / len(average_company_charger_utilisation)))
+        utilisation = sum(average_company_charger_utilisation) * 100 \
+            / len(average_company_charger_utilisation)
+
+        total_electricity_cost_apartment \
+            = sum([sum([agent["electricity_cost_apartment"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_electricity_cost_w_pv \
+            = sum([sum([agent["electricity_cost_house_w_pv"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_electricity_cost_wo_pv \
+            = sum([sum([agent["electricity_cost_house_wo_pv"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_electricity_cost = total_electricity_cost_apartment + \
+            total_electricity_cost_w_pv + total_electricity_cost_wo_pv
+            
+        total_dist_travlled_apartment \
+            = sum([sum([agent["distance_travelled_apartment"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_dist_travlled_w_pv \
+            = sum([sum([agent["distance_travelled_house_w_pv"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_dist_travlled_wo_pv \
+            = sum([sum([agent["distance_travelled_house_wo_pv"] \
+                    for agent in time_step_data.values()]) \
+                for time_step_data in model.extracted_car_data.values()])
+        total_dist_travlled = total_dist_travlled_apartment \
+            + total_dist_travlled_w_pv + total_dist_travlled_wo_pv
+            
+        nbr_agent_apartments = sum([0 if agent.house_agent.is_house else 1 \
+                                   for agent in model.schedule_cars.agents])
+        nbr_agents_w_pv = sum([1 if agent.house_agent.pv_capacity != 0 else 0 \
+                                   for agent in model.schedule_cars.agents])
+        nbr_agents_wo_pv = len(model.schedule_cars.agents) \
+            - nbr_agent_apartments - nbr_agents_w_pv
+        total_nbr_agents \
+            = nbr_agent_apartments + nbr_agents_w_pv + nbr_agents_wo_pv
+        
+        
+        avg_electricity_cost_apartment, avg_electricity_cost_w_pv, \
+            avg_electricity_cost_wo_pv, avg_dist_travlled_apartment, \
+            avg_dist_travlled_w_pv, avg_dist_travlled_wo_pv = 0, 0, 0, 0, 0, 0
+        avg_electricity_cost, avg_dist_travlled = 0, 0
+        if nbr_agent_apartments != 0:
+            avg_electricity_cost_apartment  \
+                = total_electricity_cost_apartment/  nbr_agent_apartments
+            avg_dist_travlled_apartment \
+                = total_dist_travlled_apartment / nbr_agent_apartments
+        if nbr_agents_w_pv != 0:
+            avg_electricity_cost_w_pv \
+                = total_electricity_cost_w_pv / nbr_agents_w_pv
+            avg_dist_travlled_w_pv \
+                = total_dist_travlled_w_pv / nbr_agents_w_pv
+        if nbr_agents_wo_pv != 0:
+            avg_electricity_cost_wo_pv \
+                = total_electricity_cost_wo_pv / nbr_agents_wo_pv
+            avg_dist_travlled_wo_pv \
+                = total_dist_travlled_wo_pv / nbr_agents_wo_pv
+        if total_nbr_agents != 0:
+            avg_electricity_cost = total_electricity_cost / total_nbr_agents
+            avg_dist_travlled = total_dist_travlled / total_nbr_agents
+        
+        avg_cost_apartment_per_km = 0
+        if avg_dist_travlled_apartment != 0:
+            avg_cost_apartment_per_km \
+                = avg_electricity_cost_apartment / avg_dist_travlled_apartment
+        avg_cost_house_pv_per_km = 0
+        if avg_dist_travlled_w_pv != 0:
+            avg_cost_house_pv_per_km \
+                = avg_electricity_cost_w_pv / avg_dist_travlled_w_pv
+        avg_cost_house_no_pv_per_km = 0
+        if avg_dist_travlled_wo_pv != 0:
+            avg_cost_house_no_pv_per_km \
+                = avg_electricity_cost_wo_pv / avg_dist_travlled_wo_pv
+        avg_cost_per_km = 0
+        if avg_dist_travlled != 0:
+            avg_cost_per_km = avg_electricity_cost / avg_dist_travlled
+        
+        return charge_pv, charge_work, charge_grid, charge_emergency, \
+            utilisation, avg_cost_apartment_per_km, avg_cost_house_pv_per_km, \
+            avg_cost_house_no_pv_per_km, avg_cost_per_km
+        
+    def print_overall_charging_results(self, model):
+        co = ConsoleOutput()
+        co.t_print("COMMENCING DATA EVALUATION")    
+        charge_pv, charge_work, charge_grid, charge_emergency, utilisation, \
+        avg_cost_apartment, avg_cost_house_pv, avg_cost_house_no_pv, avg_cost \
+            = self.calc_overall_charging_results(model)
+        co.t_print("charge_received_work: {:.01f} kWh".format(charge_work))
+        co.t_print("charge_received_pv: {:.01f} kWh".format(charge_pv))
+        co.t_print("charge_received_grid: {:.01f} kWh".format(charge_grid))
+        co.t_print("charge_received_public: {:.01f} kWh".format(\
+                                                        charge_emergency))
+        co.t_print("Company Charger Utilisation: {:.02f}%".format(utilisation))
+        co.t_print("Average Electricity Cost for Apartments: ${:.04f}".format(\
+                                                        avg_cost_apartment))
+        co.t_print("Average Electricity Cost for House wo PV: ${:.04f}".format(\
+                                                        avg_cost_house_no_pv))
+        co.t_print("Average Electricity Cost for House w PV: ${:.04f}".format(\
+                                                        avg_cost_house_pv))
+        co.t_print("Average Electricity Cost: ${:.04f}".format(avg_cost))
+        co.t_print("DATA EVALUATION COMPLETE")
         
     def print_route_stats(self, model):
+        co = ConsoleOutput()
         route_lengths = []
         for agent in model.schedule_cars.agents:
             home = agent.house_agent.location
@@ -161,9 +273,14 @@ class OutputData():
             else:
                 length = agent.distance_commuted_if_work_and_home_equal
             route_lengths.append(length)
-        print("Route (min / avg / max) = {:.1f} km / {:.1f} km / {:.1f} km".format(\
+        co.t_print("Route (min / avg / max) = {:.1f} km / {:.1f} km / {:.1f} km".format(\
             min(route_lengths), sum(route_lengths)/len(route_lengths),
             max(route_lengths)))
+        co.t_print("Average Consumption {:.1f} kWh".format(\
+            sum([sum([agent["charge_consumed"] \
+                  for agent in time_step_data.values()])\
+                 for time_step_data in model.extracted_car_data.values()]) \
+                / len(model.schedule_cars.agents)))
         
     def plot_extracted_data(self, model):
         extr_data = model.extracted_car_data
@@ -183,22 +300,66 @@ class OutputData():
             plt.grid(axis='x', color='0.95')
             plt.show()
         
-    def plot_parameter_scan(self, scan_parameters, scan_collected_data):
+    def plot_parameter_scan(self, scan_parameters, scan_collected_data, title):
         if len(scan_parameters) == 1:
+            # fig, ax = plt.subplots()
+            # for name, data_set in scan_collected_data.items():
+            #     ax.plot(list(scan_parameters.values())[0], data_set,
+            #             label=name)
+            # ax.set(xlabel=list(scan_parameters.keys())[0])
+            # plt.legend()
+            # plt.show()
+            # for name, data_set in scan_collected_data.items():
+            #     fig, ax = plt.subplots()
+            #     time_steps = list(scan_parameters.values())[0]
+            #     ax.plot(time_steps, data_set)
+            #     ax.set(xlabel=list(scan_parameters.keys())[0], ylabel=name)
+            #     plt.show()
+            # general data
+            time_steps = list(scan_parameters.values())[0]
+            directory = "results/"
+            # plot consumption
             fig, ax = plt.subplots()
-            for name, data_set in scan_collected_data.items():
-                ax.plot(list(scan_parameters.values())[0], data_set,
-                        label=name)
-            ax.set(xlabel=list(scan_parameters.keys())[0])
+            ax.plot(time_steps, scan_collected_data["charge_pv"],
+                    label="charge_pv")
+            ax.plot(time_steps, scan_collected_data["charge_work"], 
+                    label="charge_work")
+            ax.plot(time_steps, scan_collected_data["charge_grid"],
+                    label="charge_grid")
+            ax.plot(time_steps, scan_collected_data["charge_emergency"],
+                    label="charge_emergency")
+            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="kWh")
+            plt.title(title)
             plt.legend()
             plt.show()
-            for name, data_set in scan_collected_data.items():
-                fig, ax = plt.subplots()
-                time_steps = list(scan_parameters.values())[0]
-                ax.plot(time_steps, data_set)
-                ax.set(xlabel=list(scan_parameters.keys())[0], ylabel=name)
-                plt.xticks(time_axis_labels(time_steps))
-                plt.show()
+            file_name = directory + title + "_consumption.png"
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            # plot utilisation
+            fig, ax = plt.subplots()
+            ax.plot(time_steps, scan_collected_data["utilisation"],
+                    label="utilisation")
+            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="utilisation in %")
+            plt.title(title)
+            plt.show()
+            file_name = directory + title + "_utilisation.png"
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            # plot cost
+            fig, ax = plt.subplots()
+            ax.plot(time_steps, scan_collected_data["avg_cost_apartment"],
+                    label="avg_cost_apartment")
+            ax.plot(time_steps, scan_collected_data["avg_cost_house_pv"], 
+                    label="avg_cost_house_pv")
+            ax.plot(time_steps, scan_collected_data["avg_cost_house_no_pv"],
+                    label="avg_cost_house_no_pv")
+            ax.plot(time_steps, scan_collected_data["avg_cost"],
+                    label="avg_cost")
+            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="$/km")
+            plt.legend()
+            plt.title(title)
+            plt.show()
+            file_name = directory + title + "_cost.png"
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            
                 
     def evaluate_overall_charge(self, model):
         charge_sets = ["charge_received_work", "charge_received_pv",

@@ -125,16 +125,25 @@ def round_down_time_step(time_in_hours, time_step_in_min):
     return time_in_min / 60
 
 class ChargingStrategy():
-    def __init__(self, car_agent):
+    def __init__(self, parameters, car_agent=None):
         self.ALWAYS_CHARGE = 0
         self.ALWAYS_CHARGE_NO_WORK_CHARGERS = 1
         self.ALWAYS_CHARGE_AT_HOME = 2
         self.ALWAYS_CHARGE_AT_WORK = 3
         self.CHARGE_WHERE_CHEAPER_BASIC = 4
         self.CHARGE_WHERE_CHEAPER_ADVANCED = 5
+        self.charging_model = parameters.get("charging_model", "int")
+        self.charging_model_names = {0: "Always charge",
+                                     1: "Always charge (no work chargers)",
+                                     2: "Always charge at home",
+                                     3: "Always charge at work",
+                                     4: "Charge where cheaper basic",
+                                     5: "Charge where cheaper advanced"}
+        if car_agent == None: return
+        
         
         self.ca = car_agent
-        self.parameters = car_agent.parameters
+        self.parameters = parameters
         self.clock = car_agent.clock
         self.cp = car_agent.cp
         self.whereabouts = car_agent.whereabouts
@@ -153,29 +162,27 @@ class ChargingStrategy():
         self.q_one_way = car_agent.charge_needed_for_route(
                     car_agent.lrm.calc_route(car_agent.house_agent.location,
                                              car_agent.company.location))
-        self.c = car_agent.parameters.get_parameter("confidence", "float")
+        self.c = parameters.get("confidence", "float")
         self.feed_in_tariff = car_agent.house_agent.electricity_plan.feed_in_tariff
         self.cost_home_charging \
             = car_agent.house_agent.electricity_plan.cost_of_use(1, 
                                                 car_agent.clock.time_of_day)
         self.cost_work_charging = car_agent.company.charger_cost_per_kWh
         self.cost_public_charging \
-            = car_agent.parameters.get_parameter("public_charger_cost_per_kWh",
-                                                 "float")
-        self.charging_model \
-            = car_agent.parameters.get_parameter("charging_model", "int")
-            
+            = parameters.get("public_charger_cost_per_kWh", "float")            
         self.charge_rate_at_home \
             = car_agent.house_agent.max_charge_rate(car_agent.car_model)
         self.charge_rate_at_work \
             = car_agent.company.ccm.max_charge_rate(car_agent.car_model)
         self.charge_rate_at_public \
             = car_agent.whereabouts.cur_location.companies[0].ccm.max_charge_rate(car_agent.car_model)
-        self.minimum_soc = car_agent.car_model.battery_capacity * \
-            self.parameters.get_parameter("minimum_relative_state_of_charge",
-                                          "float")
+        self.minimum_soc = max(car_agent.car_model.battery_capacity * \
+            self.parameters.get("minimum_relative_state_of_charge", "float"),
+                               self.reserve_charge)
     
     def determine_charge_instructions(self, soc):
+        if not hasattr(self,'ca'):
+            raise RuntimeError("charging_strategy: Initialised without car_agent")
         charge_at_home = 0
         charge_at_work = 0
         
@@ -188,7 +195,6 @@ class ChargingStrategy():
         q_res =  self.reserve_charge
         
         c  = self.c
-        mu, sig = self.ca.calc_total_forcast_mean_and_std_dev()
         
         pv_cap = self.house_agent.pv_capacity
         
@@ -244,29 +250,51 @@ class ChargingStrategy():
         
         # model #5: advanced - incluing PV
         if self.charging_model == self.CHARGE_WHERE_CHEAPER_ADVANCED:
+            next_home_stay_start, next_home_stay_end \
+                = self.det_next_home_stay()
+            forcast_begin = max(self.clock.elapsed_time, next_home_stay_start)
+            mu, sig \
+                = self.ca.calc_forcast_mean_and_std_dev(forcast_begin,
+                                                        next_home_stay_end)
             if self.whereabouts.destination_activity == self.cp.WORK:
-                if pv_cap != 0 and self.house_agent.charger != None:
+                if pv_cap != 0 and self.house_agent.charger != None and sig > 0:
                     charge_at_work = parm_cost_fct_charging_at_work_anal(q_ow,
                         q_res, p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
                 elif pv_cap == 0 and self.house_agent.charger != None:
                     charge_at_work = max(2 * q_ow + q_res - soc, 0) \
-                                                if p_grid > p_work \
+                                                if p_grid < p_work \
                                                 else max(q_ow + q_res - soc, 0)
                 else:
                     charge_at_work = max(2 * q_ow + q_res - soc, 0)
+                # ensure charge suffices to reach home, but uses as little 
+                # public charging as possible
+                work_stay_duration \
+                    = ((cal.find_next_departure_from_activity(self.cp.WORK)\
+                    - self.clock.elapsed_time) / 60) % (24 * 7)
+                charge_at_work = max(q_ow + q_res - soc, 0,
+                                     min(charge_at_work,
+                                         work_stay_duration * cr_w))
             if self.whereabouts.destination_activity == self.cp.HOME:
-                if pv_cap != 0 and self.house_agent.charger != None:
+                if pv_cap != 0 and self.house_agent.charger != None and sig > 0:
                     charge_at_home = parm_cost_fct_charging_at_home_anal(q_ow,
                         q_res, p_feed, p_grid, p_em, p_work, soc, c, mu, sig)
                 elif pv_cap == 0 and self.house_agent.charger != None:
                     charge_at_home = max(2 * q_ow + q_res - soc, 0) \
-                                                if p_grid <= p_work \
+                                                if p_grid >= p_work \
                                                 else max(q_ow + q_res - soc, 0)    
                 else:
                     charge_needed = max(q_ow + q_res - soc, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
                         return 0, 0
+                # ensure charge suffices to reach home, but uses as little 
+                # public charging as possible
+                home_stay_duration \
+                    = ((cal.find_next_departure_from_activity(self.cp.HOME)\
+                    - self.clock.elapsed_time) / 60) % (24 * 7)
+                charge_at_home = max(q_ow + q_res - soc, 0,
+                                     min(charge_at_home,
+                                         home_stay_duration * cr_h))
                         
         # charge from alternative source
         # that is if usually prefer to charge at work, check if additional
@@ -384,7 +412,7 @@ class ChargingStrategy():
         cur_time_in_hours = round(self.clock.elapsed_time / 60)
         for time in np.arange(cur_time_in_hours, cur_time_in_hours + 7*24, 1):
             for it, start in enumerate(self.ca.calendar.starts):
-                if time % (7*24) == start:
+                if time % (7*24) == start % (7*24):
                     shifts_to_come.append(it)
                     break
         
@@ -399,6 +427,40 @@ class ChargingStrategy():
         arr_at_home = self.ca.calendar.ends[prev_shift] + self.commute_duration
         dep_from_home=self.ca.calendar.starts[next_shift]-self.commute_duration
         return (dep_from_home - arr_at_home) % (24*7)
+    
+    def det_next_home_stay(self):
+        # determine shift after next home stay
+        time_step = self.clock.time_step
+        min_dist = 168
+        min_dist_it = 0
+        for start_it, start in enumerate(self.ca.calendar.starts):
+            dist = (start - self.commute_duration \
+                    - self.clock.time_of_week / 60) % (7 * 24)
+            if dist < min_dist and dist != 0:
+                min_dist = dist
+                min_dist_it = start_it
+        end_home_stay = (self.ca.calendar.starts[min_dist_it] \
+            - self.commute_duration) % (7 * 24)
+        end_in_min = end_home_stay * 60
+        # adjust for passed time
+        offset = (self.clock.elapsed_time // (7 * 24 * 60)) * (7 * 24 * 60)
+        end_in_min += offset
+        if end_in_min < self.clock.elapsed_time:
+            end_in_min += 7 * 24 * 60
+        # round to previous 5 min step
+        end_in_min_rounded = (end_in_min // time_step) * time_step
+        if end_in_min % time_step == 0:
+            end_in_min_rounded -= time_step
+            
+        start_home_stay_in_min \
+            = end_in_min - self.calc_time_at_home(min_dist_it) * 60
+        # round to next 5 min step
+        start_in_min_rounded = (start_home_stay_in_min // time_step)*time_step
+        if start_home_stay_in_min % time_step != 0:
+            start_in_min_rounded += time_step
+            
+        return start_in_min_rounded, end_in_min_rounded
+            
     
     def calc_charge_need_to_reach_shift(self, soc_check, shifts_to_come,
                                         shift_it, start_at_work):

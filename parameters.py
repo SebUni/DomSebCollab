@@ -16,6 +16,10 @@ class Parameters():
     to charging model. Key-value pairs are stored in "parameters.csv".
     """
     def __init__(self):
+        self.OVERWRITE_STATISTIC = "STATISTIC"
+        self.OVERWRITE_TRUE = "TRUE"
+        self.OVERWRITE_FALSE = "FALSE"
+        
         self.parameters = dict()
         file_name = "parameters.csv"
         csv_helper = CSVHelper("data",file_name)        
@@ -23,13 +27,13 @@ class Parameters():
             key = row[0]
             value = row[1]
             if key in self.parameters:
-                sys.exit("Parameter " + key \
-                         + " is defined twice in parameters.csv")
+                raise RuntimeError("parameters.py: Parameter " + key \
+                                   + " is defined twice in parameters.csv")
             self.parameters[key] = value
         self.uid_to_check = -1
         self.next_stop = -1
     
-    def get_parameter(self, parameter_name, parameter_type):
+    def get(self, parameter_name, parameter_type):
         """
         Returns a parameter from self.parameter as a requested type.
 
@@ -49,8 +53,8 @@ class Parameters():
 
         """
         if parameter_name not in self.parameters:
-            sys.exit("No parameter called " + parameter_name \
-                     + " is defined in parameters.csv")
+            raise RuntimeError("parameters.py: No parameter called " \
+                               +parameter_name+" is defined in parameters.csv")
         value_str = self.parameters[parameter_name]
         
         cast = Cast("Get Parameter")
@@ -69,4 +73,31 @@ class Parameters():
         else:
             sys.exit("Type '" + parameter_type + "' for parameter " \
                      + parameter_name + " is not recognised")
+                
+    def overwrite_value(self, parameter_name):
+        overwrite_value = self.get(parameter_name, "string")
+        if overwrite_value not in [self.OVERWRITE_STATISTIC,
+                                   self.OVERWRITE_TRUE,
+                                   self.OVERWRITE_FALSE]:
+            raise RuntimeError("parameters.py: Overwrite parameter " \
+                               + parameter_name + "is ill defined!")
+        return overwrite_value
+    
+    def overwrite(self, parameter_name, original_value=None):
+        overwrite_value = self.overwrite_value(parameter_name)
         
+        if not isinstance(original_value, bool) and not original_value == None:
+            raise RuntimeError("parameters.py: Original value to overwrite "\
+                               + "for " + parameter_name + " is not a bool!")
+        if original_value == None \
+            and overwrite_value == self.OVERWRITE_STATISTIC:
+            raise RuntimeError("parameters.py: No original value provided "\
+                               + "and overwrite value 'statistic' chosen for "\
+                               + parameter_name)
+                
+        if overwrite_value == self.OVERWRITE_STATISTIC:
+            return original_value
+        elif overwrite_value == self.OVERWRITE_TRUE:
+            return True
+        else:
+            return False

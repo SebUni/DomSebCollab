@@ -35,16 +35,12 @@ class Clock():
         co = ConsoleOutput()
         self.elapsed_time = 0
         self.cur_time_step = 0;
-        self.pre_heat_steps \
-            = parameters.get_parameter("pre_heat_steps", "int")
+        self.pre_heat_steps = parameters.get("pre_heat_steps", "int")
         self.is_pre_heated = False
-        self.season = parameters.get_parameter("season","int")
-        self.time_step = parameters.get_parameter("time_step","int")
-        self.time_step_limit = parameters.get_parameter("time_step_limit",
-                                                        "int")
-        self.forecast_horizon = parameters.get_parameter("forecast_horizon",
-                                                         "int")
-        co.t_print("Selected time step: " + str(self.time_step) + " min")
+        self.season = parameters.get("season","int")
+        self.time_step = parameters.get("time_step","int")
+        self.time_step_limit = parameters.get("time_step_limit", "int")
+        self.forecast_horizon = parameters.get("forecast_horizon", "int")
         
         # This boolean indicates if step() has ever been called. If not the
         # clock does not step forward. This is done so that the first round can
@@ -69,9 +65,7 @@ class Clock():
         if next_season == 1:
             self.season_in_min["End"] \
                 = 60*24*(31+28+31+30+31+30+31+31+30+31+30+31)
-        if 0 <= self.season <= 3:
-            co.t_print("Selected season: " + self.season_names[self.season])
-        else:
+        if not (0 <= self.season <= 3):
             sys.exit("Season ill defined. Must be in [0,3]")
         
     def calc_time_of_day(self):

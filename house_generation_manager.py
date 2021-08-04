@@ -63,8 +63,7 @@ class HouseGenerationManager():
         self.cur_irradiances = self.irradiances[0]
         self.cur_temperatures = self.temperatures[0]
         
-        self.forecast_horizon = parameters.get_parameter("forecast_horizon",
-                                                         "int")
+        self.forecast_horizon = parameters.get("forecast_horizon", "int")
         
         cast = Cast("Normed rooftop PV output fit parameters")
         self.irwin_hall_factor = 0
@@ -143,6 +142,23 @@ class HouseGenerationManager():
         return pv_capacity * irradiance * (1 - 0.005 * (temperature - 25)) / 1000
     
     # TODO this neglects the PV capacity and return irradiation not pv power output! Needs to return power output
-    def generation_forecast_distribution_parameter(self, name_plate_capacity):
-        return self.forecast_mu * name_plate_capacity, \
-                self.forecast_sig * name_plate_capacity
+    def generation_forecast_distribution_parameter(self, name_plate_capacity,
+                                                   begin_forecast,
+                                                   end_forecast):
+        # irwin_hall_factor = 0
+        # for time_step in range(int(begin_forecast // self.clock.time_step),
+        #                        int(end_forecast // self.clock.time_step) + 1):
+        #     irwin_hall_factor += self.irwin_hall_factors[time_step]
+        # forecast_mu = irwin_hall_factor / 2
+        # forecast_sig = math.sqrt(irwin_hall_factor / 12)
+        # return forecast_mu * name_plate_capacity, \
+        #         forecast_sig * name_plate_capacity
+        
+        return [self.irwin_hall_factors[time_step] * name_plate_capacity / 2 \
+                for time_step \
+                    in range(int(begin_forecast // self.clock.time_step),
+                             int(end_forecast // self.clock.time_step) + 1)], \
+               [self.irwin_hall_factors[time_step] * name_plate_capacity / 12 \
+                for time_step \
+                    in range(int(begin_forecast // self.clock.time_step),
+                             int(end_forecast // self.clock.time_step) + 1)]

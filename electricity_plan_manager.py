@@ -59,7 +59,7 @@ class ElectricityPlanManager():
                          + " is ill-defined!")
             is_commercial_plan = classification == "com"
             base = cast.to_float(row[2], "Base")
-            feed_in_tariff = parameters.get_parameter("feed_in_tariff","float")
+            feed_in_tariff = parameters.get("feed_in_tariff","float")
             # create tariff structure
             tariff_str = row[3]
             tariff = self.extract_tariffs_from_string(tariff_str)

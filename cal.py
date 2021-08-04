@@ -42,7 +42,7 @@ class Cal():
         self.time_reserve = calendar_planer.arrival_time_reserve
         self.hours_worked_per_week \
             = calendar_planer.draw_hours_worked_per_week_at_random()
-        # self.hours_worked_per_week = 3
+        # self.hours_worked_per_week = 60
         
         self.cur_scheduled_activity = cur_activity
         self.cur_scheduled_location = cur_location
@@ -57,6 +57,7 @@ class Cal():
         self.calendar, self.starts, self.ends \
             = self.cp.create_calendar(self.hours_worked_per_week,
                                       min_shift_lengh)
+        if self.starts == [] and self.ends == []: return False
         self.cur_scheduled_activity = self.calendar[self.clock.elapsed_time]
         if self.cur_scheduled_activity == self.cp.HOME:
             self.cur_scheduled_location = self.residency_location
@@ -66,6 +67,7 @@ class Cal():
             = self.find_next_activity()
         self.next_route, self.next_route_length = self.find_next_route()
         self.next_departure_time = self.find_next_departure_time()
+        return True
     
     def find_next_activity(self):
         """

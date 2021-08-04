@@ -13,10 +13,9 @@ class HouseAgent(Agent):
     """
     An agent which represents the house assgined to a car agent.
     """
-    def __init__(self, uid, model, clock, residency_location, company,
-                 charger_manager, electricity_plan_manager,
-                 house_consumption_manager, house_generation_manager,
-                 parameters):
+    def __init__(self, uid, model, parameters, clock, residency_location,
+                 company, charger_manager, electricity_plan_manager,
+                 house_consumption_manager, house_generation_manager):
         super().__init__(uid, model)
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
@@ -25,39 +24,40 @@ class HouseAgent(Agent):
         self.location = residency_location
         
         self.is_house = residency_location.draw_shall_new_dwelling_be_a_house()
-        # self.is_house = True
+        self.is_house = parameters.overwrite("only_houses", self.is_house)
         self.is_house_owned = residency_location.draw_shall_new_house_be_owned()
-        # self.is_house_owned = False
+        self.is_house_owned = parameters.overwrite("all_houses_owned",
+                                                   self.is_house_owned)
         self.occupants = residency_location.draw_occupants_at_random()
-        # TODO check how charger is chosen
         # if there is no charger assign "None"
         self.charger = None
-        self.battery_capacity = 0
         self.pv_capacity = 0
         if self.is_house:
             charger_model = charger_manager.draw_charger_at_random( \
                                                 charger_manager.HOME_CHARGER)        
             self.charger = charger_manager.add_charger(charger_model)
-            self.battery_capacity = \
-                parameters.get_parameter("battery_capacity","float")
             if self.is_house_owned:
-                self.pv_capacity \
-                    = residency_location.draw_pv_capacity_on_owned_house_at_random()
-                #self.pv_capacity \
-                    #= residency_location.pv_avg_capacity
-        # TODO check how electricity plan is chosen
+                overwrite_value \
+                    = parameters.overwrite_value("owned_houses_have_pv")
+                if overwrite_value == parameters.OVERWRITE_STATISTIC:
+                    self.pv_capacity \
+                        = residency_location.draw_pv_capacity_on_owned_house_at_random()
+                elif overwrite_value == parameters.OVERWRITE_TRUE:
+                    self.pv_capacity = residency_location.pv_avg_capacity
+                else:
+                    self.pv_capacity = 0
         electricity_plan_uid \
             = random.choice(electricity_plan_manager.residential_plan_uids)
         self.electricity_plan \
             = electricity_plan_manager.electricity_plans[electricity_plan_uid]
-        self.battery_soc = 0.0
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
-        self.cur_pv_excess_supply = 0
+        self.cur_house_power_balance = 0
         self.charging_price_at_company \
             = company.electricity_plan.cost_of_use(1,0);
         self.earnings_from_feed_in = 0
         self.spendings_for_house_consumption = 0
+        self.cur_electricity_cost = 0
         self.extracted_data = dict()
             
     def charge_car(self, car_agent, charge_up_to):
@@ -87,11 +87,18 @@ class HouseAgent(Agent):
                                 charge_up_to])
         if self.clock.is_pre_heated:
             self.location.total_charge_delivered += delivered_charge
-        charging_cost \
-             = self.electricity_plan.cost_of_use(delivered_charge,
+        feed_in_tariff_per_kWh = self.electricity_plan.feed_in_tariff
+        charging_cost_grid_per_kWh \
+             = self.electricity_plan.cost_of_use(1,
                                                  self.clock.time_of_day)
+        charge_from_pv = min(delivered_charge,
+                             max(self.cur_house_power_balance, 0))
+        charge_from_grid = delivered_charge - charge_from_pv
+        self.cur_house_power_balance -= charge_from_pv
+        charging_cost = charge_from_pv * feed_in_tariff_per_kWh \
+            + charge_from_grid * charging_cost_grid_per_kWh
         
-        return delivered_charge, charging_cost
+        return charge_from_pv, charge_from_grid, charging_cost
     
     def max_charge_rate(self, car_model):
         if self.charger != None:
@@ -103,6 +110,7 @@ class HouseAgent(Agent):
             return 0
         
     def step(self):
+        self.cur_electricity_cost = 0
         # 1) Calculate house consumption
         inst_consumption \
             = self.hcm.instantaneous_consumption(self.location, self.occupants)
@@ -110,7 +118,7 @@ class HouseAgent(Agent):
         # 2) Calculate PV geneation
         inst_generation = self.hgm.instantaneous_generation(self.pv_capacity)
         cur_generation = inst_generation * self.clock.time_step / 60
-        self.cur_pv_excess_supply = max(cur_generation - cur_consumption, 0)
+        self.cur_house_power_balance = cur_generation - cur_consumption
         # 3) Determine car charge requirements once car has returned (only
         #    required once time of use is considered)
         
@@ -119,19 +127,14 @@ class HouseAgent(Agent):
         feed_in = self.electricity_plan.feed_in_tariff
         charging_price_at_home = self.electricity_plan.cost_of_use(1,
                                                         self.clock.time_of_day)
-        if self.cur_pv_excess_supply > 0:
-            if self.charging_price_at_company \
-                < charging_price_at_home + feed_in:
-                self.earnings_from_feed_in += self.cur_pv_excess_supply * feed_in
-            else:
-                self.battery_soc += self.cur_pv_excess_supply
+        if self.cur_house_power_balance > 0:
+            self.earnings_from_feed_in += self.cur_house_power_balance * feed_in
+            self.cur_electricity_cost -= self.cur_house_power_balance * feed_in
         else:
-            power_to_purchase = - self.cur_pv_excess_supply
-            if self.charging_price_at_company \
-                < charging_price_at_home + feed_in:
-                power_from_battery = min(self.battery_soc, power_to_purchase)
-                self.battery_soc -= power_from_battery
-                power_to_purchase -= power_from_battery
+            power_to_purchase = - self.cur_house_power_balance
             self.spendings_for_house_consumption \
+                += self.electricity_plan.cost_of_use(power_to_purchase,
+                                                     self.clock.time_of_day)
+            self.cur_electricity_cost \
                 += self.electricity_plan.cost_of_use(power_to_purchase,
                                                      self.clock.time_of_day)

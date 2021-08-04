@@ -6,6 +6,7 @@ Created on Sat Dec 26 14:34:59 2020
 """
 
 import random
+import time
 
 from cast import Cast
 from csv_helper import CSVHelper
@@ -41,9 +42,8 @@ class CalendarPlanner():
         """
         self.clock = clock
         self.lrm = location_road_manager
-        self.arrival_time_reserve \
-            = parameters.get_parameter("arrival_time_reserve", "int")
-            
+        self.arrival_time_reserve = parameters.get("arrival_time_reserve",
+                                                   "int")
         self.min_hour_per_week = []
         self.max_hour_per_week = []
         self.hour_share_per_week = []
@@ -66,8 +66,10 @@ class CalendarPlanner():
         
         starts, ends = self.generate_schedule(hours_worked_per_week,
                                               min_shift_length)
-        # starts = [1,25,58,80,109,133,159]
-        # ends = [2,37,64,89,113,134,160]
+        if starts == [] and ends == []:
+            return calendar, starts, ends # abort generation
+        # starts = [7, 31, 55, 79, 109]
+        # ends = [15, 36, 60, 90, 113]
         
         starts_org, ends_orgs = starts, ends
         init_start = starts[0]
@@ -211,12 +213,17 @@ class CalendarPlanner():
             if largest_gap <= 1+2*rest_between_shifts:
                 break
         
+        # FailSafe: If runs longer than time_limit kill loop
+        start_time = int(time.time())
+        time_limit = 3 # in seconds
         # place hours for shifts
         starts, ends = [], []
         # create make shift for loop iterating over all hours, with iterator
         # cur_hour iterating upon successful placement of an hour in a shift
         cur_hour = 0
         while cur_hour < hours_worked_per_week:
+            if int(time.time()) > start_time + time_limit:
+                return [], []
             scheduled_hour_successul = False
             hours_needed_for_cur_shifts \
                 = sum([max(min_shift_length-(ends[shift]-starts[shift])%168,0)\
