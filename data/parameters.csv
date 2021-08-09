@@ -18,7 +18,7 @@ k_jam,150,Jam density
 pcu_length,4.9,Passenger Car Unit length in Meter
 battery_capacity,10,Home battery capacity in kW
 traffic_jam_velocity,4,velocity cars travel at when stuck in a traffic jam
-nbr_of_agents,12000,Number of car agents
+nbr_of_agents,1200,Number of car agents
 sa_level,3,statistical area level; choose 3 for high and 4 for low details
 inner_area_speed_limit,50,Speed limit applied if agent travels only with in one area
 start_soc,0.2,State of charge each agents starts with in %

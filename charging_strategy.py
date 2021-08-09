@@ -138,7 +138,7 @@ class ChargingStrategy():
                                      1: "Always charge (no work chargers)",
                                      2: "Always charge at home",
                                      3: "Always charge at work",
-                                     4: "Always_charge where cheaper",
+                                     4: "Always charge where cheaper",
                                      5: "Charge where cheaper basic",
                                      6: "Charge where cheaper advanced"}
         if car_agent == None: return

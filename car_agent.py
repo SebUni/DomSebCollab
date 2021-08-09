@@ -445,7 +445,9 @@ class CarAgent(Agent):
                             = max(charge_at_home_now,
                                   min(self.house_agent.max_charge_rate(self.car_model)\
                                       * self.clock.time_step / 60,
-                                      self.house_agent.cur_house_power_balance))
+                                      self.house_agent.cur_house_power_balance,
+                                      self.car_model.battery_capacity * 0.8 \
+                                          - self.soc))
                     if charge_at_home_now > 0:
                         charge_up_to = min(charge_at_home_now, missing_charge)
                         received_charge_pv, received_charge_grid, \

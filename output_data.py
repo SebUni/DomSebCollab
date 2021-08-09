@@ -281,6 +281,20 @@ class OutputData():
                  for time_step_data in model.extracted_car_data.values()]) \
                 / len(model.schedule_cars.agents)))
         
+    def print_house_stats(self, model):
+        co = self.co
+        nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv = 0, 0, 0
+        for dwelling in model.schedule_houses.agents:
+            if dwelling.is_house:
+                if dwelling.pv_capacity != 0:
+                    nbr_houses_w_pv += 1
+                else:
+                    nbr_houses_wo_pv += 1
+            else:
+                nbr_apartments += 1
+        co.t_print("Apartments: {}, Houses wo PV: {}, Houses w PV: {}".format(\
+            nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv))
+        
     def plot_extracted_data(self, model):
         extr_data = model.extracted_car_data
         time_steps = [time_step for time_step in extr_data.keys()]

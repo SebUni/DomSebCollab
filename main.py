@@ -35,6 +35,7 @@ if not run_parameter_scan:
     cm.summarise_simulation()
     
     od.print_route_stats(cm)
+    od.print_house_stats(cm)
     od.print_overall_charging_results(cm)
     
     if plot_extraced_data:
