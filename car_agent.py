@@ -14,10 +14,10 @@ from cal import Cal
 
 class CarAgent(Agent):
     """An agent which can travel along the map."""
-    def __init__(self, uid, model, clock, cur_activity, cur_location,
-                 house_agent, company, location_road_manager,
+    def __init__(self, uid, model, tracking_id, clock, cur_activity,
+                 cur_location, house_agent, company, location_road_manager,
                  car_model_manager, whereabouts_manager, calendar_planer,
-                 parameters):
+                 extracted_data, parameters):
         """
         Parameters
         ----------
@@ -76,6 +76,7 @@ class CarAgent(Agent):
         # uid is redundant because super alreay incorperates unique_id but
         # for brevity and consistency through out the code i define uid
         self.uid = uid 
+        self.tracking_id = tracking_id
         self.parameters = parameters
         self.clock = clock
         self.house_agent = house_agent
@@ -126,9 +127,7 @@ class CarAgent(Agent):
         self.charging_strategy = ChargingStrategy(parameters, self)
         
         self.would_run_flat = False
-        #self.extracted_data_hist = dict()
-        #self.extracted_data_hist_list = []
-        self.extracted_data = dict()
+        self.extracted_data = extracted_data
         self.last_charge_at_work = 0
         self.activity_before_emergency_charging = None
         self.distance_travelled = 0
@@ -138,34 +137,25 @@ class CarAgent(Agent):
             test = 0
         # initialise extraction data
         self.distance_travelled = 0
-        self.extracted_data = dict()
-        self.extracted_data["cur_activity"] = 0
-        self.extracted_data["charge_received_pv"] = 0
-        self.extracted_data["charge_received_grid"] = 0
-        self.extracted_data["charge_received_work"] = 0
-        self.extracted_data["charge_received_public"] = 0
-        self.extracted_data["charge_consumed"] = 0
-        self.extracted_data["soc"] = 0
-        #self.extracted_data["mu"], self.extracted_data["sig"] \
-        # self.extracted_data["mu"], _ \
-        #     = self.calc_total_forcast_mean_and_std_dev()
         self.cur_electricity_cost = 0
         
         # Writing this while I should be celebrating christmas, fuck COVID
         self.calendar.step()
         self.plan()
         self.move()
-        self.extracted_data["work_charge_instruction"] = self.charge_at_work    
-        self.extracted_data["home_charge_instruction"] = self.charge_at_home
-        self.extracted_data["emergency_charge_instruction"] \
-            = self.emergency_charging
+        self.extracted_data.set(self.tracking_id, "work_charge_instruction",
+                                self.charge_at_work)
+        self.extracted_data.set(self.tracking_id, "home_charge_instruction",
+                                self.charge_at_home)
+        self.extracted_data.set(self.tracking_id,
+                                "emergency_charge_instruction",
+                                self.emergency_charging)
         self.charge()
         
         cur_soc = self.soc / self.car_model.battery_capacity
-        self.extracted_data["soc"] = cur_soc
-        self.extracted_data["cur_activity"] = self.whereabouts.cur_activity
-        #self.extracted_data_hist[self.clock.cur_time_step] = self.extracted_data
-        #self.extracted_data_hist_list.append(self.extracted_data)
+        self.extracted_data.set(self.tracking_id, "soc", cur_soc)
+        self.extracted_data.set(self.tracking_id, "cur_activity",
+                                self.whereabouts.cur_activity)
         self.last_charge_at_work = self.charge_at_work
         
     def plan(self):
@@ -226,7 +216,8 @@ class CarAgent(Agent):
             distance = self.distance_commuted_if_work_and_home_equal
             consumption = self.car_model.consumption(velocity, distance)
             self.distance_travelled  += distance
-            self.extracted_data["charge_consumed"] += consumption
+            self.extracted_data.add(self.tracking_id, "charge_consumed",
+                                    consumption)
             self.soc -= consumption
             self.arrival_at_destination()
             return
@@ -283,7 +274,8 @@ class CarAgent(Agent):
                 consumption = self.car_model.consumption(cur_velocity,
                                                 remaining_distance_on_edge)
                 self.distance_travelled += remaining_distance_on_edge
-                self.extracted_data["charge_consumed"] += consumption
+                self.extracted_data.add(self.tracking_id, "charge_consumed",
+                                        consumption)
                 self.soc -= consumption
                 # if next location is final destination
                 if wa.route[-1] == end:
@@ -312,7 +304,8 @@ class CarAgent(Agent):
                      coord_start[1] + ratio_trvld_on_edge * diff_vct[1]]
                 consumption = self.car_model.consumption(cur_velocity,
                                                        distance_travelled)
-                self.extracted_data["charge_consumed"] += consumption
+                self.extracted_data.add(self.tracking_id, "charge_consumed",
+                                        consumption)
                 self.soc -= consumption
                 remaining_time = 0
         # update position on grid
@@ -462,10 +455,12 @@ class CarAgent(Agent):
                         self.soc += received_charge
                         total_received_charge += received_charge
                         total_charging_cost += charging_cost
-                        self.extracted_data["charge_received_pv"] \
-                            += received_charge_pv
-                        self.extracted_data["charge_received_grid"] \
-                            += received_charge_grid
+                        self.extracted_data.add(self.tracking_id,
+                                                "charge_received_pv",
+                                                received_charge_pv)
+                        self.extracted_data.add(self.tracking_id, 
+                                                "charge_received_grid",
+                                                received_charge_grid)
                 # if car agent is at work
                 if cur_activity == self.cp.WORK \
                     and self.charge_at_work != 0.0:
@@ -479,8 +474,9 @@ class CarAgent(Agent):
                         self.soc += received_charge
                         total_received_charge += received_charge
                         total_charging_cost += charging_cost
-                        self.extracted_data["charge_received_work"] \
-                            += received_charge
+                        self.extracted_data.add(self.tracking_id,
+                                                "charge_received_work",
+                                                received_charge)
                     elif self not in self.company.ccm.charging_que:
                         is_queuing = None
                         if self.queuing_condition == "ALWAYS":
@@ -528,8 +524,9 @@ class CarAgent(Agent):
                     total_charging_cost += charging_cost
                     if self.emergency_charging == 0:
                         pub_company.unblock_charger(self)
-                    self.extracted_data["charge_received_public"] \
-                        += received_charge
+                    self.extracted_data.add(self.tracking_id,
+                                            "charge_received_public",
+                                            received_charge)
                 if self.emergency_charging == 0:
                     if self.activity_before_emergency_charging \
                         == self.whereabouts.destination_activity:

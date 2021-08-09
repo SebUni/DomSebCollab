@@ -10,6 +10,7 @@ from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 
 from clock import Clock
+from extracted_data import ExtractedData
 from car_agent import CarAgent
 from house_agent import HouseAgent
 from location_road_manager import LocationRoadManager
@@ -53,7 +54,24 @@ class ChargingModel(Model):
                                      False)
         
         self.extracted_company_data = {"Charger utilisation": []}
-        self.extracted_car_data = dict()
+        self.extracted_car_data = ExtractedData(self.clock)
+        self.extracted_car_data.init_tracked_var("cur_activity", 0)
+        self.extracted_car_data.init_tracked_var("charge_received_pv", 0)
+        self.extracted_car_data.init_tracked_var("charge_received_grid", 0)
+        self.extracted_car_data.init_tracked_var("charge_received_work", 0)
+        self.extracted_car_data.init_tracked_var("charge_received_public", 0)
+        self.extracted_car_data.init_tracked_var("charge_consumed", 0)
+        self.extracted_car_data.init_tracked_var("soc", 0)
+        self.extracted_car_data.init_tracked_var("work_charge_instruction", 0)
+        self.extracted_car_data.init_tracked_var("home_charge_instruction", 0)
+        self.extracted_car_data.init_tracked_var("emergency_charge_instruction", 0)
+        self.extracted_car_data.init_tracked_var("electricity_cost_apartment", 0)
+        self.extracted_car_data.init_tracked_var("electricity_cost_house_w_pv", 0)
+        self.extracted_car_data.init_tracked_var("electricity_cost_house_wo_pv", 0)
+        self.extracted_car_data.init_tracked_var("distance_travelled_apartment", 0)
+        self.extracted_car_data.init_tracked_var("distance_travelled_house_w_pv", 0)
+        self.extracted_car_data.init_tracked_var("distance_travelled_house_wo_pv", 0)
+        
         
         msg="Selected number of agents: {}, season: {}, time step: {} min"
         self.co.t_print(msg.format(nbr_of_agents,
@@ -73,6 +91,7 @@ class ChargingModel(Model):
         # create agents
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
+            car_tracking_id = self.extracted_car_data.init_tracked_agent()
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
@@ -87,9 +106,10 @@ class ChargingModel(Model):
             house_agent = HouseAgent(agent_uid, self, self.parameters,
                                      self.clock, residency_location, company,
                                      self.chm, self.epm, self.hcm, self.hgm)
-            car_agent = CarAgent(agent_uid, self, self.clock, cur_activity,
-                                 cur_location, house_agent, company, self.lrm,
-                                 self.cmm, self.wm, self.cp, self.parameters)
+            car_agent = CarAgent(agent_uid, self, car_tracking_id, self.clock,
+                                 cur_activity, cur_location, house_agent,
+                                 company, self.lrm, self.cmm, self.wm, self.cp,
+                                 self.extracted_car_data, self.parameters)
             self.schedule_houses.add(house_agent)
             self.schedule_cars.add(car_agent)
             self.space.place_agent(car_agent, pos)
@@ -141,35 +161,29 @@ class ChargingModel(Model):
         if self.clock.is_pre_heated:
             self.extracted_company_data["Charger utilisation"].append( \
                                         self.lrm.company_charger_utilisation())
-            self.extracted_car_data[self.clock.elapsed_time] = dict()
             for car_agent in self.schedule_cars.agents:
-                car_agent.extracted_data["electricity_cost_apartment"] = 0
-                car_agent.extracted_data["electricity_cost_house_w_pv"] = 0
-                car_agent.extracted_data["electricity_cost_house_wo_pv"] = 0
-                car_agent.extracted_data["distance_travelled_apartment"] = 0
-                car_agent.extracted_data["distance_travelled_house_w_pv"] = 0
-                car_agent.extracted_data["distance_travelled_house_wo_pv"] = 0
-                # total_electricity_cost = car_agent.cur_electricity_cost \
-                #         + car_agent.house_agent.cur_electricity_cost
                 total_electricity_cost = car_agent.cur_electricity_cost
                 if not car_agent.house_agent.is_house:
-                    car_agent.extracted_data["electricity_cost_apartment"] \
-                        = total_electricity_cost
-                    car_agent.extracted_data["distance_travelled_apartment"] \
-                        = car_agent.distance_travelled
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "electricity_cost_apartment",
+                                                total_electricity_cost)
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "distance_travelled_apartment",
+                                                car_agent.distance_travelled)
                 elif car_agent.house_agent.pv_capacity != 0:
-                    car_agent.extracted_data["electricity_cost_house_w_pv"] \
-                        = total_electricity_cost
-                    car_agent.extracted_data["distance_travelled_house_w_pv"] \
-                        = car_agent.distance_travelled
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "electricity_cost_house_w_pv",
+                                                total_electricity_cost)
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "distance_travelled_house_w_pv",
+                                                car_agent.distance_travelled)
                 else:
-                    car_agent.extracted_data["electricity_cost_house_wo_pv"] \
-                        = total_electricity_cost
-                    car_agent.extracted_data["distance_travelled_house_wo_pv"] \
-                        = car_agent.distance_travelled
-
-                self.extracted_car_data[self.clock.elapsed_time][car_agent.uid]\
-                    = car_agent.extracted_data
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "electricity_cost_house_wo_pv",
+                                                total_electricity_cost)
+                    self.extracted_car_data.set(car_agent.tracking_id,
+                                                "distance_travelled_house_wo_pv",
+                                                car_agent.distance_travelled)
             
     def summarise_simulation(self):
         self.co.endProgress("simulation_step", "STEP CALCULATION COMPLETE")

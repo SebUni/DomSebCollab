@@ -83,39 +83,40 @@ class OutputData():
     def write_all_to_file(self, model):
         extr_data = model.extracted_car_data
         data_file = "output_car_data.csv"
-        data_elements_per_agent \
-            = list(next(iter(next(iter(extr_data.values())).values())).keys())
         
         if os.path.exists(data_file): os.remove(data_file)
         f = open(data_file,"x")
             
         data_header = "Elapsed time"
         for i in range(model.num_agents):
-            for element in data_elements_per_agent:
-                data_header += "," + str(element)
+            for var_name in extr_data.tracked_vars():
+                data_header += "," + str(var_name)
         f.writelines(data_header + "\n")
         
-        for time_step, time_step_data in extr_data.items():
+        for time_step in extr_data.tracked_time_steps():
             line = str(time_step)
-            for agent_data in time_step_data.values():
-                for element in data_elements_per_agent:
-                    line += "," + str(agent_data[element])
+            for agent in model.schedule_cars.agents:
+                for var_name in extr_data.tracked_vars():
+                    line += "," + str(extr_data.get(time_step,
+                                                    agent.tracking_id,
+                                                    var_name))
             f.writelines(line + "\n")
         f.close()
         
     def write_one_agent_to_file(self, model, agent_uid):
         extr_data = model.extracted_car_data
-        data_elements_per_agent \
-            = list(next(iter(next(iter(extr_data.values())).values())).keys())
+        tracked_vars = extr_data.tracked_vars()
         out = []
-        out.append("time_step," + ",".join(data_elements_per_agent))
-        for time_step, data in extr_data.items():
+        out.append("time_step," + ",".join(tracked_vars))
+        for time_step in extr_data.tracked_time_steps():
             line = str(time_step)
-            for elem in data_elements_per_agent:
-                if isinstance(data[agent_uid][elem], int):
-                    line += ",{}".format(data[agent_uid][elem])
+            for var_name in tracked_vars:
+                tracking_id = model.schedule_cars.agents[agent_uid].tracking_id
+                tracked_var = extr_data.get(time_step, tracking_id, var_name)
+                if isinstance(tracked_var, int):
+                    line += ",{}".format(tracked_var)
                 else:
-                    line += ",{:.03f}".format(data[agent_uid][elem])
+                    line += ",{:.03f}".format(tracked_var)
             out.append(line)
         data_file = "output" + str(agent_uid) + ".csv"
         if os.path.exists(data_file): os.remove(data_file)
@@ -125,26 +126,19 @@ class OutputData():
         f.close()
     
     def calc_overall_charging_results(self, model):
+        extr_data = model.extracted_car_data
         charge_pv, charge_work, charge_grid, charge_emergency = 0, 0, 0, 0
         charge_sets = ["charge_received_work", "charge_received_pv",
                        "charge_received_grid", "charge_received_public"]
-        time_steps = [time_step for time_step in model.extracted_car_data.keys()]
-        charges = dict()
         for charge_set in charge_sets:
-            charges[charge_set] = []
-            for time_step, time_step_data in model.extracted_car_data.items():
-                charge = 0
-                for agent in time_step_data.values():
-                    charge += agent[charge_set]
-                charges[charge_set].append(charge)
             if charge_set == "charge_received_work":
-                charge_work = sum(charges[charge_set])
+                charge_work = extr_data.sum_over_all_agents(charge_set)
             if charge_set == "charge_received_pv":
-                charge_pv = sum(charges[charge_set])
+                charge_pv = extr_data.sum_over_all_agents(charge_set)
             if charge_set == "charge_received_grid":
-                charge_grid = sum(charges[charge_set])
+                charge_grid = extr_data.sum_over_all_agents(charge_set)
             if charge_set == "charge_received_public":
-                charge_emergency = sum(charges[charge_set])
+                charge_emergency = extr_data.sum_over_all_agents(charge_set)
         
         charger_utilisations \
             = [list(time_step.values()) for time_step in \
@@ -154,69 +148,34 @@ class OutputData():
                in charger_utilisations]
         utilisation = sum(average_company_charger_utilisation) * 100 \
             / len(average_company_charger_utilisation)
-
-        total_electricity_cost_apartment \
-            = sum([sum([agent["electricity_cost_apartment"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_electricity_cost_w_pv \
-            = sum([sum([agent["electricity_cost_house_w_pv"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_electricity_cost_wo_pv \
-            = sum([sum([agent["electricity_cost_house_wo_pv"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_electricity_cost = total_electricity_cost_apartment + \
-            total_electricity_cost_w_pv + total_electricity_cost_wo_pv
-            
-        total_dist_travlled_apartment \
-            = sum([sum([agent["distance_travelled_apartment"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_dist_travlled_w_pv \
-            = sum([sum([agent["distance_travelled_house_w_pv"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_dist_travlled_wo_pv \
-            = sum([sum([agent["distance_travelled_house_wo_pv"] \
-                    for agent in time_step_data.values()]) \
-                for time_step_data in model.extracted_car_data.values()])
-        total_dist_travlled = total_dist_travlled_apartment \
-            + total_dist_travlled_w_pv + total_dist_travlled_wo_pv
-            
-        nbr_agent_apartments = sum([0 if agent.house_agent.is_house else 1 \
-                                   for agent in model.schedule_cars.agents])
-        nbr_agents_w_pv = sum([1 if agent.house_agent.pv_capacity != 0 else 0 \
-                                   for agent in model.schedule_cars.agents])
-        nbr_agents_wo_pv = len(model.schedule_cars.agents) \
-            - nbr_agent_apartments - nbr_agents_w_pv
-        total_nbr_agents \
-            = nbr_agent_apartments + nbr_agents_w_pv + nbr_agents_wo_pv
         
+        avg_electricity_cost_apartment  \
+            = extr_data.avg_over_time_and_agents("electricity_cost_apartment")
+        avg_dist_travlled_apartment \
+            = extr_data.avg_over_time_and_agents("distance_travelled_apartment")
+        avg_electricity_cost_w_pv \
+            = extr_data.avg_over_time_and_agents("electricity_cost_house_w_pv")
+        avg_dist_travlled_w_pv \
+            = extr_data.avg_over_time_and_agents("distance_travelled_house_w_pv")
+        avg_electricity_cost_wo_pv \
+            = extr_data.avg_over_time_and_agents("electricity_cost_house_wo_pv")
+        avg_dist_travlled_wo_pv \
+            = extr_data.avg_over_time_and_agents("distance_travelled_house_wo_pv")
         
-        avg_electricity_cost_apartment, avg_electricity_cost_w_pv, \
-            avg_electricity_cost_wo_pv, avg_dist_travlled_apartment, \
-            avg_dist_travlled_w_pv, avg_dist_travlled_wo_pv = 0, 0, 0, 0, 0, 0
-        avg_electricity_cost, avg_dist_travlled = 0, 0
-        if nbr_agent_apartments != 0:
-            avg_electricity_cost_apartment  \
-                = total_electricity_cost_apartment/  nbr_agent_apartments
-            avg_dist_travlled_apartment \
-                = total_dist_travlled_apartment / nbr_agent_apartments
-        if nbr_agents_w_pv != 0:
-            avg_electricity_cost_w_pv \
-                = total_electricity_cost_w_pv / nbr_agents_w_pv
-            avg_dist_travlled_w_pv \
-                = total_dist_travlled_w_pv / nbr_agents_w_pv
-        if nbr_agents_wo_pv != 0:
-            avg_electricity_cost_wo_pv \
-                = total_electricity_cost_wo_pv / nbr_agents_wo_pv
-            avg_dist_travlled_wo_pv \
-                = total_dist_travlled_wo_pv / nbr_agents_wo_pv
-        if total_nbr_agents != 0:
-            avg_electricity_cost = total_electricity_cost / total_nbr_agents
-            avg_dist_travlled = total_dist_travlled / total_nbr_agents
+        nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv \
+            = self.get_house_stats(model)
+        avg_electricity_cost, avg_dist_travlled = 0, 0    
+        if sum([nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv]) != 0:
+            avg_electricity_cost \
+                = (avg_electricity_cost_apartment * nbr_apartments \
+                   + avg_electricity_cost_w_pv * nbr_houses_w_pv \
+                   + avg_electricity_cost_wo_pv * nbr_houses_wo_pv) \
+                  / sum([nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv])
+            avg_dist_travlled \
+                = (avg_dist_travlled_apartment * nbr_apartments \
+                   + avg_dist_travlled_w_pv * nbr_houses_w_pv \
+                   + avg_dist_travlled_wo_pv * nbr_houses_wo_pv) \
+                  / sum([nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv])
         
         avg_cost_apartment_per_km = 0
         if avg_dist_travlled_apartment != 0:
@@ -275,14 +234,11 @@ class OutputData():
         co.t_print("Route (min / avg / max) = {:.1f} km / {:.1f} km / {:.1f} km".format(\
             min(route_lengths), sum(route_lengths)/len(route_lengths),
             max(route_lengths)))
-        co.t_print("Average Consumption {:.1f} kWh".format(\
-            sum([sum([agent["charge_consumed"] \
-                  for agent in time_step_data.values()])\
-                 for time_step_data in model.extracted_car_data.values()]) \
-                / len(model.schedule_cars.agents)))
-        
-    def print_house_stats(self, model):
-        co = self.co
+        avg_consumption = len(model.extracted_car_data.tracked_time_steps()) *\
+            model.extracted_car_data.avg_over_time_and_agents("charge_consumed")
+        co.t_print("Average Consumption {:.1f} kWh".format(avg_consumption))
+    
+    def get_house_stats(self, model):
         nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv = 0, 0, 0
         for dwelling in model.schedule_houses.agents:
             if dwelling.is_house:
@@ -292,23 +248,27 @@ class OutputData():
                     nbr_houses_wo_pv += 1
             else:
                 nbr_apartments += 1
+        return nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv
+    
+    def print_house_stats(self, model):
+        co = self.co
+        nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv \
+            = self.get_house_stats(model)
         co.t_print("Apartments: {}, Houses wo PV: {}, Houses w PV: {}".format(\
             nbr_apartments, nbr_houses_wo_pv, nbr_houses_w_pv))
         
     def plot_extracted_data(self, model):
         extr_data = model.extracted_car_data
-        time_steps = [time_step for time_step in extr_data.keys()]
-        data_elements_per_agent \
-            = list(next(iter(next(iter(extr_data.values())).values())).keys())
+        time_steps = extr_data.tracked_time_steps()
+        tracked_vars = extr_data.tracked_vars()
         lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
         
-        for element in data_elements_per_agent:
+        for tracked_var in tracked_vars:
             fig, ax = plt.subplots()
-            for agent in next(iter(extr_data.values())):
-                soc = [time_step[agent][element] \
-                       for time_step in extr_data.values()]
-                ax.plot(time_steps, soc)
-            ax.set(xlabel='time in hours', ylabel=element)
+            for agent_id in range(extr_data.nbr_of_tracked_agents):
+                y_data = extr_data.agent_time_series(agent_id, tracked_var)
+                ax.plot(time_steps, y_data)
+            ax.set(xlabel='time in hours', ylabel=tracked_var)
             plt.xticks(lbl_time_steps, lbl_hour_steps)
             plt.grid(axis='x', color='0.95')
             plt.show()
@@ -375,17 +335,16 @@ class OutputData():
             
                 
     def evaluate_overall_charge(self, model):
+        extr_data = model.extracted_car_data
         charge_sets = ["charge_received_work", "charge_received_pv",
                        "charge_received_grid", "charge_received_public"]
-        time_steps = [time_step for time_step in model.extracted_car_data.keys()]
+        time_steps = extr_data.tracked_time_steps()
         lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
         charges = dict()
         for charge_set in charge_sets:
             charges[charge_set] = []
-            for time_step, time_step_data in model.extracted_car_data.items():
-                charge = 0
-                for agent in time_step_data.values():
-                    charge += agent[charge_set]
+            for time_step in time_steps:
+                charge = extr_data.sum_over_time_step(charge_set, time_step)
                 charges[charge_set].append(charge)
         
         fig, ax = plt.subplots()
