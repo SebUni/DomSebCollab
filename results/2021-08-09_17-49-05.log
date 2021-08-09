@@ -1,0 +1,12 @@
+INFO:root:[17:49:05] INITIALISING CHARGING MODEL
+INFO:root:[17:49:06] Selected number of agents: 12000, season: summer, time step: 5 min
+INFO:root:[17:49:06] Selected charging strategy: Charge where cheaper basic
+INFO:root:[17:49:06] Selected work charge price: 0.30 $/kWh, employees per charger: 1
+INFO:root:[17:49:06] Start to create agents
+INFO:root:[17:49:09] Agent creation complete
+INFO:root:[17:49:09] Create agent's work schedule
+INFO:root:[17:49:47] Completed agent's work schedule
+INFO:root:[17:49:47] Agent creation complete
+INFO:root:[17:49:47] INITIALISATION COMPLETE
+INFO:root:[17:49:47] 
+INFO:root:[17:49:47] COMMENCING STEP CALCULATION
