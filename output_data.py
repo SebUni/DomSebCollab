@@ -10,8 +10,6 @@ import fiona
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
-from console_output import ConsoleOutput
-
 def time_stamp(i, time_step):
     days = i * time_step // 60 // 24
     day_of_week = round(int(days % 7)+1)
@@ -47,7 +45,8 @@ def get_color(value, min_value, max_value):
         return [1,1-rel_value,1-rel_value]    
 
 class OutputData():
-    def __init__(self, parameters):
+    def __init__(self, console_output, parameters):
+        self.co = console_output
         self.parameters = parameters
 
     def draw_car_agents(self, model, it):
@@ -240,7 +239,7 @@ class OutputData():
             avg_cost_house_no_pv_per_km, avg_cost_per_km
         
     def print_overall_charging_results(self, model):
-        co = ConsoleOutput()
+        co = self.co
         co.t_print("COMMENCING DATA EVALUATION")    
         charge_pv, charge_work, charge_grid, charge_emergency, utilisation, \
         avg_cost_apartment, avg_cost_house_pv, avg_cost_house_no_pv, avg_cost \
@@ -251,17 +250,17 @@ class OutputData():
         co.t_print("charge_received_public: {:.01f} kWh".format(\
                                                         charge_emergency))
         co.t_print("Company Charger Utilisation: {:.02f}%".format(utilisation))
-        co.t_print("Average Electricity Cost for Apartments: ${:.04f}".format(\
+        co.t_print("Average Electricity Cost Apartments: $/km {:.04f}".format(\
                                                         avg_cost_apartment))
-        co.t_print("Average Electricity Cost for House wo PV: ${:.04f}".format(\
+        co.t_print("Average Electricity Cost House wo PV: $/km {:.04f}".format(\
                                                         avg_cost_house_no_pv))
-        co.t_print("Average Electricity Cost for House w PV: ${:.04f}".format(\
+        co.t_print("Average Electricity Cost House w PV: $/km {:.04f}".format(\
                                                         avg_cost_house_pv))
-        co.t_print("Average Electricity Cost: ${:.04f}".format(avg_cost))
+        co.t_print("Average Electricity Cost: $/km {:.04f}".format(avg_cost))
         co.t_print("DATA EVALUATION COMPLETE")
         
     def print_route_stats(self, model):
-        co = ConsoleOutput()
+        co = self.co
         route_lengths = []
         for agent in model.schedule_cars.agents:
             home = agent.house_agent.location

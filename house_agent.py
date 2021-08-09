@@ -52,7 +52,7 @@ class HouseAgent(Agent):
             = electricity_plan_manager.electricity_plans[electricity_plan_uid]
         self.hcm = house_consumption_manager
         self.hgm = house_generation_manager
-        self.cur_house_power_balance = 0
+        self.cur_house_power_balance = 0 # + is excess gen. / - is excess con.
         self.charging_price_at_company \
             = company.electricity_plan.cost_of_use(1,0);
         self.earnings_from_feed_in = 0

@@ -9,8 +9,6 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 
-
-from console_output import ConsoleOutput
 from clock import Clock
 from car_agent import CarAgent
 from house_agent import HouseAgent
@@ -27,8 +25,8 @@ from charging_strategy import ChargingStrategy
 
 class ChargingModel(Model):
     """The charging model with N agents."""
-    def __init__(self, nbr_of_agents, parameters):
-        self.co = ConsoleOutput()
+    def __init__(self, nbr_of_agents, console_output, parameters):
+        self.co = console_output
         self.co.t_print("INITIALISING CHARGING MODEL")
         self.parameters = parameters
         self.num_agents = nbr_of_agents
@@ -57,14 +55,15 @@ class ChargingModel(Model):
         self.extracted_company_data = {"Charger utilisation": []}
         self.extracted_car_data = dict()
         
-        msg="Selected number of agents / season / time step: {} / {} / {} min"
+        msg="Selected number of agents: {}, season: {}, time step: {} min"
         self.co.t_print(msg.format(nbr_of_agents,
                                    self.clock.season_names[self.clock.season],
                                    self.clock.time_step))
         msg="Selected charging strategy: {}"
         cs = ChargingStrategy(parameters)
         self.co.t_print(msg.format(cs.charging_model_names[cs.charging_model]))
-        msg="Selected work charge price / employees per charger: {} $/kWh / {}"
+        msg = "Selected work charge price: {:.02f} $/kWh, " \
+            + "employees per charger: {}"
         self.co.t_print(msg.format(\
             parameters.get("company_charger_cost_per_kWh", "float"),
             parameters.get("employees_per_charger", "int")))
@@ -77,8 +76,8 @@ class ChargingModel(Model):
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
-            # residency_location = self.lrm.locations[21305]
-            # employment_location = self.lrm.locations[20901]
+            # residency_location = self.lrm.locations[21002]
+            # employment_location = self.lrm.locations[21402]
             company = self.cpm.add_employee_to_location(employment_location)
             
             cur_activity = self.cp.HOME       # actually assigned once

@@ -130,15 +130,17 @@ class ChargingStrategy():
         self.ALWAYS_CHARGE_NO_WORK_CHARGERS = 1
         self.ALWAYS_CHARGE_AT_HOME = 2
         self.ALWAYS_CHARGE_AT_WORK = 3
-        self.CHARGE_WHERE_CHEAPER_BASIC = 4
-        self.CHARGE_WHERE_CHEAPER_ADVANCED = 5
+        self.ALWAYS_CHARGE_WHERE_CHEAPER = 4
+        self.CHARGE_WHERE_CHEAPER_BASIC = 5
+        self.CHARGE_WHERE_CHEAPER_ADVANCED = 6
         self.charging_model = parameters.get("charging_model", "int")
         self.charging_model_names = {0: "Always charge",
                                      1: "Always charge (no work chargers)",
                                      2: "Always charge at home",
                                      3: "Always charge at work",
-                                     4: "Charge where cheaper basic",
-                                     5: "Charge where cheaper advanced"}
+                                     4: "Always_charge where cheaper",
+                                     5: "Charge where cheaper basic",
+                                     6: "Charge where cheaper advanced"}
         if car_agent == None: return
         
         
@@ -160,18 +162,18 @@ class ChargingStrategy():
         self.reserve_charge = max(car_agent.reserve_power,
                                   car_agent.minimum_absolute_state_of_charge)
         self.q_one_way = car_agent.charge_needed_for_route(
-                    car_agent.lrm.calc_route(car_agent.house_agent.location,
+                    car_agent.lrm.calc_route(self.house_agent.location,
                                              car_agent.company.location))
         self.c = parameters.get("confidence", "float")
-        self.feed_in_tariff = car_agent.house_agent.electricity_plan.feed_in_tariff
+        self.feed_in_tariff = self.house_agent.electricity_plan.feed_in_tariff
         self.cost_home_charging \
-            = car_agent.house_agent.electricity_plan.cost_of_use(1, 
+            = self.house_agent.electricity_plan.cost_of_use(1, 
                                                 car_agent.clock.time_of_day)
         self.cost_work_charging = car_agent.company.charger_cost_per_kWh
         self.cost_public_charging \
             = parameters.get("public_charger_cost_per_kWh", "float")            
         self.charge_rate_at_home \
-            = car_agent.house_agent.max_charge_rate(car_agent.car_model)
+            = self.house_agent.max_charge_rate(car_agent.car_model)
         self.charge_rate_at_work \
             = car_agent.company.ccm.max_charge_rate(car_agent.car_model)
         self.charge_rate_at_public \
@@ -179,6 +181,12 @@ class ChargingStrategy():
         self.minimum_soc = max(car_agent.car_model.battery_capacity * \
             self.parameters.get("minimum_relative_state_of_charge", "float"),
                                self.reserve_charge)
+        self.always_charge_from_pv \
+            = True if self.cost_work_charging > self.feed_in_tariff else False
+        if self.charging_model not in [self.CHARGE_WHERE_CHEAPER_BASIC,
+                                       self.CHARGE_WHERE_CHEAPER_ADVANCED] \
+            or not self.house_agent.is_house:
+            self.always_charge_from_pv = False
     
     def determine_charge_instructions(self, soc):
         if not hasattr(self,'ca'):
@@ -224,8 +232,8 @@ class ChargingStrategy():
         if self.charging_model == self.ALWAYS_CHARGE_NO_WORK_CHARGERS:
             charge_at_work = 0
                 
-        # model #4: basics - charge where cheaper
-        if self.charging_model == self.CHARGE_WHERE_CHEAPER_BASIC:
+        # model #4: basics - always charge where cheaper
+        if self.charging_model == self.ALWAYS_CHARGE_WHERE_CHEAPER:
             if self.whereabouts.destination_activity == self.cp.WORK\
                 and p_work <= p_grid:
                 work_stay_duration \
@@ -233,7 +241,7 @@ class ChargingStrategy():
                     - self.clock.elapsed_time) / 60) % (24 * 7)
                 charge_at_work \
                     = max(min(self.ca.car_model.battery_capacity * 0.8 - soc,
-                              work_stay_duration * self.charge_rate_at_work),0)
+                              work_stay_duration * cr_w),0)
             if self.whereabouts.destination_activity == self.cp.HOME:
                 if self.house_agent.charger != None:
                     if p_work >= p_grid:
@@ -241,14 +249,42 @@ class ChargingStrategy():
                             = ((cal.find_next_departure_from_activity(self.cp.HOME)\
                                 - self.clock.elapsed_time) / 60) % (24 * 7)
                         charge_at_home \
-                            = max(min(home_stay_duration*self.charge_rate_at_home,
-                                     self.ca.car_model.battery_capacity*0.8-soc),0)
+                            = max(min(self.ca.car_model.battery_capacity*0.8-soc,
+                                      home_stay_duration * cr_h),0)
+                else:
+                    charge_needed = max(q_ow + q_res - soc, 0)
+                    if charge_needed != 0:
+                        self.ca.initiate_emergency_charging(charge_needed)
+                        
+        # model #5: basics - charge where cheaper
+        if self.charging_model == self.CHARGE_WHERE_CHEAPER_BASIC:
+            if self.whereabouts.destination_activity == self.cp.WORK:
+                work_stay_duration \
+                    = ((cal.find_next_departure_from_activity(self.cp.WORK)\
+                    - self.clock.elapsed_time) / 60) % (24 * 7)
+                if p_grid > p_work:
+                    charge_at_work = q_ow
+                if p_grid >= p_work:
+                    charge_at_work += q_ow + q_res - soc
+                charge_at_work = max(min(work_stay_duration * cr_w,
+                                         charge_at_work),0)
+            if self.whereabouts.destination_activity == self.cp.HOME:
+                if self.house_agent.charger != None:
+                    home_stay_duration \
+                        = ((cal.find_next_departure_from_activity(self.cp.HOME)\
+                            - self.clock.elapsed_time) / 60) % (24 * 7)
+                    if p_grid < p_work:
+                        charge_at_home = q_ow
+                    if p_grid <= p_work:
+                        charge_at_home += q_ow + q_res - soc
+                    charge_at_home = max(min(home_stay_duration * cr_h,
+                                             charge_at_home),0)
                 else:
                     charge_needed = max(q_ow + q_res - soc, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
         
-        # model #5: advanced - incluing PV
+        # model #6: advanced - incluing PV
         if self.charging_model == self.CHARGE_WHERE_CHEAPER_ADVANCED:
             next_home_stay_start, next_home_stay_end \
                 = self.det_next_home_stay()
@@ -257,50 +293,179 @@ class ChargingStrategy():
                 = self.ca.calc_forcast_mean_and_std_dev(forcast_begin,
                                                         next_home_stay_end)
             if self.whereabouts.destination_activity == self.cp.WORK:
-                if pv_cap != 0 and self.house_agent.charger != None and sig > 0:
-                    charge_at_work = parm_cost_fct_charging_at_work_anal(q_ow,
-                        q_res, p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
-                elif pv_cap == 0 and self.house_agent.charger != None:
-                    charge_at_work = max(2 * q_ow + q_res - soc, 0) \
-                                                if p_grid < p_work \
-                                                else max(q_ow + q_res - soc, 0)
+                # when agents earn more by selling PV than using it to charge
+                if p_feed >= p_work:
+                    charge_at_work = 2 * q_ow + q_res - soc
+                # when charging from grid is more expensive than at work but
+                # charging from PV is better than selling PV at feed in cost
+                elif p_grid >= p_work:
+                    # car can charge at home also from PV and forecast is not 0
+                    if pv_cap != 0 and self.house_agent.charger != None \
+                        and sig > 0:
+                        charge_at_work \
+                            = parm_cost_fct_charging_at_work_anal(q_ow, q_res,
+                                p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
+                    # car can charge at home but NOT from PV or car can NOT\
+                    # charge at home
+                    else:
+                        charge_at_work = 2 * q_ow + q_res - soc
+                # when only public charging is more expen. than work charging
                 else:
-                    charge_at_work = max(2 * q_ow + q_res - soc, 0)
+                    charge_at_work = q_ow + q_res - soc
                 # ensure charge suffices to reach home, but uses as little 
                 # public charging as possible
                 work_stay_duration \
                     = ((cal.find_next_departure_from_activity(self.cp.WORK)\
                     - self.clock.elapsed_time) / 60) % (24 * 7)
-                charge_at_work = max(q_ow + q_res - soc, 0,
-                                     min(charge_at_work,
-                                         work_stay_duration * cr_w))
+                charge_at_work = max(charge_at_work, 0)
             if self.whereabouts.destination_activity == self.cp.HOME:
-                if pv_cap != 0 and self.house_agent.charger != None and sig > 0:
-                    charge_at_home = parm_cost_fct_charging_at_home_anal(q_ow,
-                        q_res, p_feed, p_grid, p_em, p_work, soc, c, mu, sig)
-                elif pv_cap == 0 and self.house_agent.charger != None:
-                    charge_at_home = max(2 * q_ow + q_res - soc, 0) \
-                                                if p_grid >= p_work \
-                                                else max(q_ow + q_res - soc, 0)    
+                if self.house_agent.charger != None:
+                    home_stay_duration \
+                        = ((cal.find_next_departure_from_activity(self.cp.HOME)\
+                            - self.clock.elapsed_time) / 60) % (24 * 7)
+                    charge_at_home = q_ow + q_res - soc
+                    if p_grid < p_work:
+                        charge_at_home += q_ow
+                    charge_at_home = max(charge_at_home, 0)
                 else:
                     charge_needed = max(q_ow + q_res - soc, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
-                        return 0, 0
-                # ensure charge suffices to reach home, but uses as little 
-                # public charging as possible
-                home_stay_duration \
-                    = ((cal.find_next_departure_from_activity(self.cp.HOME)\
+        
+        # boost charge by using public chargers if needed to reach next
+        # destination
+        if charge_at_home != 0:
+            charge_needed_to_work = max(q_ow + q_res - soc, 0)
+            home_stay_duration \
+                = ((cal.find_next_departure_from_activity(self.cp.HOME)\
                     - self.clock.elapsed_time) / 60) % (24 * 7)
-                charge_at_home = max(q_ow + q_res - soc, 0,
-                                     min(charge_at_home,
-                                         home_stay_duration * cr_h))
+            if cr_h * home_stay_duration <= charge_needed_to_work:
+                # determine the fraction of time of home_stay_duration that
+                # car should actually charge at home, the rest is time spend
+                # charging at public charger
+                charge_time_home \
+                    = (charge_needed_to_work - home_stay_duration * cr_p) \
+                    / (cr_h - cr_p)
+                charge_time_home = round_down_time_step(charge_time_home,
+                                                        self.clock.time_step)
+                # determine fraction of charge_at_home that can be charged at
+                # home the rest is charged at public charger
+                charge_frac_home = charge_time_home * cr_h
+                # public charge limited by charge time and charge rate
+                max_charge_at_public_cr = cr_p \
+                    * max(home_stay_duration - self.clock.time_step / 60, 0)
+                # public charge limited by battery capacity
+                max_charge_at_public_bat \
+                    = self.ca.car_model.battery_capacity - soc
+                max_charge_at_public = min(max_charge_at_public_cr,
+                                           max_charge_at_public_bat)
+                public_frac_charge = charge_needed_to_work - charge_frac_home
+                public_at_charge = max(min(public_frac_charge,
+                                       max_charge_at_public), 0)
+                if public_at_charge != 0:
+                    self.ca.initiate_emergency_charging(public_at_charge)
+                return 0, 0
+            
+        if charge_at_work != 0:
+            charge_needed_to_home = max(q_ow + q_res - soc, 0)
+            work_stay_duration \
+                = ((cal.find_next_departure_from_activity(self.cp.WORK)\
+                    - self.clock.elapsed_time) / 60) % (24 * 7)
+            if cr_w * work_stay_duration <= charge_needed_to_home:
+                # determine the fraction of time of work_stay_duration that
+                # car should actually charge at work, the rest is time spend
+                # charging at public charger
+                charge_time_work \
+                    = (charge_needed_to_home - work_stay_duration * cr_p)\
+                    / (cr_w - cr_p)
+                charge_time_work = round_down_time_step(charge_time_work,
+                                                        self.clock.time_step)
+                # determine fraction of charge_at_work that can be charged at
+                # work the rest is charged at public charger
+                charge_frac_work = charge_time_work * cr_w
+                # public charge limited by charge time and charge rate
+                max_charge_at_public_cr = cr_p \
+                    * max(work_stay_duration - self.clock.time_step / 60, 0)
+                # public charge limited by battery capacity
+                max_charge_at_public_bat \
+                    = self.ca.car_model.battery_capacity - soc
+                max_charge_at_public = min(max_charge_at_public_cr,
+                                           max_charge_at_public_bat)
+                public_frac_charge = charge_needed_to_home - charge_frac_work
+                public_at_charge = max(min(public_frac_charge,
+                                       max_charge_at_public), 0)
+                if public_at_charge != 0:
+                    self.ca.initiate_emergency_charging(public_at_charge)
+                return 0, 0
                         
-        # charge from alternative source
+        # increase primary charge (the source that is cheaper) if necessary
+        if self.charging_model in [self.CHARGE_WHERE_CHEAPER_BASIC,
+                                   self.CHARGE_WHERE_CHEAPER_ADVANCED]:
+            if self.whereabouts.destination_activity == self.cp.WORK \
+                and p_grid >= p_work:
+                # check if agent needs to charge now to reach all future stops
+                soc_check = soc
+                shifts_to_come = self.det_shifts_to_come()
+                charge_instruction_at_work = 0
+                for shift_it, shift in enumerate(shifts_to_come):
+                    # add charge agent can charge now
+                    # TODO to be precise this would need to check if the first
+                    # shift is shorter due to a delayed arrival
+                    next_shift_length = self.calc_shift_length(shift)
+                    soc_check = min(max(2 * q_ow + q_res, soc_check),
+                                    soc_check + cr_w * next_shift_length,
+                                    self.ca.car_model.battery_capacity)
+                    # is charge needed to get to home?
+                    soc_check -= q_ow
+                    charge_needed_to_home \
+                        = self.calc_charge_need_from_pri_source_to_reach_shift(\
+                            soc, soc_check, shifts_to_come, shift_it, False)
+                    # is charge neeed to get back home?
+                    soc_check -= q_ow
+                    charge_needed_to_work \
+                        = self.calc_charge_need_from_pri_source_to_reach_shift(\
+                            soc, soc_check, shifts_to_come, shift_it, True)
+                    # see if charge needed exceeds previously found demand
+                    charge_instruction_at_work \
+                        = max(charge_instruction_at_work,charge_needed_to_work,
+                              charge_needed_to_home)
+                charge_at_work = max(charge_at_work,charge_instruction_at_work)
+            if self.whereabouts.destination_activity == self.cp.HOME \
+                and p_grid <= p_work and self.house_agent.is_house:
+                # check if agent needs to charge now to reach all future stops
+                soc_check = soc
+                shifts_to_come = self.det_shifts_to_come()
+                charge_instruction_at_home = 0
+                for shift_it, shift in enumerate(shifts_to_come):
+                    # add charge agent can charge now
+                    # shift  is the shift following after this home stay
+                    next_time_at_home = self.calc_time_at_home(shift)
+                    soc_check = min(max(2 * q_ow + q_res, soc_check),
+                                    soc_check + cr_h * next_time_at_home,
+                                    self.ca.car_model.battery_capacity)
+                    # is charge needed to get to work?
+                    soc_check -= q_ow
+                    charge_needed_to_work \
+                        = self.calc_charge_need_from_pri_source_to_reach_home(\
+                            soc, soc_check, shifts_to_come, shift_it, False)
+                    # is charge neeed to get back home?
+                    soc_check -= q_ow
+                    charge_needed_to_home \
+                        = self.calc_charge_need_from_pri_source_to_reach_home(\
+                            soc, soc_check, shifts_to_come, shift_it, True)
+                    # see if charge needed exceeds previously found demand
+                    charge_instruction_at_home \
+                        = max(charge_instruction_at_home,charge_needed_to_work,
+                              charge_needed_to_home)
+                charge_at_home = max(charge_at_home,charge_instruction_at_home)
+            
+        
+        # charge from alternative source (the more expenise charging option)
         # that is if usually prefer to charge at work, check if additional
         # charge is needed
         if self.charging_model in [self.ALWAYS_CHARGE_AT_HOME,
                                    self.ALWAYS_CHARGE_AT_WORK,
+                                   self.ALWAYS_CHARGE_WHERE_CHEAPER,
                                    self.CHARGE_WHERE_CHEAPER_BASIC,
                                    self.CHARGE_WHERE_CHEAPER_ADVANCED]:
             if self.whereabouts.destination_activity == self.cp.WORK \
@@ -311,11 +476,11 @@ class ChargingStrategy():
                 shifts_to_come.append(shifts_to_come.pop(0))
                 charge_instruction_at_work = 0
                 for shift_it, shift in enumerate(shifts_to_come):
-                    # is charge needed to get to home? # CONTINUE FROM HERE
+                    # is charge needed to get to home?
                     soc_check -= q_ow
                     charge_needed_to_home \
-                        = self.calc_charge_need_to_reach_home(soc_check,
-                                                shifts_to_come, shift_it, True)
+                        = self.calc_charge_need_from_alt_source_to_reach_home(\
+                                    soc_check, shifts_to_come, shift_it, True)
                     # is charge neeed to get back home?
                     # shift  is the shift following after this home stay
                     next_time_at_home = self.calc_time_at_home(shift)
@@ -323,15 +488,15 @@ class ChargingStrategy():
                                     self.ca.car_model.battery_capacity)
                     soc_check -= q_ow
                     charge_needed_to_work \
-                        = self.calc_charge_need_to_reach_home(soc_check,
-                                               shifts_to_come, shift_it, False)
+                        = self.calc_charge_need_from_alt_source_to_reach_home(\
+                                    soc_check, shifts_to_come, shift_it, False)
                     # see if charge needed exceeds previously found demand
                     charge_instruction_at_work \
                         = max(charge_instruction_at_work,charge_needed_to_work,
                               charge_needed_to_home)
                 charge_at_work = max(charge_at_work,charge_instruction_at_work)
             if self.whereabouts.destination_activity == self.cp.HOME \
-                and p_grid > p_work:
+                and p_grid > p_work and self.house_agent.is_house:
                 # check if agent needs to charge now to reach all future stops
                 soc_check = soc
                 shifts_to_come = self.det_shifts_to_come()
@@ -340,70 +505,21 @@ class ChargingStrategy():
                     # is charge needed to get to work?
                     soc_check -= q_ow
                     charge_needed_to_work \
-                        = self.calc_charge_need_to_reach_shift(soc_check,
-                                                shifts_to_come, shift_it, True)
+                        = self.calc_charge_need_from_alt_source_to_reach_shift(\
+                                    soc_check, shifts_to_come, shift_it, True)
                     # is charge neeed to get back home?
                     next_shift_length = self.calc_shift_length(shift)
                     soc_check = min(soc_check + cr_w * next_shift_length, 
                                     self.ca.car_model.battery_capacity)
                     soc_check -= q_ow
                     charge_needed_to_home \
-                        = self.calc_charge_need_to_reach_shift(soc_check,
-                                               shifts_to_come, shift_it, False)
+                        = self.calc_charge_need_from_alt_source_to_reach_shift(\
+                                    soc_check, shifts_to_come, shift_it, False)
                     # see if charge needed exceeds previously found demand
                     charge_instruction_at_home \
                         = max(charge_instruction_at_home,charge_needed_to_work,
                               charge_needed_to_home)
                 charge_at_home = max(charge_at_home,charge_instruction_at_home)
-        
-        # boost charge by using public chargers if needed
-        if charge_at_home != 0:
-            home_stay_duration \
-                = ((cal.find_next_departure_from_activity(self.cp.HOME)\
-                    - self.clock.elapsed_time) / 60) % (24 * 7)
-            if cr_h * home_stay_duration < charge_at_home:
-                # determine the fraction of time of home_stay_duration that
-                # car should actually charge at home, the rest is time spend
-                # charging at public charger
-                charge_time_home \
-                    = (charge_at_home - home_stay_duration*cr_p)/(cr_h - cr_p)
-                charge_time_home = round_down_time_step(charge_time_home,
-                                                        self.clock.time_step)
-                # determine fraction of charge_at_home that can be charged at
-                # home the rest is charged at public charger
-                charge_frac_home = charge_time_home * cr_h
-                max_charge_at_public = cr_p \
-                    * max(home_stay_duration - self.clock.time_step / 60, 0)
-                public_frac_charge = charge_at_home - charge_frac_home
-                public_at_charge = min(max(public_frac_charge, 0),
-                                       max_charge_at_public)
-                if public_at_charge != 0:
-                    self.ca.initiate_emergency_charging(public_at_charge)
-                return 0, 0
-            
-        if charge_at_work != 0:
-            work_stay_duration \
-                = ((cal.find_next_departure_from_activity(self.cp.WORK)\
-                    - self.clock.elapsed_time) / 60) % (24 * 7)
-            if cr_w * work_stay_duration < charge_at_work:
-                # determine the fraction of time of work_stay_duration that
-                # car should actually charge at work, the rest is time spend
-                # charging at public charger
-                charge_time_work \
-                    = (charge_at_work - work_stay_duration*cr_p)/(cr_w - cr_p)
-                charge_time_work = round_down_time_step(charge_time_work,
-                                                        self.clock.time_step)
-                # determine fraction of charge_at_work that can be charged at
-                # work the rest is charged at public charger
-                charge_frac_work = charge_time_work * cr_w
-                max_charge_at_public = cr_p \
-                    * max(work_stay_duration - self.clock.time_step / 60, 0)
-                public_frac_charge = charge_at_work - charge_frac_work
-                public_at_charge = min(max(public_frac_charge, 0),
-                                       max_charge_at_public)
-                if public_at_charge != 0:
-                    self.ca.initiate_emergency_charging(public_at_charge)
-                return 0, 0
         
         return charge_at_home, charge_at_work         
     
@@ -460,10 +576,58 @@ class ChargingStrategy():
             start_in_min_rounded += time_step
             
         return start_in_min_rounded, end_in_min_rounded
-            
     
-    def calc_charge_need_to_reach_shift(self, soc_check, shifts_to_come,
-                                        shift_it, start_at_work):
+    def calc_charge_need_from_pri_source_to_reach_shift(self,cur_soc,soc_check,
+        shifts_to_come, shift_it, start_at_work):
+        if soc_check < self.minimum_soc:
+            tmp_soc = self.minimum_soc
+            shifts_going_back = shifts_to_come[:shift_it+1]
+            shifts_going_back.reverse()
+            for it_rev, shift_rev in enumerate(shifts_going_back):
+                next_shift_length = self.calc_shift_length(shift_rev)
+                time_at_home = self.calc_time_at_home(shift_rev)
+                
+                if not (it_rev == 0 and start_at_work):
+                    tmp_soc += self.q_one_way
+                    if tmp_soc > self.ca.car_model.battery_capacity:
+                        tmp_soc = self.ca.car_model.battery_capacity
+                        
+                tmp_soc += self.q_one_way
+                if tmp_soc > self.ca.car_model.battery_capacity:
+                    tmp_soc = self.ca.car_model.battery_capacity
+                if shift_rev != shifts_to_come[0]:
+                    tmp_soc -= self.charge_rate_at_work * next_shift_length
+                    if tmp_soc < self.minimum_soc: break
+                else:
+                    return max(tmp_soc - cur_soc, 0)
+        return 0
+
+    def calc_charge_need_from_pri_source_to_reach_home(self, cur_soc,soc_check,
+        shifts_to_come, shift_it, start_at_home):
+        if soc_check < self.minimum_soc:
+            tmp_soc = self.minimum_soc
+            shifts_going_back = shifts_to_come[:shift_it+1]
+            shifts_going_back.reverse()
+            for it_rev, shift_rev in enumerate(shifts_going_back):
+                time_at_home = self.calc_time_at_home(shift_rev)
+                
+                if not (it_rev == 0 and not start_at_home):
+                    tmp_soc += self.q_one_way
+                    if tmp_soc > self.ca.car_model.battery_capacity:
+                        tmp_soc = self.ca.car_model.battery_capacity
+                    
+                tmp_soc += self.q_one_way
+                if tmp_soc > self.ca.car_model.battery_capacity: 
+                    tmp_soc = self.ca.car_model.battery_capacity
+                if shift_rev != shifts_to_come[0]:
+                    tmp_soc -= self.charge_rate_at_home * time_at_home
+                    if tmp_soc < self.minimum_soc: break
+                else:
+                    return max(tmp_soc - cur_soc, 0)
+        return 0
+    
+    def calc_charge_need_from_alt_source_to_reach_shift(self, soc_check,
+        shifts_to_come, shift_it, start_at_work):
         if soc_check < self.minimum_soc:
             charge_missing = - soc_check + self.minimum_soc
             tmp_soc = self.minimum_soc
@@ -486,8 +650,8 @@ class ChargingStrategy():
                     return charge_missing
         return 0
 
-    def calc_charge_need_to_reach_home(self, soc_check, shifts_to_come,
-                                       shift_it, start_at_home):
+    def calc_charge_need_from_alt_source_to_reach_home(self, soc_check,
+        shifts_to_come, shift_it, start_at_home):
         if soc_check < self.minimum_soc:
             charge_missing = - soc_check + self.minimum_soc
             tmp_soc = self.minimum_soc

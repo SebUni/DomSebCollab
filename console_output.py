@@ -8,6 +8,7 @@ Created on Thu Mar 11 12:46:02 2021
 import sys
 import datetime
 import time
+import logging
 
 def seconds_to_time_string(seconds):
     eta_sec = int(seconds % 60)
@@ -35,11 +36,18 @@ class ConsoleOutput():
         self.limits = dict()
         self.start_time = dict()
         self.PROGRESS_BAR_LENGTH = 30
+        self.clean_logger()
+        path = "results/"
+        filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        path_filename = path + filename + ".log"
+        logging.basicConfig(filename=path_filename, level=logging.INFO)
     
     # time print
     def t_print(self, message):
         time_str = datetime.datetime.now().strftime("[%H:%M:%S]")
-        print(time_str + " " + message)
+        final_msg = "{} {}".format(time_str, message)
+        logging.info(final_msg)
+        print(final_msg)
         
     # indent print
     def i_print(self, message):
@@ -77,5 +85,10 @@ class ConsoleOutput():
         time_str = datetime.datetime.now().strftime("[%H:%M:%S]")
         sys.stdout.write("\r{} {}\n".format(time_str, message))
         sys.stdout.flush()
+        logging.info("{} {}".format(time_str, message))
         del self.limits[title]
         del self.start_time[title]
+        
+    def clean_logger(self):
+        for handler in logging.root.handlers:
+            logging.root.removeHandler(handler)

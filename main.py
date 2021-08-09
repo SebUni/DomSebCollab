@@ -10,22 +10,24 @@ import numpy as np
 import charging_model
 from parameters import Parameters
 from output_data import OutputData
+from console_output import ConsoleOutput
 
 draw_agents_on_map = False
 plot_extraced_data = True
 plot_extraced_data_details = True
 
-run_parameter_scan = True
+run_parameter_scan = False
 
+co = ConsoleOutput()
 parameters = Parameters()
-od = OutputData(parameters)
+od = OutputData(co, parameters)
 nbr_of_agents = parameters.get("nbr_of_agents","int")
 
 # single run
 if not run_parameter_scan:
-    cm = charging_model.ChargingModel(nbr_of_agents, parameters)
+    cm = charging_model.ChargingModel(nbr_of_agents, co, parameters)
     for i in range(cm.clock.time_step_limit):
-        if i == 2256:
+        if i == 2016:
             test = 0
         cm.step()
         if draw_agents_on_map:
@@ -52,8 +54,6 @@ else:
                                "avg_cost_house_pv": [],
                                "avg_cost_house_no_pv": [], "avg_cost": []}
         for price_at_work in scan_parameters["prices_at_work"]:
-            print("price_at_work: {:.03f} / employees_per_charger: {}".format(\
-                                        price_at_work, employees_per_charger))
             parameters.parameters["company_charger_cost_per_kWh"] \
                 = price_at_work
             parameters.parameters["employees_per_charger"] \
@@ -86,3 +86,5 @@ else:
             = scan_parameters["prices_at_work"]
         od.plot_parameter_scan(slct_scan_parameters, scan_collected_data,
                                title)
+        
+co.clean_logger()

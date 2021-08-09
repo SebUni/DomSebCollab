@@ -71,6 +71,9 @@ class CalendarPlanner():
         # starts = [7, 31, 55, 79, 109]
         # ends = [15, 36, 60, 90, 113]
         
+        # starts = [8, 32, 55, 79, 109]
+        # ends = [9, 33, 56, 80, 113]
+        
         starts_org, ends_orgs = starts, ends
         init_start = starts[0]
         for time_slot in range(0, 60*24*7, self.clock.time_step):
