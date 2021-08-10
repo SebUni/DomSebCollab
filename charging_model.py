@@ -65,6 +65,7 @@ class ChargingModel(Model):
         self.extracted_car_data.init_tracked_var("work_charge_instruction", 0)
         self.extracted_car_data.init_tracked_var("home_charge_instruction", 0)
         self.extracted_car_data.init_tracked_var("emergency_charge_instruction", 0)
+        self.extracted_car_data.init_tracked_var("charge_held_back", 0)
         self.extracted_car_data.init_tracked_var("electricity_cost_apartment", 0)
         self.extracted_car_data.init_tracked_var("electricity_cost_house_w_pv", 0)
         self.extracted_car_data.init_tracked_var("electricity_cost_house_wo_pv", 0)

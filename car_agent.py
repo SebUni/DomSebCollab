@@ -95,6 +95,7 @@ class CarAgent(Agent):
             * self.parameters.get("start_soc","float")# soc in kWh
         self.charge_at_home = 0.0
         self.charge_at_work = 0.0
+        self.charge_held_back = 0.0
         
         self.electricity_cost = 0 # in $ i guess ^^
         self.cur_electricity_cost = 0
@@ -138,6 +139,7 @@ class CarAgent(Agent):
         # initialise extraction data
         self.distance_travelled = 0
         self.cur_electricity_cost = 0
+        self.charge_held_back = 0.0
         
         # Writing this while I should be celebrating christmas, fuck COVID
         self.calendar.step()
@@ -156,6 +158,8 @@ class CarAgent(Agent):
         self.extracted_data.set(self.tracking_id, "soc", cur_soc)
         self.extracted_data.set(self.tracking_id, "cur_activity",
                                 self.whereabouts.cur_activity)
+        self.extracted_data.set(self.tracking_id, "charge_held_back",
+                                self.charge_held_back)
         self.last_charge_at_work = self.charge_at_work
         
     def plan(self):
@@ -405,7 +409,7 @@ class CarAgent(Agent):
         return power_required
     
     def plan_charging(self):
-        self.charge_at_home, self.charge_at_work \
+        self.charge_at_home, self.charge_at_work, self.charge_held_back \
            = self.charging_strategy.determine_charge_instructions(self.soc)
                
     def charge(self):

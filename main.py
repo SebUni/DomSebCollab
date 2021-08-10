@@ -43,7 +43,6 @@ if not run_parameter_scan:
     if plot_extraced_data_details:
         od.plot_extracted_data(cm)
 
-
 # parameter scan
 else:
     scan_parameters = {"prices_at_work" : np.arange (0.14, 0.29, 0.02),

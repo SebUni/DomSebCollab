@@ -212,6 +212,8 @@ class ChargingStrategy():
         
         cal = self.ca.calendar
         
+        charge_held_back = 0
+        
         # model #0: basics - charge always to 80%
         if self.charging_model == self.ALWAYS_CHARGE \
             or self.charging_model == self.ALWAYS_CHARGE_NO_WORK_CHARGERS:
@@ -305,6 +307,8 @@ class ChargingStrategy():
                         charge_at_work \
                             = parm_cost_fct_charging_at_work_anal(q_ow, q_res,
                                 p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
+                        charge_held_back \
+                            = (2 * q_ow + q_res - soc) - charge_at_work
                     # car can charge at home but NOT from PV or car can NOT\
                     # charge at home
                     else:
@@ -364,7 +368,7 @@ class ChargingStrategy():
                                        max_charge_at_public), 0)
                 if public_at_charge != 0:
                     self.ca.initiate_emergency_charging(public_at_charge)
-                return 0, 0
+                return 0, 0, 0
             
         if charge_at_work != 0:
             charge_needed_to_home = max(q_ow + q_res - soc, 0)
@@ -396,7 +400,7 @@ class ChargingStrategy():
                                        max_charge_at_public), 0)
                 if public_at_charge != 0:
                     self.ca.initiate_emergency_charging(public_at_charge)
-                return 0, 0
+                return 0, 0, 0
                         
         # increase primary charge (the source that is cheaper) if necessary
         if self.charging_model in [self.CHARGE_WHERE_CHEAPER_BASIC,
@@ -521,7 +525,11 @@ class ChargingStrategy():
                               charge_needed_to_home)
                 charge_at_home = max(charge_at_home,charge_instruction_at_home)
         
-        return charge_at_home, charge_at_work         
+        # check how much charge was held back in the end
+        if charge_held_back != 0:
+            charge_held_back = max((2 * q_ow + q_res - soc) - charge_at_work,0)
+                            
+        return charge_at_home, charge_at_work, charge_held_back       
     
     def det_shifts_to_come(self):
         shifts_to_come = []

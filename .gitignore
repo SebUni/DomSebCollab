@@ -5,5 +5,7 @@ TODO
 *.png
 test.py
 
+*.ini
+
 .spyproject/
-.spyproject/config/workspace.ini
+

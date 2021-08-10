@@ -127,9 +127,11 @@ class OutputData():
     
     def calc_overall_charging_results(self, model):
         extr_data = model.extracted_car_data
-        charge_pv, charge_work, charge_grid, charge_emergency = 0, 0, 0, 0
+        charge_pv, charge_work, charge_grid, charge_emergency, \
+            charge_held_back = 0, 0, 0, 0, 0
         charge_sets = ["charge_received_work", "charge_received_pv",
-                       "charge_received_grid", "charge_received_public"]
+                       "charge_received_grid", "charge_received_public",
+                       "charge_held_back"]
         for charge_set in charge_sets:
             if charge_set == "charge_received_work":
                 charge_work = extr_data.sum_over_all_agents(charge_set)
@@ -139,6 +141,8 @@ class OutputData():
                 charge_grid = extr_data.sum_over_all_agents(charge_set)
             if charge_set == "charge_received_public":
                 charge_emergency = extr_data.sum_over_all_agents(charge_set)
+            if charge_set == "charge_held_back":
+                charge_held_back = extr_data.sum_over_all_agents(charge_set)
         
         charger_utilisations \
             = [list(time_step.values()) for time_step in \
@@ -194,20 +198,24 @@ class OutputData():
             avg_cost_per_km = avg_electricity_cost / avg_dist_travlled
         
         return charge_pv, charge_work, charge_grid, charge_emergency, \
-            utilisation, avg_cost_apartment_per_km, avg_cost_house_pv_per_km, \
-            avg_cost_house_no_pv_per_km, avg_cost_per_km
+            charge_held_back, utilisation, avg_cost_apartment_per_km, \
+            avg_cost_house_pv_per_km, avg_cost_house_no_pv_per_km,\
+            avg_cost_per_km
         
     def print_overall_charging_results(self, model):
         co = self.co
         co.t_print("COMMENCING DATA EVALUATION")    
-        charge_pv, charge_work, charge_grid, charge_emergency, utilisation, \
-        avg_cost_apartment, avg_cost_house_pv, avg_cost_house_no_pv, avg_cost \
+        charge_pv, charge_work, charge_grid, charge_emergency, \
+        charge_held_back, utilisation, avg_cost_apartment, avg_cost_house_pv,\
+        avg_cost_house_no_pv, avg_cost \
             = self.calc_overall_charging_results(model)
         co.t_print("charge_received_work: {:.01f} kWh".format(charge_work))
         co.t_print("charge_received_pv: {:.01f} kWh".format(charge_pv))
         co.t_print("charge_received_grid: {:.01f} kWh".format(charge_grid))
         co.t_print("charge_received_public: {:.01f} kWh".format(\
                                                         charge_emergency))
+        co.t_print("charge_held_back: {:.01f} kWh".format(\
+                                                        charge_held_back))
         co.t_print("Company Charger Utilisation: {:.02f}%".format(utilisation))
         co.t_print("Average Electricity Cost Apartments: $/km {:.04f}".format(\
                                                         avg_cost_apartment))
