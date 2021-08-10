@@ -17,7 +17,7 @@ plot_extraced_data = True
 plot_extraced_data_details = False
 store_to_csv = True
 
-run_parameter_scan = False
+run_parameter_scan = True
 
 parameters = Parameters()
 co = ConsoleOutput(parameters)
@@ -48,20 +48,21 @@ if not run_parameter_scan:
 
 # parameter scan
 else:
-    scan_parameters = {"prices_at_work" : np.arange (0.14, 0.29, 0.02),
-                        "employees_per_charger" : range(1,2,9)}
-    for employees_per_charger in scan_parameters["employees_per_charger"]:
-        scan_collected_data = {"charge_pv" :[], "charge_work" : [],
-                               "charge_grid" :[], "charge_emergency" : [],
-                               "utilisation" : [], "avg_cost_apartment": [],
-                               "avg_cost_house_pv": [],
-                               "avg_cost_house_no_pv": [], "avg_cost": []}
-        for price_at_work in scan_parameters["prices_at_work"]:
-            parameters.parameters["company_charger_cost_per_kWh"] \
-                = price_at_work
-            parameters.parameters["employees_per_charger"] \
-                = employees_per_charger 
-            cm = charging_model.ChargingModel(nbr_of_agents, parameters)
+    scan_parameters = {"employees_per_charger" : range(1,1,1),
+                "company_charger_cost_per_kWh" : np.arange (0.10, 0.32, 0.02)}
+    scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
+    scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
+                           "charge_emergency": [], "charge_held_back": [],
+                           "utilisation": [], "avg_cost_apartment": [],
+                           "avg_cost_house_pv": [], "avg_cost_house_no_pv": [],
+                           "avg_cost": []}
+    if len(scan_parameters[scan_order[0]]) == 0:
+        scan_parameters[scan_order[0]] = [parameters.get(scan_order[0],"float")]
+    for outer_parameter in scan_parameters[scan_order[0]]:
+        parameters.parameters[scan_order[0]] = outer_parameter
+        for inner_parameter in scan_parameters[scan_order[1]]:
+            parameters.parameters[scan_order[1]] = inner_parameter 
+            cm = charging_model.ChargingModel(nbr_of_agents, co, parameters)
             for i in range(cm.clock.time_step_limit):
                 cm.step()
             cm.summarise_simulation()    
@@ -69,25 +70,26 @@ else:
             od.print_overall_charging_results(cm)
                 
             charge_pv, charge_work, charge_grid, charge_emergency, \
-            utilisation, avg_cost_apartment, avg_cost_house_pv, \
-            avg_cost_house_no_pv, avg_cost \
+            charge_held_back, utilisation, avg_cost_apartment, \
+            avg_cost_house_pv, avg_cost_house_no_pv, avg_cost \
                 = od.calc_overall_charging_results(cm)
                 
             scan_collected_data["charge_pv"].append(charge_pv)
             scan_collected_data["charge_work"].append(charge_work)
             scan_collected_data["charge_grid"].append(charge_grid)
             scan_collected_data["charge_emergency"].append(charge_emergency)
+            scan_collected_data["charge_held_back"].append(charge_held_back)
             scan_collected_data["utilisation"].append(utilisation)
             scan_collected_data["avg_cost_apartment"].append(avg_cost_apartment)
             scan_collected_data["avg_cost_house_pv"].append(avg_cost_house_pv)
             scan_collected_data["avg_cost_house_no_pv"].append(avg_cost_house_no_pv)
             scan_collected_data["avg_cost"].append(avg_cost)
-        
-        title = "employees_per_charger_{}".format(employees_per_charger)
-        slct_scan_parameters = dict()
-        slct_scan_parameters["prices_at_work"] \
-            = scan_parameters["prices_at_work"]
-        od.plot_parameter_scan(slct_scan_parameters, scan_collected_data,
-                               title)
+    
+    if store_to_csv:
+        od.store_sweep_parameters_to_csv(scan_parameters, scan_order,
+                                         scan_collected_data)
+    if plot_extraced_data:
+        od.plot_sweep_parameters(scan_parameters, scan_order,
+                                 scan_collected_data)
         
 co.clean_logger()

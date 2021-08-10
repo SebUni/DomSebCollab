@@ -7,8 +7,10 @@ Created on Wed Jul 14 15:01:29 2021
 
 import os
 import fiona
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def time_stamp(i, time_step):
     days = i * time_step // 60 // 24
@@ -42,7 +44,13 @@ def get_color(value, min_value, max_value):
     if rel_value <= 0:
         return [1+rel_value,1+rel_value,1]
     else:
-        return [1,1-rel_value,1-rel_value]    
+        return [1,1-rel_value,1-rel_value]
+    
+def min2D(array):
+    return min([min(row) for row in array])
+
+def max2D(array):
+    return max([max(row) for row in array])
 
 class OutputData():
     def __init__(self, console_output, parameters):
@@ -274,67 +282,6 @@ class OutputData():
             plt.xticks(lbl_time_steps, lbl_hour_steps)
             plt.grid(axis='x', color='0.95')
             plt.show()
-        
-    def plot_parameter_scan(self, scan_parameters, scan_collected_data, title):
-        if len(scan_parameters) == 1:
-            # fig, ax = plt.subplots()
-            # for name, data_set in scan_collected_data.items():
-            #     ax.plot(list(scan_parameters.values())[0], data_set,
-            #             label=name)
-            # ax.set(xlabel=list(scan_parameters.keys())[0])
-            # plt.legend()
-            # plt.show()
-            # for name, data_set in scan_collected_data.items():
-            #     fig, ax = plt.subplots()
-            #     time_steps = list(scan_parameters.values())[0]
-            #     ax.plot(time_steps, data_set)
-            #     ax.set(xlabel=list(scan_parameters.keys())[0], ylabel=name)
-            #     plt.show()
-            # general data
-            time_steps = list(scan_parameters.values())[0]
-            directory = "results/"
-            # plot consumption
-            fig, ax = plt.subplots()
-            ax.plot(time_steps, scan_collected_data["charge_pv"],
-                    label="charge_pv")
-            ax.plot(time_steps, scan_collected_data["charge_work"], 
-                    label="charge_work")
-            ax.plot(time_steps, scan_collected_data["charge_grid"],
-                    label="charge_grid")
-            ax.plot(time_steps, scan_collected_data["charge_emergency"],
-                    label="charge_emergency")
-            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="kWh")
-            plt.title(title)
-            plt.legend()
-            plt.show()
-            file_name = directory + title + "_consumption.png"
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
-            # plot utilisation
-            fig, ax = plt.subplots()
-            ax.plot(time_steps, scan_collected_data["utilisation"],
-                    label="utilisation")
-            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="utilisation in %")
-            plt.title(title)
-            plt.show()
-            file_name = directory + title + "_utilisation.png"
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
-            # plot cost
-            fig, ax = plt.subplots()
-            ax.plot(time_steps, scan_collected_data["avg_cost_apartment"],
-                    label="avg_cost_apartment")
-            ax.plot(time_steps, scan_collected_data["avg_cost_house_pv"], 
-                    label="avg_cost_house_pv")
-            ax.plot(time_steps, scan_collected_data["avg_cost_house_no_pv"],
-                    label="avg_cost_house_no_pv")
-            ax.plot(time_steps, scan_collected_data["avg_cost"],
-                    label="avg_cost")
-            ax.set(xlabel=list(scan_parameters.keys())[0], ylabel="$/km")
-            plt.legend()
-            plt.title(title)
-            plt.show()
-            file_name = directory + title + "_cost.png"
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
-            
                 
     def evaluate_overall_charge(self, model):
         extr_data = model.extracted_car_data
@@ -445,8 +392,126 @@ class OutputData():
                     + str(time_series_charger_utilisation[time_step_it])
                 print(line, file=f)
         
-    def store_sweep_parameters_to_csv(self, scan_parameters,
+    def store_sweep_parameters_to_csv(self, scan_parameters, scan_order,
                                       scan_collected_data):
+        if len(scan_parameters) > 2:
+            raise RuntimeError("output_data.py: Too many scan parameters!")
+        if len(scan_parameters[scan_order[0]]) < 1:
+            # single parameter scan
+            file_name = self.parameters.path_file_name("sweep_data", ".csv")
+            with open(file_name, 'w') as f:
+                header = str(scan_order[1])
+                for collected_element in scan_collected_data.keys():
+                    header += "," + str(collected_element)
+                print(header, file=f)
+                for inner_it, inner_parameter \
+                    in enumerate(scan_parameters[scan_order[1]]):
+                    line = str(inner_parameter)
+                    for collected_data in scan_collected_data.values():
+                        line += "," + str(collected_data[inner_it])
+                    print(line, file=f)
+        else:
+            # double parameter scan
+            header = str(scan_order[0]) + "\\" + str(scan_order[1])
+            for scan_parameter_1 in scan_parameters[scan_order[1]]:
+                header += "," + str(scan_parameter_1)
+            for slct_var in scan_collected_data.keys():
+                file_name = self.parameters.path_file_name(slct_var, ".csv")
+                with open(file_name, 'w') as f:
+                    print(header, file=f)
+                    it = 0
+                    for scan_parameter_0 in scan_parameters[scan_order[0]]:
+                        line = str(scan_parameter_0)
+                        for _ in scan_parameters[scan_order[1]]:
+                            line += ","+str(scan_collected_data[slct_var][it])
+                            it += 1
+                        print(line, file=f)
+    
+    def plot_sweep_parameters(self, scan_parameters, scan_order,
+                                  scan_collected_data):
+        if len(scan_parameters) > 2:
+            raise RuntimeError("output_data.py: Too many scan parameters!")
+        if len(scan_parameters[scan_order[0]]) <= 1:
+            # single parameter scan
+            x_data = scan_parameters[scan_order[1]]
+            # charge delivered by source
+            file_name = self.parameters.path_file_name("charge_delivered",
+                                                       ".png")
+            fig, ax = plt.subplots()
+            ax.plot(x_data, scan_collected_data["charge_pv"],
+                    label="charge_pv")
+            ax.plot(x_data, scan_collected_data["charge_work"], 
+                    label="charge_work")
+            ax.plot(x_data, scan_collected_data["charge_grid"],
+                    label="charge_grid")
+            ax.plot(x_data, scan_collected_data["charge_emergency"],
+                    label="charge_emergency")
+            ax.plot(x_data, scan_collected_data["charge_held_back"],
+                    label="charge_held_back")
+            ax.set(xlabel=scan_order[1], ylabel="kWh / 5 min")
+            plt.title("Charge delivered by source")
+            plt.legend()
+            plt.show()
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            # average charger utilisation
+            file_name \
+                = self.parameters.path_file_name("avg_charger_utilisation",
+                                                 ".png")
+            fig, ax = plt.subplots()
+            ax.plot(x_data, scan_collected_data["utilisation"],
+                    label="utilisation")
+            ax.set(xlabel=scan_order[1], ylabel="utilisation in %")
+            plt.title("Average charger utilisation")
+            plt.show()
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            # average cost per km
+            file_name = self.parameters.path_file_name("cost", ".png")
+            fig, ax = plt.subplots()
+            ax.plot(x_data, scan_collected_data["avg_cost_apartment"],
+                    label="avg_cost_apartment")
+            ax.plot(x_data, scan_collected_data["avg_cost_house_pv"], 
+                    label="avg_cost_house_pv")
+            ax.plot(x_data, scan_collected_data["avg_cost_house_no_pv"],
+                    label="avg_cost_house_no_pv")
+            ax.plot(x_data, scan_collected_data["avg_cost"],
+                    label="avg_cost")
+            ax.set(xlabel=scan_order[1], ylabel="$/km")
+            plt.legend()
+            plt.title("Average cost per km")
+            plt.show()
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+        else:
+            # double parameter scan
+            x = scan_parameters[scan_order[1]]
+            y = scan_parameters[scan_order[0]]
+            cmap = mpl.cm.viridis
+            for slct_var in scan_collected_data.keys():
+                fig, ax = plt.subplots()
+                file_name = self.parameters.path_file_name(slct_var, ".png")
+                it = 0
+                slct_data = []
+                for _ in scan_parameters[scan_order[0]]:
+                    slct_data.append(list())
+                    for _ in scan_parameters[scan_order[1]]:
+                        slct_data[-1].append(scan_collected_data[slct_var][it])
+                        it += 1
+                norm = mpl.colors.Normalize(vmin=min2D(slct_data),
+                                            vmax=max2D(slct_data))
+                ax.pcolormesh(x, y, slct_data, cmap=cmap, shading='gouraud',
+                              vmin=min2D(slct_data), vmax=max2D(slct_data))
+                ax.set(xlabel=scan_order[1], ylabel=scan_order[0])
+                
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size="5%", pad=0.05)
+                cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                                    cax=cax)
+                cbar.set_label(slct_var)
+                
+                ax.set_title(slct_var)
+                plt.show()
+                fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            
+            
         # store charge demand by sources (pv,grid,work,public,charge_held_back)
         pass
         # store charger_utilisation

@@ -9,9 +9,7 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 
-import os
-import psutil
-
+from memory_tracker import MemoryTracker
 from clock import Clock
 from extracted_data import ExtractedData
 from car_agent import CarAgent
@@ -27,15 +25,11 @@ from house_consumption_manager import HouseConsumptionManager
 from house_generation_manager import HouseGenerationManager
 from charging_strategy import ChargingStrategy
 
-def get_current_ram_usage():
-    process = psutil.Process(os.getpid())
-    mem = process.memory_info()[0] / float(2 ** 30)
-    vmem = process.memory_info()[1] / float(2 ** 30)
-    return "RAM: {:.03f} GB / VRAM {:.03f} GB".format(mem, vmem)
-
 class ChargingModel(Model):
     """The charging model with N agents."""
     def __init__(self, nbr_of_agents, console_output, parameters):
+        self.memory_tracker = MemoryTracker()
+        self.memory_tracker.track_now("base")
         self.co = console_output
         self.co.t_print("INITIALISING CHARGING MODEL")
         self.parameters = parameters
@@ -83,8 +77,7 @@ class ChargingModel(Model):
             parameters.get("employees_per_charger", "int")))
         del msg, cs
         
-        self.co.t_print("Current memory usage: {}".format(\
-                    get_current_ram_usage()))
+        self.memory_tracker.track_now("read files")
         
         # create agents
         self.co.t_print("Start to create agents")
@@ -152,8 +145,7 @@ class ChargingModel(Model):
         self.co.endProgress("calendar_creation",
                             "Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
-        self.co.t_print("Current memory usage: {}".format(\
-                    get_current_ram_usage()))
+        self.memory_tracker.track_now("created agents")
         self.co.t_print("INITIALISATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("COMMENCING STEP CALCULATION")
@@ -207,8 +199,14 @@ class ChargingModel(Model):
         self.co.endProgress("simulation_step", "STEP CALCULATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("Summary")
-        self.co.t_print("Current memory usage: {}".format(\
-                    get_current_ram_usage()))
+        self.memory_tracker.track_now("ran steps")
+        msg = "Memory useage | Base: {} Agents: {} Steps: {} Total: {}".format(\
+            self.memory_tracker.difference("base", "read files"),
+            self.memory_tracker.difference("read files", "created agents"),
+            self.memory_tracker.difference("created agents", "ran steps"),
+            self.memory_tracker.absolute("ran steps"))
+        self.co.t_print(msg)
+        del msg
         
         flat_cars = []
         for car_agent in self.schedule_cars.agents:
