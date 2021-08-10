@@ -396,7 +396,7 @@ class OutputData():
                                       scan_collected_data):
         if len(scan_parameters) > 2:
             raise RuntimeError("output_data.py: Too many scan parameters!")
-        if len(scan_parameters[scan_order[0]]) < 1:
+        if len(scan_parameters[scan_order[0]]) <= 1:
             # single parameter scan
             file_name = self.parameters.path_file_name("sweep_data", ".csv")
             with open(file_name, 'w') as f:
@@ -452,7 +452,7 @@ class OutputData():
             plt.title("Charge delivered by source")
             plt.legend()
             plt.show()
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             # average charger utilisation
             file_name \
                 = self.parameters.path_file_name("avg_charger_utilisation",
@@ -463,7 +463,7 @@ class OutputData():
             ax.set(xlabel=scan_order[1], ylabel="utilisation in %")
             plt.title("Average charger utilisation")
             plt.show()
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             # average cost per km
             file_name = self.parameters.path_file_name("cost", ".png")
             fig, ax = plt.subplots()
@@ -479,7 +479,7 @@ class OutputData():
             plt.legend()
             plt.title("Average cost per km")
             plt.show()
-            fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
         else:
             # double parameter scan
             x = scan_parameters[scan_order[1]]
@@ -509,7 +509,7 @@ class OutputData():
                 
                 ax.set_title(slct_var)
                 plt.show()
-                fig.savefig(file_name, bbox_inches='tight', pad_inches=0)
+                fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             
             
         # store charge demand by sources (pv,grid,work,public,charge_held_back)

@@ -25,7 +25,7 @@ start_soc,0.2,State of charge each agents starts with in %
 pre_heat_steps,2016,Amount of steps passed before simulation is tracked 288 is one day).
 minimum_relative_state_of_charge,0.2,Battery charge shall not fall below this percentage threshold
 consumption_calc_method,MANUFACTURER,Choose whay method is choosen to calculate the consumption of car agents. Choose either: MANUFACTURER or FORMULA
-charging_model,4,"ALWAYS_CHARGE=0,ALWAYS_CHARGE_NO_WORK_CHARGERS=1,ALWAYS_CHARGE_AT_HOME=2,ALWAYS_CHARGE_AT_WORK=3,CHARGE_WHERE_CHEAPER_BASIC=4,CHARGE_WHERE_CHEAPER_ADVANCED=5"
+charging_model,6,"ALWAYS_CHARGE=0,ALWAYS_CHARGE_NO_WORK_CHARGERS=1,ALWAYS_CHARGE_AT_HOME=2,ALWAYS_CHARGE_AT_WORK=3,CHARGE_WHERE_CHEAPER_BASIC=4,CHARGE_WHERE_CHEAPER_ADVANCED=5"
 only_houses,STATISTIC,Determines if all dwellings should be houses (choose STATISTIC or TRUE or FALSE)
 all_houses_owned,STATISTIC,Determines if all houses should be owned (choose STATISTIC or TRUE or FALSE)
 owned_houses_have_pv,STATISTIC,Determines if all owned houses have PV (choose STATISTIC or TRUE or FALSE)
