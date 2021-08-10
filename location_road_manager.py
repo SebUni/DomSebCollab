@@ -34,7 +34,7 @@ class LocationRoadManager():
     """
     Holds information on locations and how they interact.
     """
-    def __init__(self, parameters, company_manager, clock):
+    def __init__(self, parameters, company_manager, clock, extracted_data):
         self.min_lat = 90.0   # most southern point
         self.max_lat = -90.0  # most northern point
         self.min_lon = 361.0  # most western point
@@ -55,6 +55,7 @@ class LocationRoadManager():
         self.pcu_length = self.parameters.get("pcu_length","float")
         self.inner_area_speed_limit \
             = self.parameters.get("inner_area_speed_limit","float")
+        self.extracted_data = extracted_data
         
         self.load_locations()
         self.load_connections()
@@ -120,13 +121,15 @@ class LocationRoadManager():
             flats_total = cast.to_positive_int(row[10], "Flats total")
             houses_owned = cast.to_positive_int(row[11], "Houses owned")
             houses_total = cast.to_positive_int(row[12], "Houses total")
-                    
-            loc = Location(uid, name, longitude, latitude,
+            
+            tracking_id = self.extracted_data.init_tracked_agent(uid)
+            loc = Location(uid, name, tracking_id, longitude, latitude,
                          occupant_distribution, occupant_values,
                          pv_density, pv_avg_capacity,
                          distance_commuted_if_work_and_home_equal_distribution,
                          distance_commuted_if_work_and_home_equal_values,
-                         flats_total, houses_owned, houses_total)
+                         flats_total, houses_owned, houses_total,
+                         self.extracted_data)
             # add public charger
             self.cpm.add_company(loc)
             
@@ -322,17 +325,11 @@ class LocationRoadManager():
             self.traffic_network.edges[edge]['cur_speed'] \
                 = max(min(cur_speed_flow, \
                       self.traffic_network.edges[edge]['speed_limit']),
-                      self.traffic_jam_velocity) 
-                
-    # def company_charger_utilisation(self):
-    #     company_charger_utilisations_at_location = dict()
-    #     for location in self.locations.values():
-    #         for it, company in enumerate(location.companies):
-    #             if it == 0: continue
-    #             company_charger_utilisations_at_location[company.uid] \
-    #                 = company.charger_utilisation
-
-    #     return company_charger_utilisations_at_location       
+                      self.traffic_jam_velocity)
+    
+    def step(self):
+        for location in self.locations.values():
+            location.step()
         
     def print_locations(self):
         """

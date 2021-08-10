@@ -15,11 +15,12 @@ from console_output import ConsoleOutput
 draw_agents_on_map = False
 plot_extraced_data = True
 plot_extraced_data_details = False
+store_to_csv = True
 
 run_parameter_scan = False
 
-co = ConsoleOutput()
 parameters = Parameters()
+co = ConsoleOutput(parameters)
 od = OutputData(co, parameters)
 nbr_of_agents = parameters.get("nbr_of_agents","int")
 
@@ -42,6 +43,8 @@ if not run_parameter_scan:
         od.evaluate_overall_charge(cm)
     if plot_extraced_data_details:
         od.plot_extracted_data(cm)
+    if store_to_csv:
+        od.store_time_series_to_csv(cm)
 
 # parameter scan
 else:

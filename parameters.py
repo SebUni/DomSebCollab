@@ -6,6 +6,7 @@ Created on Wed Feb 24 20:09:40 2021
 """
 
 import sys
+import datetime
 
 from cast import Cast
 from csv_helper import CSVHelper
@@ -32,6 +33,13 @@ class Parameters():
             self.parameters[key] = value
         self.uid_to_check = -1
         self.next_stop = -1
+        self.result_path = "results/"
+        self.file_name_prefix = "model_{}_nbr_agents_{}_season_{}".format(\
+                                        self.parameters["charging_model"],
+                                        self.parameters["nbr_of_agents"],
+                                        self.parameters["season"])
+        self.file_name_suffix\
+            = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     
     def get(self, parameter_name, parameter_type):
         """
@@ -101,3 +109,7 @@ class Parameters():
             return True
         else:
             return False
+        
+    def path_file_name(self, identifier, ending):
+        return self.result_path + self.file_name_prefix + "_" \
+            + str(identifier) + "_" + self.file_name_suffix + str(ending)

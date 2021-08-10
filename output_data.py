@@ -143,15 +143,6 @@ class OutputData():
                 charge_emergency = extr_data.sum_over_all_agents(charge_set)
             if charge_set == "charge_held_back":
                 charge_held_back = extr_data.sum_over_all_agents(charge_set)
-        
-        # charger_utilisations \
-        #     = [list(time_step.values()) for time_step in \
-        #        model.extracted_company_data["Charger utilisation"]]
-        # average_company_charger_utilisation \
-        #     = [sum(time_step_data) / len(time_step_data) for time_step_data \
-        #        in charger_utilisations]
-        # utilisation = sum(average_company_charger_utilisation) * 100 \
-        #     / len(average_company_charger_utilisation)
             
         utilisation = model.extracted_company_data.avg_over_time_and_agents(
             "Charger utilisation") * 100
@@ -355,9 +346,6 @@ class OutputData():
         for charge_set in charge_sets:
             charges[charge_set] \
                 = extr_data.all_agents_sum_time_series(charge_set)
-            # for time_step in time_steps:
-            #     charge = extr_data.sum_over_time_step(charge_set, time_step)
-            #     charges[charge_set].append(charge)
         
         fig, ax = plt.subplots()
         for name, charge in charges.items():
@@ -388,6 +376,83 @@ class OutputData():
         plt.xticks(lbl_time_steps, lbl_hour_steps)
         plt.grid(axis='x', color='0.95')
         plt.show()
+        
+    def store_time_series_to_csv(self, model):
+        # store location data (addional withdrawls and injections)
+        # each location is stored
+        time_steps = model.extracted_location_data.tracked_time_steps()
+        agents = model.extracted_location_data.tracked_agents
+        time_series_feed_in \
+            = model.extracted_location_data.all_agents_time_series(\
+                                                            "Feed in quantity")
+        time_series_charge_for_car \
+            = model.extracted_location_data.all_agents_time_series(\
+                                                            "Charged quantity")
+        file_name = self.parameters.path_file_name("location_time_series",
+                                                   ".csv")
+        with open(file_name, 'w') as f:
+            header = "time_step"
+            for agent in agents: header += "," + str(agent)
+            print(header, file=f)
+            for time_step_it, time_step in enumerate(time_steps):
+                line = str(time_step)
+                for agent_it in range(len(agents)):
+                    line += ","
+                    line += str(time_series_feed_in[time_step_it][agent_it] \
+                        - time_series_charge_for_car[time_step_it][agent_it])
+                print(line, file=f)
+                    
+        # store charge demand by sources (pv, grid, work, public)
+        time_steps = model.extracted_company_data.tracked_time_steps()
+        time_series_charge_received_pv \
+            = model.extracted_car_data.all_agents_sum_time_series(\
+                                                    "charge_received_pv")
+        time_series_charge_received_grid \
+            = model.extracted_car_data.all_agents_sum_time_series(\
+                                                    "charge_received_grid")
+        time_series_charge_received_work \
+            = model.extracted_car_data.all_agents_sum_time_series(\
+                                                    "charge_received_work")
+        time_series_charge_received_public \
+            = model.extracted_car_data.all_agents_sum_time_series(\
+                                                    "charge_received_public")
+        file_name \
+            = self.parameters.path_file_name("charge_received_time_series",
+                                             ".csv")
+        with open(file_name, 'w') as f:
+            header = "time_step,charge_received_pv,charge_received_grid," \
+                + "charge_received_work,charge_received_public"
+            print(header, file=f)
+            for time_step_it, time_step in enumerate(time_steps):
+                line = str(time_step) \
+                     +","+str(time_series_charge_received_pv[time_step_it])   \
+                     +","+str(time_series_charge_received_grid[time_step_it]) \
+                     +","+str(time_series_charge_received_work[time_step_it]) \
+                     +","+str(time_series_charge_received_public[time_step_it])
+                print(line, file=f)
+        # store charger_utilisation
+        time_steps = model.extracted_company_data.tracked_time_steps()
+        time_series_charger_utilisation \
+            = model.extracted_company_data.all_agents_avg_time_series(\
+                                                        "Charger utilisation")
+        file_name \
+            = self.parameters.path_file_name("charger_utilisation_time_series",
+                                             ".csv")
+        with open(file_name, 'w') as f:
+            print("time_step,charger_utilisation", file=f)
+            for time_step_it, time_step in enumerate(time_steps):
+                line = str(time_step) + "," \
+                    + str(time_series_charger_utilisation[time_step_it])
+                print(line, file=f)
+        
+    def store_sweep_parameters_to_csv(self, scan_parameters,
+                                      scan_collected_data):
+        # store charge demand by sources (pv,grid,work,public,charge_held_back)
+        pass
+        # store charger_utilisation
+        pass
+        # store price per km (apartments, houses_w_pv, houses_wo_pv)
+        pass
         
     def evaluate_geographic_charge_distribution(self, model):
         # parameters to retrieve area border gps data

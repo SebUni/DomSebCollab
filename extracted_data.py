@@ -94,6 +94,21 @@ class ExtractedData():
                 for time_step in range(len(self.time_steps))]
                
     def all_agents_sum_time_series(self, var_name):
+        """
+        Returns one time series that sums up the values of all agents for that
+        time step.
+
+        Parameters
+        ----------
+        var_name : String
+            Name of the tracked variable.
+
+        Returns
+        -------
+        list
+            See Description.
+
+        """
         var_name_it = self.var_assignment[var_name]
         return [sum(self.data[var_name_it][time_step]) \
                 for time_step in range(len(self.time_steps))]

@@ -10,13 +10,15 @@ import random
 
 class Location():
     """Object storing information on individual regions or suburbs."""
-    def __init__(self, uid, name, longitude, latitude, occupant_distribution, 
-                 occupant_values, pv_density, pv_avg_capacity,
+    def __init__(self, uid, name, tracking_id, longitude, latitude,
+                 occupant_distribution, occupant_values, pv_density,
+                 pv_avg_capacity,
                  distance_commuted_if_work_equal_home_distribution,
                  distance_commuted_if_work_equal_home_values, flats_total,
-                 houses_owned, houses_total):
+                 houses_owned, houses_total, extracted_data):
         self.uid = uid
         self.name = str(name).strip(" ").strip('"')
+        self.tracking_id = tracking_id
         self.longitude = longitude  # east-west-coordinate
         self.latitude = latitude   # north-south-coordinate
         self.population = None # is calculated by employee commutes
@@ -33,8 +35,10 @@ class Location():
         self.chance_dwelling_is_a_house \
             = houses_total / (flats_total + houses_total)
         self.chance_house_is_owned = houses_owned / houses_total
-        self.total_charge_delivered = 0
-        self.total_feed_in = 0
+        self.cur_charge_delivered_to_house = 0
+        self.cur_charge_delivered_to_car = 0
+        self.cur_feed_in = 0
+        self.extracted_data = extracted_data
         
     def draw_occupants_at_random(self):
         total = sum(self.occupant_distribution)
@@ -94,8 +98,14 @@ class Location():
         """
         return [self.longitude, self.latitude]   
     
-    def company_charger_utilisations(self):
-        return [company.charger_utilisation for company in self.companies[1:]]
+    def step(self):
+        self.extracted_data.set(self.tracking_id, "Feed in quantity",
+                                self.cur_feed_in)
+        self.extracted_data.set(self.tracking_id, "Charged quantity",
+                                self.cur_charge_delivered_to_car)
+        self.cur_charge_delivered_to_house = 0
+        self.cur_charge_delivered_to_car = 0
+        self.cur_feed_in = 0
         
     def __repr__(self):
         msg = "Id: {}, Name: {}".format(self.uid, self.name)

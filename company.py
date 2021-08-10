@@ -124,8 +124,7 @@ class Company():
         
             delivered_charge = min([self.clock.time_step / 60 * charge_rate,
                                 charge_up_to])
-            if self.clock.is_pre_heated:
-                self.location.total_charge_delivered += delivered_charge
+            self.location.cur_charge_delivered_to_car += delivered_charge
             charging_cost = self.charger_cost_per_kWh * delivered_charge
             if company_charger not in self.chargers_used_this_time_step:
                 self.chargers_used_this_time_step.append(company_charger)

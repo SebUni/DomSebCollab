@@ -7,8 +7,6 @@ Created on Fri Dec 25 23:47:02 2020
 
 import sys
 
-from console_output import ConsoleOutput
-
 class Clock():
     """
     This object is used to have syncronised time in all other objects.
@@ -32,7 +30,6 @@ class Clock():
         None.
 
         """
-        co = ConsoleOutput()
         self.elapsed_time = 0
         self.cur_time_step = 0;
         self.pre_heat_steps = parameters.get("pre_heat_steps", "int")

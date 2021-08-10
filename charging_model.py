@@ -49,7 +49,11 @@ class ChargingModel(Model):
         self.extracted_company_data.init_tracked_var("Charger utilisation", 0)
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
                                   self.epm, self.extracted_company_data)
-        self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock)
+        self.extracted_location_data = ExtractedData(self.clock)
+        self.extracted_location_data.init_tracked_var("Feed in quantity", 0)
+        self.extracted_location_data.init_tracked_var("Charged quantity", 0)
+        self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock,
+                                       self.extracted_location_data)
         self.cmm = CarModelManager(self.parameters, self.lrm)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
         self.wm = WhereaboutsManager(self.lrm, self.clock, self.cp)
@@ -77,10 +81,13 @@ class ChargingModel(Model):
         self.co.t_print(msg.format(\
             parameters.get("company_charger_cost_per_kWh", "float"),
             parameters.get("employees_per_charger", "int")))
-        
         del msg, cs
         
+        self.co.t_print("Current memory usage: {}".format(\
+                    get_current_ram_usage()))
+        
         # create agents
+        self.co.t_print("Start to create agents")
         self.extracted_car_data = ExtractedData(self.clock)
         self.extracted_car_data.init_tracked_var("cur_activity", 0)
         self.extracted_car_data.init_tracked_var("charge_received_pv", 0)
@@ -99,7 +106,6 @@ class ChargingModel(Model):
         self.extracted_car_data.init_tracked_var("distance_travelled_apartment", 0)
         self.extracted_car_data.init_tracked_var("distance_travelled_house_w_pv", 0)
         self.extracted_car_data.init_tracked_var("distance_travelled_house_wo_pv", 0)
-        self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
             car_tracking_id \
                 = self.extracted_car_data.init_tracked_agent(agent_uid)
@@ -170,6 +176,7 @@ class ChargingModel(Model):
         for house_agent in self.schedule_houses.agents:
             house_agent.step_late()
         self.cpm.step()
+        self.lrm.step()
         
         if self.clock.is_pre_heated:
             for car_agent in self.schedule_cars.agents:

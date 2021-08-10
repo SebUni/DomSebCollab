@@ -85,8 +85,8 @@ class HouseAgent(Agent):
         max_charge_rate = self.max_charge_rate(car_agent.car_model)
         delivered_charge = min([self.clock.time_step / 60 * max_charge_rate,
                                 charge_up_to])
-        if self.clock.is_pre_heated:
-            self.location.total_charge_delivered += delivered_charge
+        self.location.cur_charge_delivered_to_car \
+                += delivered_charge
         feed_in_tariff_per_kWh = self.electricity_plan.feed_in_tariff
         charging_cost_grid_per_kWh \
              = self.electricity_plan.cost_of_use(1,
@@ -124,17 +124,20 @@ class HouseAgent(Agent):
         
     def step_late(self):
         # 4) Marry house consumption and generation
-        feed_in = self.electricity_plan.feed_in_tariff
-        charging_price_at_home = self.electricity_plan.cost_of_use(1,
-                                                        self.clock.time_of_day)
+        feed_in_quantity = max(0, self.cur_house_power_balance)
+        power_to_purchase = max(0, - self.cur_house_power_balance)
+        feed_in_price = self.electricity_plan.feed_in_tariff
+        
         if self.cur_house_power_balance > 0:
-            self.earnings_from_feed_in += self.cur_house_power_balance * feed_in
-            self.cur_electricity_cost -= self.cur_house_power_balance * feed_in
+            self.earnings_from_feed_in += feed_in_quantity * feed_in_price
+            self.cur_electricity_cost -= feed_in_quantity * feed_in_price
         else:
-            power_to_purchase = - self.cur_house_power_balance
             self.spendings_for_house_consumption \
                 += self.electricity_plan.cost_of_use(power_to_purchase,
                                                      self.clock.time_of_day)
             self.cur_electricity_cost \
                 += self.electricity_plan.cost_of_use(power_to_purchase,
                                                      self.clock.time_of_day)
+                
+        self.location.cur_charge_delivered_to_house += power_to_purchase
+        self.location.cur_feed_in += feed_in_quantity
