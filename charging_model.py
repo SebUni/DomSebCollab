@@ -9,6 +9,9 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
 
+import os
+import psutil
+
 from clock import Clock
 from extracted_data import ExtractedData
 from car_agent import CarAgent
@@ -24,6 +27,12 @@ from house_consumption_manager import HouseConsumptionManager
 from house_generation_manager import HouseGenerationManager
 from charging_strategy import ChargingStrategy
 
+def get_current_ram_usage():
+    process = psutil.Process(os.getpid())
+    mem = process.memory_info()[0] / float(2 ** 30)
+    vmem = process.memory_info()[1] / float(2 ** 30)
+    return "RAM: {:.03f} GB / VRAM {:.03f} GB".format(mem, vmem)
+
 class ChargingModel(Model):
     """The charging model with N agents."""
     def __init__(self, nbr_of_agents, console_output, parameters):
@@ -35,8 +44,11 @@ class ChargingModel(Model):
         self.clock = Clock(self.parameters)
         self.chm = ChargerManager()
         self.epm = ElectricityPlanManager(self.parameters, self.clock)
+        # create company manager
+        self.extracted_company_data = ExtractedData(self.clock)
+        self.extracted_company_data.init_tracked_var("Charger utilisation", 0)
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
-                                  self.epm)
+                                  self.epm, self.extracted_company_data)
         self.lrm = LocationRoadManager(self.parameters, self.cpm, self.clock)
         self.cmm = CarModelManager(self.parameters, self.lrm)
         self.cp = CalendarPlanner(self.parameters, self.clock, self.lrm)
@@ -53,7 +65,22 @@ class ChargingModel(Model):
                                      self.lrm.north_south_spread * 1.001,
                                      False)
         
-        self.extracted_company_data = {"Charger utilisation": []}
+        msg="Selected number of agents: {}, season: {}, time step: {} min"
+        self.co.t_print(msg.format(nbr_of_agents,
+                                   self.clock.season_names[self.clock.season],
+                                   self.clock.time_step))
+        msg="Selected charging strategy: {}"
+        cs = ChargingStrategy(parameters)
+        self.co.t_print(msg.format(cs.charging_model_names[cs.charging_model]))
+        msg = "Selected work charge price: {:.02f} $/kWh, " \
+            + "employees per charger: {}"
+        self.co.t_print(msg.format(\
+            parameters.get("company_charger_cost_per_kWh", "float"),
+            parameters.get("employees_per_charger", "int")))
+        
+        del msg, cs
+        
+        # create agents
         self.extracted_car_data = ExtractedData(self.clock)
         self.extracted_car_data.init_tracked_var("cur_activity", 0)
         self.extracted_car_data.init_tracked_var("charge_received_pv", 0)
@@ -72,27 +99,10 @@ class ChargingModel(Model):
         self.extracted_car_data.init_tracked_var("distance_travelled_apartment", 0)
         self.extracted_car_data.init_tracked_var("distance_travelled_house_w_pv", 0)
         self.extracted_car_data.init_tracked_var("distance_travelled_house_wo_pv", 0)
-        
-        
-        msg="Selected number of agents: {}, season: {}, time step: {} min"
-        self.co.t_print(msg.format(nbr_of_agents,
-                                   self.clock.season_names[self.clock.season],
-                                   self.clock.time_step))
-        msg="Selected charging strategy: {}"
-        cs = ChargingStrategy(parameters)
-        self.co.t_print(msg.format(cs.charging_model_names[cs.charging_model]))
-        msg = "Selected work charge price: {:.02f} $/kWh, " \
-            + "employees per charger: {}"
-        self.co.t_print(msg.format(\
-            parameters.get("company_charger_cost_per_kWh", "float"),
-            parameters.get("employees_per_charger", "int")))
-        
-        del msg, cs
-        
-        # create agents
         self.co.t_print("Start to create agents")
         for agent_uid in range (self.num_agents):
-            car_tracking_id = self.extracted_car_data.init_tracked_agent()
+            car_tracking_id \
+                = self.extracted_car_data.init_tracked_agent(agent_uid)
             residency_location = self.lrm.draw_location_of_residency()
             employment_location = \
                 self.lrm.draw_location_of_employment(residency_location)
@@ -136,6 +146,8 @@ class ChargingModel(Model):
         self.co.endProgress("calendar_creation",
                             "Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
+        self.co.t_print("Current memory usage: {}".format(\
+                    get_current_ram_usage()))
         self.co.t_print("INITIALISATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("COMMENCING STEP CALCULATION")
@@ -160,8 +172,6 @@ class ChargingModel(Model):
         self.cpm.step()
         
         if self.clock.is_pre_heated:
-            self.extracted_company_data["Charger utilisation"].append( \
-                                        self.lrm.company_charger_utilisation())
             for car_agent in self.schedule_cars.agents:
                 total_electricity_cost = car_agent.cur_electricity_cost
                 if not car_agent.house_agent.is_house:
@@ -190,6 +200,8 @@ class ChargingModel(Model):
         self.co.endProgress("simulation_step", "STEP CALCULATION COMPLETE")
         self.co.t_print("")
         self.co.t_print("Summary")
+        self.co.t_print("Current memory usage: {}".format(\
+                    get_current_ram_usage()))
         
         flat_cars = []
         for car_agent in self.schedule_cars.agents:

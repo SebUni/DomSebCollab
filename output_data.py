@@ -144,14 +144,17 @@ class OutputData():
             if charge_set == "charge_held_back":
                 charge_held_back = extr_data.sum_over_all_agents(charge_set)
         
-        charger_utilisations \
-            = [list(time_step.values()) for time_step in \
-               model.extracted_company_data["Charger utilisation"]]
-        average_company_charger_utilisation \
-            = [sum(time_step_data) / len(time_step_data) for time_step_data \
-               in charger_utilisations]
-        utilisation = sum(average_company_charger_utilisation) * 100 \
-            / len(average_company_charger_utilisation)
+        # charger_utilisations \
+        #     = [list(time_step.values()) for time_step in \
+        #        model.extracted_company_data["Charger utilisation"]]
+        # average_company_charger_utilisation \
+        #     = [sum(time_step_data) / len(time_step_data) for time_step_data \
+        #        in charger_utilisations]
+        # utilisation = sum(average_company_charger_utilisation) * 100 \
+        #     / len(average_company_charger_utilisation)
+            
+        utilisation = model.extracted_company_data.avg_over_time_and_agents(
+            "Charger utilisation") * 100
         
         avg_electricity_cost_apartment  \
             = extr_data.avg_over_time_and_agents("electricity_cost_apartment")
@@ -350,10 +353,11 @@ class OutputData():
         lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
         charges = dict()
         for charge_set in charge_sets:
-            charges[charge_set] = []
-            for time_step in time_steps:
-                charge = extr_data.sum_over_time_step(charge_set, time_step)
-                charges[charge_set].append(charge)
+            charges[charge_set] \
+                = extr_data.all_agents_sum_time_series(charge_set)
+            # for time_step in time_steps:
+            #     charge = extr_data.sum_over_time_step(charge_set, time_step)
+            #     charges[charge_set].append(charge)
         
         fig, ax = plt.subplots()
         for name, charge in charges.items():
@@ -366,8 +370,8 @@ class OutputData():
         
         # show all individual company utilisation
         charger_utilisations \
-            = [list(time_step.values()) for time_step in \
-               model.extracted_company_data["Charger utilisation"]]
+            = model.extracted_company_data.all_agents_time_series(\
+                                                        "Charger utilisation")
         fig, ax = plt.subplots()
         ax.plot(time_steps, charger_utilisations)
         ax.set(xlabel="time in minutes", ylabel="Charger utilisation")

@@ -14,10 +14,10 @@ class Company():
     A company is either the place of employement for an agent or it can provide
     public chargers for a location.
     """
-    def __init__(self, uid=None, clock=None, location=None,
+    def __init__(self, uid=None, clock=None, tracking_id=None, location=None,
                  electricity_plan=None, charger_manager=None,
                  charger_cost_per_kWh=None, charger_model=None,
-                 employees_per_charger=None):
+                 employees_per_charger=None, extracted_data=None):
         """
         Parameters
         ----------
@@ -51,17 +51,19 @@ class Company():
         if uid is None or clock is None or location is None or \
             electricity_plan is None or charger_manager is None or \
             charger_cost_per_kWh is None or charger_model is None or \
-            employees_per_charger is None:
+            employees_per_charger is None or extracted_data is None:
                 self.used_default_constructor = True
         else:
             self.uid = uid
             self.clock = clock
+            self.tracking_id = tracking_id
             self.location = location
             self.nbr_of_employees = 0
             self.ccm = CompanyChargerManager(charger_manager, charger_model)
             self.charger_cost_per_kWh = charger_cost_per_kWh
             self.electricity_plan = electricity_plan
             self.employees_per_charger = employees_per_charger
+            self.extracted_data = extracted_data
         
             self.chargers_used_this_time_step = []
             self.charger_utilisation = 0
@@ -199,10 +201,11 @@ class Company():
         self.ccm.remove_from_charging_que(car_agent)
         
     def step(self):
-        if self.clock.is_pre_heated:
+        if self.clock.is_pre_heated and self.tracking_id is not None:
             self.charger_utilisation \
                 = len(self.chargers_used_this_time_step)/len(self.ccm.chargers)
-            #self.charger_history[self.clock.elapsed_time] = self.ccm.history()
+            self.extracted_data.set(self.tracking_id, "Charger utilisation",
+                                    self.charger_utilisation)
         self.chargers_used_this_time_step.clear()
     
     def __repr__(self):

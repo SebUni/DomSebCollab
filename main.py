@@ -14,7 +14,7 @@ from console_output import ConsoleOutput
 
 draw_agents_on_map = False
 plot_extraced_data = True
-plot_extraced_data_details = True
+plot_extraced_data_details = False
 
 run_parameter_scan = False
 

@@ -15,7 +15,7 @@ class CompanyManager():
     Holds all companies for easy access and simplified parameter adaptation.
     """
     def __init__(self, parameters, clock, charger_manager,
-                 electricity_plan_manager):
+                 electricity_plan_manager, extracted_data):
         """
         Parameters
         ----------
@@ -36,6 +36,7 @@ class CompanyManager():
         self.clock = clock
         self.charger_manager = charger_manager
         self.electricity_plan_manager = electricity_plan_manager
+        self.extracted_data = extracted_data
     
     def add_company(self, location):
         uid = len(self.companies)
@@ -51,7 +52,7 @@ class CompanyManager():
             = self.electricity_plan_manager.electricity_plans[electricity_plan_uid]
             
         # TODO Add criteria for charger cost
-        charger_cost_per_kWh, employees_per_charger = 0, 0
+        charger_cost_per_kWh, employees_per_charger, tracking_id = 0, 0, None
         if is_public_facility:
             charger_cost_per_kWh \
                 = self.parameters.get("public_charger_cost_per_kWh", "float")
@@ -60,7 +61,8 @@ class CompanyManager():
             charger_cost_per_kWh \
                 = self.parameters.get("company_charger_cost_per_kWh", "float")
             employees_per_charger \
-                = self.parameters.get("employees_per_charger", "positive_int") 
+                = self.parameters.get("employees_per_charger", "positive_int")
+            tracking_id = self.extracted_data.init_tracked_agent(uid)
             
         if len(self.charger_manager.charger_models) == 0:
             sys.exit("CompanyManager: No charger models to to choose from")
@@ -75,9 +77,10 @@ class CompanyManager():
                 = self.charger_manager.draw_charger_at_random(\
                                         self.charger_manager.WORK_CHARGER)
             
-        company = Company(uid, self.clock, location, electricity_plan,
-                          self.charger_manager, charger_cost_per_kWh,
-                          charger_model, employees_per_charger)
+        company = Company(uid, self.clock, tracking_id, location,
+                          electricity_plan, self.charger_manager,
+                          charger_cost_per_kWh, charger_model,
+                          employees_per_charger, self.extracted_data)
         self.companies.append(company)
         location.companies.append(company)
         
