@@ -17,10 +17,10 @@ plot_extraced_data = True
 plot_extraced_data_details = False
 store_to_csv = True
 
-run_parameter_scan = True
+run_parameter_scan = False
 
 parameters = Parameters()
-co = ConsoleOutput(parameters)
+co = ConsoleOutput(parameters.path_file_name("log", ".log"))
 od = OutputData(co, parameters)
 nbr_of_agents = parameters.get("nbr_of_agents","int")
 
@@ -48,8 +48,8 @@ if not run_parameter_scan:
 
 # parameter scan
 else:
-    scan_parameters = {"employees_per_charger" : range(1,9,2),
-                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.02)}
+    scan_parameters = {"employees_per_charger" : range(1,5,2),
+                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.2)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],
@@ -67,6 +67,7 @@ else:
                 cm.step()
             cm.summarise_simulation()    
             od.print_route_stats(cm)
+            od.print_house_stats(cm)
             od.print_overall_charging_results(cm)
                 
             charge_pv, charge_work, charge_grid, charge_emergency, \

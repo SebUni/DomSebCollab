@@ -32,19 +32,20 @@ def seconds_to_time_string(seconds):
     return time_str
 
 class ConsoleOutput():
-    def __init__(self, parameters):
+    def __init__(self, log_path_filename=None):
         self.limits = dict()
         self.start_time = dict()
         self.PROGRESS_BAR_LENGTH = 30
-        self.clean_logger()
-        path_filename = parameters.path_file_name("log", ".log")
-        logging.basicConfig(filename=path_filename, level=logging.INFO)
+        self.isLogging = log_path_filename is not None
+        if self.isLogging:
+            self.clean_logger()
+            logging.basicConfig(filename=log_path_filename, level=logging.INFO)
     
     # time print
     def t_print(self, message):
         time_str = datetime.datetime.now().strftime("[%H:%M:%S]")
         final_msg = "{} {}".format(time_str, message)
-        logging.info(final_msg)
+        if self.isLogging: logging.info(final_msg)
         print(final_msg)
         
     # indent print
@@ -83,7 +84,7 @@ class ConsoleOutput():
         time_str = datetime.datetime.now().strftime("[%H:%M:%S]")
         sys.stdout.write("\r{} {}\n".format(time_str, message))
         sys.stdout.flush()
-        logging.info("{} {}".format(time_str, message))
+        if self.isLogging: logging.info("{} {}".format(time_str, message))
         del self.limits[title]
         del self.start_time[title]
         
