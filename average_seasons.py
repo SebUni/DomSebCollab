@@ -98,7 +98,8 @@ def decide_what_to_do(co, identifiers, title, seasons):
             co.t_print("{} misses seasons: {}".format(_identifier, _seasons))
     else:
         # no files to average for Single-Run-Session
-        pass
+        return False
+    return True
 
 # formated output
 co = ConsoleOutput()
@@ -117,11 +118,19 @@ SEASONS = [0,1,2,3]
 model = 4
 nbr_of_agents = 10
 
+no_files_found = True
+
 # Average Single-Run-Session
-decide_what_to_do(co, SINGLE_RUN, "Single-Run-Session", SEASONS)
+files_found = decide_what_to_do(co, SINGLE_RUN, "Single-Run-Session", SEASONS)
+if files_found: no_files_found = False
 
 # Average 1-Dimensional-Sweep
-decide_what_to_do(co, D1_SWEEP, "1-Dimensional-Sweep", SEASONS)
+files_found = decide_what_to_do(co, D1_SWEEP, "1-Dimensional-Sweep", SEASONS)
+if files_found: no_files_found = False
 
 # Average 2-Dimensional-Sweep
-decide_what_to_do(co, D2_SWEEP, "2-Dimensional-Sweep", SEASONS)
+files_found = decide_what_to_do(co, D2_SWEEP, "2-Dimensional-Sweep", SEASONS)
+if files_found: no_files_found = False
+
+if no_files_found:
+    co.t_print("No matching set of files found!")
