@@ -216,7 +216,7 @@ class CalendarPlanner():
             if largest_gap <= 1+2*rest_between_shifts:
                 break
         
-        # FailSafe: If runs longer than time_limit kill loop
+        # FailSafe: If runs longer then time_limit kill loop
         start_time = int(time.time())
         time_limit = 3 # in seconds
         # place hours for shifts

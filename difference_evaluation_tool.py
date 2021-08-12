@@ -11,6 +11,8 @@ import fiona
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
+from parameters import Parameters
+from output_data import OutputData
 from console_output import ConsoleOutput
 from cast import Cast
 from csv_helper import CSVHelper
@@ -28,7 +30,7 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 1200
+nbr_of_agents = 12000
 # run A
 season_a = "1"
 model_a = 1
@@ -41,6 +43,9 @@ addendum_b = ""
 
 # use moving avg? (0 is no)
 half_avg_over = 10
+plot_all_time_steps_to_map = False
+
+frmt = lambda lst : str(lst[0]) + "-" + str(lst[1])
 
 def file_name(model, nbr_of_agents, season, identifier, addendum, ending):
     if addendum == "":
@@ -79,6 +84,11 @@ def determine_missing_files(identifiers):
     return nbr_missing_files, missing_files
 
 def subtract_2d_matrix(matricies):
+    # check if dimensions match
+    if len(matricies[0]) != len(matricies[1]) \
+        or len(next(iter(matricies[0]))) != len(next(iter(matricies[1]))):
+        raise RuntimeError("Dimensions of matricies to subtract do not match!")
+    # subtract matricies
     matrix_diff = []
     for col in range(len(next(iter(matricies)))):
         matrix_diff.append(list())
@@ -194,7 +204,6 @@ def handle_diff_comparision(identifiers, analyses_function):
                 header += cell
             data.append(tmp_data)
         data_diff[identifier] = subtract_2d_matrix(data)
-        frmt = lambda lst : str(lst[0]) + "-" + str(lst[1])
         pf_name = path_file_name(frmt(models), nbr_of_agents,
                                  frmt(seasons), "diff_" + str(identifier),
                                  frmt(addendums), ".csv")
@@ -204,7 +213,6 @@ def handle_diff_comparision(identifiers, analyses_function):
 
 def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     cast = Cast("Analysis")
-    frmt = lambda lst : str(lst[0]) + "-" + str(lst[1])
     time_steps = [cast.to_int(row, "front_row_cell")\
                   for row in front_col[identifiers[0]]]
     lbl_time_steps, lbl_hour_steps = time_axis_labels(time_steps)
@@ -263,8 +271,8 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
                              for entry in SA4_avg[SA4_code]]
     # plot data - temporal
     pf_name = path_file_name(frmt(models), nbr_of_agents, frmt(seasons),
-                             "diff_temporal" + identifiers[2], frmt(addendums),
-                             ".png")
+                             "diff_temporal_" + identifiers[2],
+                             frmt(addendums), ".png")
     fig, axs = plt.subplots(3,3)
     fig.tight_layout(pad=0.4, w_pad=-1, h_pad=0)
     fig.set_size_inches(1920 / MY_DPI, 1080 / MY_DPI)
@@ -294,8 +302,8 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     # plot data - geographic
     # parameters to retrieve area border gps data
     pf_name = path_file_name(frmt(models), nbr_of_agents, frmt(seasons),
-                             "diff_geo" + identifiers[2], frmt(addendums),
-                             ".png")
+                             "diff_geographic_" + identifiers[2],
+                             frmt(addendums), ".png")
     SA4_regions_to_include = [206,207,208,209,210,211,212,213,214]
     export_SA_level = 3
     _layer = "Statistical_Area_Level_" + str(export_SA_level) + "_2016"
@@ -309,12 +317,8 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     else:
         raise RuntimeError("Ill defined SA code!")
     # extract data from model
-    min_charge_delivered = 0
-    max_charge_delivered = 0
-    for charge_delivered in SA3_total.values():
-        min_charge_delivered = min(min_charge_delivered, charge_delivered)
-        max_charge_delivered = max(max_charge_delivered, charge_delivered)
-    
+    min_total_charge_delivered = min(SA3_total.values())
+    max_total_charge_delivered = max(SA3_total.values())
     # Check if retreived data fits map data
     # data retrieved from
     # https://data.gov.au/data/dataset/asgs-2016-edition-boundaries
@@ -322,7 +326,7 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     _file_path \
         = "data\\generators\\locations\\sa_code, sa_names, cooridnates\\"
     
-    # plot data
+    # plot total charge
     fig = plt.figure(figsize=(1080 / MY_DPI, 1080 / MY_DPI))
     ax = fig.add_subplot(111)
     with fiona.open(_file_path + _file_name, layer=_layer) as layer:
@@ -338,8 +342,9 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
             if is_in_selected_SA4_region:
                 elr_code = int(elr['properties'][_code])
                 charge_value = SA3_total[elr_code]
-                color_data = get_color(charge_value, min_charge_delivered,
-                                       max_charge_delivered)
+                color_data = get_color(charge_value,
+                                       min_total_charge_delivered,
+                                       max_total_charge_delivered)
                 for patch_data in elr['geometry']['coordinates']:
                     x = [data[0] for data in patch_data[0]]
                     y = [data[1] for data in patch_data[0]]
@@ -353,12 +358,82 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     ax.axis('off')
     plt.show()
     fig.savefig(pf_name, bbox_inches='tight', pad_inches=0.1, dpi=MY_DPI)
+    
+    # plot individual steps
+    if plot_all_time_steps_to_map:
+        parameters = Parameters()
+        co = ConsoleOutput()
+        od = OutputData(co, parameters)
+        map_dimensions = od.map_dimensions
+        min_ind_charge_delivered \
+            = min(min([min(SA3.values()) for SA3 in SA_data_ts.values()]))
+        max_ind_charge_delivered \
+            = max(max([max(SA3.values()) for SA3 in SA_data_ts.values()]))
+        pre_heat_steps = parameters.get("pre_heat_steps", "int")
+        for time_step_it, time_step in enumerate(time_steps):
+            title = "{:06d}_charge_diff".format(pre_heat_steps + time_step_it)
+            pf_name=parameters.path_file_name(title, ".png",)
+            SA3_data = dict()
+            for SA4_code, SA3_codes in location_codes.items():
+                for SA3_code, SA3_it in SA3_codes:
+                    SA3_data[SA3_code] \
+                        = SA_data_ts[SA4_code][SA3_code][time_step_it]
+            fig = plt.figure(figsize=(1080 / MY_DPI, 1080 / MY_DPI))
+            ax = fig.add_subplot(111)
+            with fiona.open(_file_path + _file_name, layer=_layer) as layer:
+                nbr_of_drawn_sas = 0
+                for export_level_region in layer:
+                    elr = export_level_region
+                    is_in_selected_SA4_region = False
+                    for SA4_region in SA4_regions_to_include:
+                        if str(SA4_region) \
+                            == elr['properties'][_code][:len(str(SA4_region))]:
+                            is_in_selected_SA4_region = True
+                            break
+                    if is_in_selected_SA4_region:
+                        elr_code = int(elr['properties'][_code])
+                        charge_value = SA3_data[elr_code]
+                        color_data = get_color(charge_value,
+                                               min_ind_charge_delivered,
+                                               max_ind_charge_delivered)
+                        for patch_data in elr['geometry']['coordinates']:
+                            x = [data[0] for data in patch_data[0]]
+                            y = [data[1] for data in patch_data[0]]
+                            p = matplotlib.patches.Polygon(patch_data[0],
+                                                          facecolor=color_data)
+                            ax.add_patch(p)
+                            ax.plot(x, y, color='black', linewidth=1)    
+                        nbr_of_drawn_sas += 1
+            
+            ax.set_xlim([map_dimensions["min_x"] ,map_dimensions["max_x"]])
+            ax.set_ylim([map_dimensions["min_y"] ,map_dimensions["max_y"]])
+            ax.axis('off')
+            plt.show()
+            fig.savefig(pf_name, bbox_inches='tight', pad_inches=0, dpi=MY_DPI)
+    
 
 def analyse_1d_sweep_diff(identifiers, first_row, front_col, data_diff):
-    co.t_print("1-Dimensional-Sweep comparison not implement yet!")
+    cast = Cast("Analysis")
+    _ = ""
+    scan_parameters = {_: _,
+           first_row[identifiers[0]][0]: [cast.to_float(i, "front_row_cell")\
+                                          for i in front_col[identifiers[0]]]}
+    scan_order = [_, first_row[identifiers[0]][0]]
+    scan_collected_data = dict()
+    for it, data_set_name in enumerate(first_row[identifiers[0]][1:]):
+        scan_collected_data[data_set_name] \
+            = [col[it] for col in data_diff[identifiers[0]]]
+    
+    parameters = Parameters()
+    od = OutputData(co, parameters)
+    pf_name_wo_identifier_and_ending \
+        = path_file_name(frmt(models), nbr_of_agents, frmt(seasons), "diff_",
+                         "", "")
+    od.plot_sweep_parameters(scan_parameters, scan_order, scan_collected_data,
+            pf_name_wo_identifier_and_ending=pf_name_wo_identifier_and_ending)
 
 def analyse_2d_sweep_diff(identifiers, first_row, front_col, data_diff):
-    co.t_print("2-Dimensional-Sweep comparison not implement yet!")
+    co.t_print("2-Dimensional-Sweep comparison plot not implement yet!")
             
 # formated output
 co = ConsoleOutput()

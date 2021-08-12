@@ -5,6 +5,8 @@ Created on Sun Nov  1 17:46:52 2020
 @author: S3739258
 """
 
+import random
+
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
@@ -130,13 +132,15 @@ class ChargingModel(Model):
                               len(self.schedule_cars.agents))
         self.cp.prepare_schedule_generation()
         car_it = 0
+        assign_order = self.det_assign_order()
         while car_it < len(self.schedule_cars.agents):
-            car_agent = self.schedule_cars.agents[car_it]
+            car_agent = self.schedule_cars.agents[assign_order[car_it]]
             self.co.progress("calendar_creation", car_it)
             success = car_agent.generate_calendar_entries()
             if not success:
                 self.co.t_print("Calendar creation reseted!")
                 self.cp.prepare_schedule_generation()
+                assign_order = self.mild_shuffle(assign_order)
                 car_it = 0
             car_agent.whereabouts.set_activity_and_location( \
                                     car_agent.calendar.cur_scheduled_activity,
@@ -151,7 +155,33 @@ class ChargingModel(Model):
         self.co.t_print("COMMENCING STEP CALCULATION")
         self.co.startProgress("simulation_step", self.clock.cur_time_step,
                               self.clock.time_step_limit)
+    
+    def det_assign_order(self):
+        min_hours = min([agent.calendar.hours_worked_per_week \
+                         for agent in self.schedule_cars.agents])
+        max_hours = max([agent.calendar.hours_worked_per_week \
+                         for agent in self.schedule_cars.agents])
+        ass_order = [[agent.uid for agent in self.schedule_cars.agents \
+                      if agent.calendar.hours_worked_per_week == i] \
+                     for i in range(min_hours,max_hours+1)]
+        ass_order.reverse()
+        assign_order = [uid for hour_slot in ass_order for uid in hour_slot]
         
+        return assign_order
+    
+    def mild_shuffle(self, lst):
+        max_rel_dist = .1
+        max_abs_dist = int(len(lst) * max_rel_dist)
+        for it in range(len(lst)):
+            move_by = random.randint(-max_abs_dist, max_abs_dist)
+            if not 0 < it + move_by <= len(lst):
+                move_by *= -1
+            cur_value = lst[it]
+            lst[it] = lst[it+move_by]
+            lst[it+move_by] = cur_value
+        
+        return lst
+    
     def step(self):
         '''Advance the model by one step.'''
         self.co.progress("simulation_step", self.clock.cur_time_step)
