@@ -249,6 +249,24 @@ class LocationRoadManager():
         #return list(self.locations.values())[0]
         return location_of_employment
     
+    def absolute_location_position(self, location):
+        """
+        Returns the location's position.
+
+        Parameters
+        ----------
+        location : Location
+            Well it's a location type object you wanna chuck in.
+
+        Returns
+        -------
+        np.array
+            The coordinate relative to the lower left-hand corner of the rect-
+            angle enclosing all locations.
+
+        """
+        return np.array((location.longitude, location.latitude))
+    
     def relative_location_position(self, location):
         """
         Returns the location's position relative to the minimum latitude and
@@ -269,6 +287,12 @@ class LocationRoadManager():
         x = location.longitude - self.min_lon
         y = location.latitude - self.min_lat
         return np.array((x, y))
+    
+    def absolute_coordinate_position(self, coordinates):
+        """
+        Returns the coordinates.
+        """
+        return np.array((coordinates[0], coordinates[1]))
     
     def relative_coordinate_position(self, coordinates):
         """

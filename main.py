@@ -14,7 +14,7 @@ from console_output import ConsoleOutput
 
 draw_agents_on_map = False
 plot_extraced_data = True
-plot_extraced_data_details = False
+plot_extraced_data_details = True
 store_to_csv = True
 
 run_parameter_scan = False
@@ -31,7 +31,7 @@ if not run_parameter_scan:
         if i == 2016:
             test = 0
         cm.step()
-        if draw_agents_on_map:
+        if draw_agents_on_map and i>=parameters.get("pre_heat_steps", "int"):
             od.draw_car_agents(cm, i)
     cm.summarise_simulation()
     
@@ -48,8 +48,8 @@ if not run_parameter_scan:
 
 # parameter scan
 else:
-    scan_parameters = {"employees_per_charger" : range(1,5,2),
-                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.2)}
+    scan_parameters = {"employees_per_charger" : range(1,1,2),
+                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.04)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],

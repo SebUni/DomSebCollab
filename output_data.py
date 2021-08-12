@@ -52,41 +52,76 @@ def min2D(array):
 def max2D(array):
     return max([max(row) for row in array])
 
+def set_min(cur_value, values):
+    min_value = min(values)
+    if cur_value == None:
+        return min_value
+    elif cur_value > min_value:
+        return min_value
+    else:
+        return cur_value
+        
+def set_max(cur_value, values):
+    max_value = max(values)
+    if cur_value == None:
+        return max_value
+    elif cur_value < max_value:
+        return max_value
+    else:
+        return cur_value
+
 class OutputData():
     def __init__(self, console_output, parameters):
         self.co = console_output
         self.parameters = parameters
-
+        self.map_dimensions = self.determine_map_dimensions()
+            
     def draw_car_agents(self, model, it):
         size = 20
+        my_dpi = 96
         x_agents = []
         y_agents = []
         for boid in model.schedule_cars.agents:
-            x_agent, y_agent = boid.pos
+            x_agent, y_agent = boid.whereabouts.cur_location_coordinates
             x_agents.append(x_agent)
             y_agents.append(y_agent)
         x_locations = []
         y_locations = []
         for location in model.lrm.locations.values():
-            x_location, y_location = model.lrm.relative_location_position(location)
+            x_location, y_location \
+                = model.lrm.absolute_location_position(location)
             x_locations.append(x_location)
             y_locations.append(y_location)
-        fig = plt.figure(figsize=(13,13))
+        fig = plt.figure(figsize=(1080 / my_dpi, 1080 / my_dpi))
         ax = fig.add_subplot(111)
-        
+        ax.axis('off')
         ax.scatter(x_agents, y_agents, s=size)
         ax.scatter(x_locations, y_locations, s=size*1.5, c="r")
-        ax.margins(0.1)
-        time_step = self.parameters.get_parameter("time_step","int")
-        ax.text(0, 0, time_stamp(it, time_step), fontsize=24)
-        ax.axis('off')
-        title = "{:06d}".format(it) + ".png"
-        fig.savefig(title, bbox_inches='tight', pad_inches=0)
+        ax.set_xlim([self.map_dimensions["min_x"],self.map_dimensions["max_x"]])
+        ax.set_ylim([self.map_dimensions["min_y"],self.map_dimensions["max_y"]])
+        time_step = self.parameters.get("time_step","int")
+        
+        text_pos = self.determine_text_position_on_map(.1, .1)
+        ax.text(text_pos[0],text_pos[1], time_stamp(it,time_step), fontsize=24)
+        title = "{:06d}_car_movement".format(it)
+        fp_name=self.parameters.path_file_name(title, ".png",)
+        fig.savefig(fp_name, bbox_inches='tight', pad_inches=0, dpi=my_dpi,
+                    transparent=True)
         
         # pngs to gif using cmd "magick convert -delay 1 -loop 0 *.png animation.gif"
         # do not connect more than a day
         # overlay gif with map using cmd "magick convert output.gif -layers optimize result.gif"
         # concatenate mutiple using cmd "magick convert day*_map_opt.gif week.gif"
+        
+    def determine_text_position_on_map(self, x_perc, y_perc):
+        if self.map_dimensions["min_x"] != self.map_dimensions["max_x"]:
+            x_min = self.map_dimensions["min_x"]
+            x_max = self.map_dimensions["max_x"]
+            y_min = self.map_dimensions["min_y"]
+            y_max = self.map_dimensions["max_y"]
+            return (x_min+x_perc*(x_max-x_min), y_min+y_perc*(y_max-y_min))
+        else:
+            return (0, 0)
         
     def write_all_to_file(self, model):
         extr_data = model.extracted_car_data
@@ -428,15 +463,16 @@ class OutputData():
                         print(line, file=f)
     
     def plot_sweep_parameters(self, scan_parameters, scan_order,
-                                  scan_collected_data):
+                                  scan_collected_data,
+                                  pf_name_wo_identifier_and_ending=""):
         if len(scan_parameters) > 2:
             raise RuntimeError("output_data.py: Too many scan parameters!")
         if len(scan_parameters[scan_order[0]]) <= 1:
             # single parameter scan
             x_data = scan_parameters[scan_order[1]]
             # charge delivered by source
-            file_name = self.parameters.path_file_name("charge_delivered",
-                                                       ".png")
+            file_name=self.parameters.path_file_name("charge_delivered",".png",
+                                            pf_name_wo_identifier_and_ending)
             fig, ax = plt.subplots()
             ax.plot(x_data, scan_collected_data["charge_pv"],
                     label="charge_pv")
@@ -454,9 +490,9 @@ class OutputData():
             plt.show()
             fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             # average charger utilisation
-            file_name \
-                = self.parameters.path_file_name("avg_charger_utilisation",
-                                                 ".png")
+            file_name=self.parameters.path_file_name("avg_charger_utilisation",
+                                            ".png",
+                                            pf_name_wo_identifier_and_ending)
             fig, ax = plt.subplots()
             ax.plot(x_data, scan_collected_data["utilisation"],
                     label="utilisation")
@@ -465,7 +501,8 @@ class OutputData():
             plt.show()
             fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             # average cost per km
-            file_name = self.parameters.path_file_name("cost", ".png")
+            file_name=self.parameters.path_file_name("cost",".png",
+                                            pf_name_wo_identifier_and_ending)
             fig, ax = plt.subplots()
             ax.plot(x_data, scan_collected_data["avg_cost_apartment"],
                     label="avg_cost_apartment")
@@ -487,7 +524,8 @@ class OutputData():
             cmap = mpl.cm.viridis
             for slct_var in scan_collected_data.keys():
                 fig, ax = plt.subplots()
-                file_name = self.parameters.path_file_name(slct_var, ".png")
+                file_name=self.parameters.path_file_name(slct_var,".png",
+                                            pf_name_wo_identifier_and_ending)
                 it = 0
                 slct_data = []
                 for _ in scan_parameters[scan_order[0]]:
@@ -598,3 +636,27 @@ class OutputData():
         ax.margins(0.1)
         ax.axis('off')
         plt.show()
+        
+    def determine_map_dimensions(self):
+        # parameters to retrieve area border gps data
+        SA4_regions_to_include = [206,207,208,209,210,211,212,213,214]
+        _layer = "Statistical_Area_Level_4_2016"
+        _code = "SA4_CODE_2016"
+        _file_name = "asgs2016absstructuresmainstructureandgccsa.gpkg"
+        _file_path \
+            = "data\\generators\\locations\\sa_code, sa_names, cooridnates\\"
+        # map_dimenstions
+        dim = {"min_x": None, "max_x": None, "min_y": None, "max_y": None}
+        if os.path.isfile(_file_path + _file_name):
+            with fiona.open(_file_path + _file_name, layer=_layer) as layer:
+                for export_level_region in layer:
+                    elr = export_level_region
+                    if int(elr['properties'][_code]) in SA4_regions_to_include:
+                        for patch_data in elr['geometry']['coordinates']:
+                            x = [data[0] for data in patch_data[0]]
+                            y = [data[1] for data in patch_data[0]]
+                            dim["min_x"] = set_min(dim["min_x"], x)
+                            dim["max_x"] = set_max(dim["max_x"], x)
+                            dim["min_y"] = set_min(dim["min_y"], y)
+                            dim["max_y"] = set_max(dim["max_y"], y)
+        return dim

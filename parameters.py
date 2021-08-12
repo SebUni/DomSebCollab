@@ -111,6 +111,12 @@ class Parameters():
         else:
             return False
         
-    def path_file_name(self, identifier, ending):
-        return self.result_path + self.file_name_prefix + str(identifier) \
-            + str(ending)
+    def path_file_name(self, identifier, ending,
+                       pf_name_wo_identifier_and_ending=""):
+        if pf_name_wo_identifier_and_ending == "":
+            return self.result_path + self.file_name_prefix + str(identifier) \
+                + str(ending)
+        else:
+            return pf_name_wo_identifier_and_ending + str(identifier) \
+                + str(ending)
+        
