@@ -67,7 +67,7 @@ class Company():
         
             self.chargers_used_this_time_step = []
             self.charger_utilisation = 0
-            self.charger_history = dict()
+            self.cur_total_revenue = 0
         
     def add_employee(self):
         """
@@ -126,6 +126,7 @@ class Company():
                                 charge_up_to])
             self.location.cur_charge_delivered_to_car += delivered_charge
             charging_cost = self.charger_cost_per_kWh * delivered_charge
+            self.cur_total_revenue += charging_cost
             if company_charger not in self.chargers_used_this_time_step:
                 self.chargers_used_this_time_step.append(company_charger)
         
@@ -205,7 +206,13 @@ class Company():
                 = len(self.chargers_used_this_time_step)/len(self.ccm.chargers)
             self.extracted_data.set(self.tracking_id, "Charger utilisation",
                                     self.charger_utilisation)
+            self.extracted_data.set(self.tracking_id, "Total revenue",
+                                    self.cur_total_revenue)
+            self.extracted_data.set(self.tracking_id, "Revenue per charger",
+                                    self.cur_total_revenue \
+                                        / len(self.ccm.chargers))
         self.chargers_used_this_time_step.clear()
+        self.cur_total_revenue = 0
     
     def __repr__(self):
         msg = ""

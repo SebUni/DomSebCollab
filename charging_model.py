@@ -43,6 +43,8 @@ class ChargingModel(Model):
         # create company manager
         self.extracted_company_data = ExtractedData(self.clock)
         self.extracted_company_data.init_tracked_var("Charger utilisation", 0)
+        self.extracted_company_data.init_tracked_var("Total revenue", 0)
+        self.extracted_company_data.init_tracked_var("Revenue per charger", 0)
         self.cpm = CompanyManager(self.parameters, self.clock, self.chm,
                                   self.epm, self.extracted_company_data)
         self.extracted_location_data = ExtractedData(self.clock)

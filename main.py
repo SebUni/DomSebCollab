@@ -17,7 +17,7 @@ plot_extraced_data = True
 plot_extraced_data_details = True
 store_to_csv = True
 
-run_parameter_scan = False
+run_parameter_scan = True
 
 parameters = Parameters()
 co = ConsoleOutput(parameters.path_file_name("log", ".log"))
@@ -48,12 +48,13 @@ if not run_parameter_scan:
 
 # parameter scan
 else:
-    scan_parameters = {"employees_per_charger" : range(1,1,2),
-                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.04)}
+    scan_parameters = {"employees_per_charger" : range(1,5,2),
+                "company_charger_cost_per_kWh" : np.arange (0.08, 0.32, 0.10)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],
-                           "utilisation": [], "avg_cost_apartment": [],
+                           "utilisation": [], "total_revenue": [],
+                           "revenue_per_charger": [],"avg_cost_apartment": [],
                            "avg_cost_house_pv": [], "avg_cost_house_no_pv": [],
                            "avg_cost": []}
     if len(scan_parameters[scan_order[0]]) == 0:
@@ -71,9 +72,9 @@ else:
             od.print_overall_charging_results(cm)
                 
             charge_pv, charge_work, charge_grid, charge_emergency, \
-            charge_held_back, utilisation, avg_cost_apartment, \
-            avg_cost_house_pv, avg_cost_house_no_pv, avg_cost \
-                = od.calc_overall_charging_results(cm)
+            charge_held_back, utilisation, total_revenue, revenue_per_charger,\
+            avg_cost_apartment, avg_cost_house_pv, avg_cost_house_no_pv, \
+            avg_cost = od.calc_overall_charging_results(cm)
                 
             scan_collected_data["charge_pv"].append(charge_pv)
             scan_collected_data["charge_work"].append(charge_work)
@@ -81,6 +82,8 @@ else:
             scan_collected_data["charge_emergency"].append(charge_emergency)
             scan_collected_data["charge_held_back"].append(charge_held_back)
             scan_collected_data["utilisation"].append(utilisation)
+            scan_collected_data["total_revenue"].append(total_revenue)
+            scan_collected_data["revenue_per_charger"].append(revenue_per_charger)
             scan_collected_data["avg_cost_apartment"].append(avg_cost_apartment)
             scan_collected_data["avg_cost_house_pv"].append(avg_cost_house_pv)
             scan_collected_data["avg_cost_house_no_pv"].append(avg_cost_house_no_pv)

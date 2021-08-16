@@ -189,6 +189,11 @@ class OutputData():
             
         utilisation = model.extracted_company_data.avg_over_time_and_agents(
             "Charger utilisation") * 100
+        avg_total_revenue \
+            = model.extracted_company_data.sum_over_all_agents("Total revenue")
+        avg_revenue_per_charger \
+            = model.extracted_company_data.sum_over_all_agents(
+                "Revenue per charger")
         
         avg_electricity_cost_apartment  \
             = extr_data.avg_over_time_and_agents("electricity_cost_apartment")
@@ -235,7 +240,8 @@ class OutputData():
             avg_cost_per_km = avg_electricity_cost / avg_dist_travlled
         
         return charge_pv, charge_work, charge_grid, charge_emergency, \
-            charge_held_back, utilisation, avg_cost_apartment_per_km, \
+            charge_held_back, utilisation, avg_total_revenue, \
+            avg_revenue_per_charger, avg_cost_apartment_per_km, \
             avg_cost_house_pv_per_km, avg_cost_house_no_pv_per_km,\
             avg_cost_per_km
         
@@ -243,7 +249,8 @@ class OutputData():
         co = self.co
         co.t_print("COMMENCING DATA EVALUATION")    
         charge_pv, charge_work, charge_grid, charge_emergency, \
-        charge_held_back, utilisation, avg_cost_apartment, avg_cost_house_pv,\
+        charge_held_back, utilisation, avg_total_revenue, \
+        avg_revenue_per_charger, avg_cost_apartment, avg_cost_house_pv,\
         avg_cost_house_no_pv, avg_cost \
             = self.calc_overall_charging_results(model)
         co.t_print("charge_received_work: {:.01f} kWh".format(charge_work))
@@ -254,6 +261,10 @@ class OutputData():
         co.t_print("charge_held_back: {:.01f} kWh".format(\
                                                         charge_held_back))
         co.t_print("Company Charger Utilisation: {:.02f}%".format(utilisation))
+        co.t_print("Avg Company Total Revenue: ${:.02f}".format(\
+                                                            avg_total_revenue))
+        co.t_print("Avg Company Revenue per Charger: ${:.02f}".format(\
+                                                    avg_revenue_per_charger))
         co.t_print("Average Electricity Cost Apartments: $/km {:.04f}".format(\
                                                         avg_cost_apartment))
         co.t_print("Average Electricity Cost House wo PV: $/km {:.04f}".format(\
@@ -310,8 +321,8 @@ class OutputData():
         
         for tracked_var in tracked_vars:
             fig, ax = plt.subplots()
-            for agent_id in range(extr_data.nbr_of_tracked_agents):
-                y_data = extr_data.agent_time_series(agent_id, tracked_var)
+            for agent_uid in extr_data.tracked_agents:
+                y_data = extr_data.agent_time_series(agent_uid, tracked_var)
                 ax.plot(time_steps, y_data)
             ax.set(xlabel='time in hours', ylabel=tracked_var)
             plt.xticks(lbl_time_steps, lbl_hour_steps)
@@ -494,10 +505,30 @@ class OutputData():
                                             ".png",
                                             pf_name_wo_identifier_and_ending)
             fig, ax = plt.subplots()
-            ax.plot(x_data, scan_collected_data["utilisation"],
-                    label="utilisation")
+            ax.plot(x_data, scan_collected_data["utilisation"])
             ax.set(xlabel=scan_order[1], ylabel="utilisation in %")
             plt.title("Average charger utilisation")
+            plt.show()
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
+            # average total revenue
+            file_name=self.parameters.path_file_name("avg_total_revenue",
+                                            ".png",
+                                            pf_name_wo_identifier_and_ending)
+            fig, ax = plt.subplots()
+            ax.plot(x_data, scan_collected_data["total_revenue"])
+            ax.set(xlabel=scan_order[1], ylabel="Average Total Revenue in $")
+            plt.title("Average Total Revenue")
+            plt.show()
+            fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
+            # average revenue per charger
+            file_name=self.parameters.path_file_name("avg_revenue_per_charger",
+                                            ".png",
+                                            pf_name_wo_identifier_and_ending)
+            fig, ax = plt.subplots()
+            ax.plot(x_data, scan_collected_data["revenue_per_charger"])
+            ax.set(xlabel=scan_order[1],
+                   ylabel="Average Revenue per Charger in $")
+            plt.title("Average Revenue per Charger")
             plt.show()
             fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
             # average cost per km
