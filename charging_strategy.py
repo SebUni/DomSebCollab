@@ -91,31 +91,17 @@ def parm_cost_fct_charging_at_work_anal(q_ow, q_res, p_f, p_g, p_em, p_w, soc,
     dp_div = dp / (2 * (1 - c))
     
     instruction = 0
-    if q_tw < thresh:
-        if p_w >= p_f + dp_div * (erf((q_tw - mu) / sqrt2sig) + 1):
-            instruction = q_th - soc
-        elif p_w <= p_f + dp_div * (1 - erf(mu / sqrt2sig)):
-            instruction = q_th + q_tw - soc
-        else:
-            instruction = q_th + q_tw - soc - mu \
-                - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
-    elif thresh < 0:
-        if p_g < p_w:
-            instruction = q_th - soc
-        elif p_g == p_w:
-            instruction = q_th - soc
-        else:
-            instruction = q_th + q_tw - soc
-    else:
-        if p_w < p_g:
-            instruction = q_th + q_tw - soc
-        elif p_w == p_g:
-            instruction = q_th - soc
-        elif p_f + dp_div * (erf(q_tw - mu) / sqrt2sig + 1) > p_w > p_g:
-            instruction = q_th + q_tw - soc - mu \
-                - sqrt2sig * erfinv((p_w - p_f) / dp_div - 1)
-        else:
-            instruction = q_th - soc
+    
+    value = q_th + q_tw - soc - mu - math.sqrt(2) * sig * erfinv(2*(1-c)*(1-(p_g-p_w)/(p_g-p_f))-1)
+    clamped_value = min(max(value,
+                   q_th - soc),
+               q_th + q_tw - soc)
+    if p_w >= p_g:
+        instruction = q_th-soc
+    if p_g > p_w > p_f:
+        instruction = clamped_value
+    if p_f >= p_w:
+        instruction = q_th + q_tw - soc
             
     return max(0, instruction)
 
@@ -294,6 +280,7 @@ class ChargingStrategy():
             mu, sig \
                 = self.ca.calc_forcast_mean_and_std_dev(forcast_begin,
                                                         next_home_stay_end)
+            charge_needed_next_route = q_ow + q_res - soc
             if self.whereabouts.destination_activity == self.cp.WORK:
                 # when agents earn more by selling PV than using it to charge
                 if p_feed >= p_work:
@@ -315,24 +302,28 @@ class ChargingStrategy():
                         charge_at_work = 2 * q_ow + q_res - soc
                 # when only public charging is more expen. than work charging
                 else:
-                    charge_at_work = q_ow + q_res - soc
+                    charge_at_work = charge_needed_next_route
                 # ensure charge suffices to reach home, but uses as little 
                 # public charging as possible
                 work_stay_duration \
                     = ((cal.find_next_departure_from_activity(self.cp.WORK)\
                     - self.clock.elapsed_time) / 60) % (24 * 7)
-                charge_at_work = max(charge_at_work, 0)
+                charge_at_work \
+                    = max(min(charge_at_work, work_stay_duration*cr_w),
+                          charge_needed_next_route, 0)
             if self.whereabouts.destination_activity == self.cp.HOME:
                 if self.house_agent.charger != None:
                     home_stay_duration \
                         = ((cal.find_next_departure_from_activity(self.cp.HOME)\
                             - self.clock.elapsed_time) / 60) % (24 * 7)
-                    charge_at_home = q_ow + q_res - soc
+                    charge_at_home = charge_needed_next_route
                     if p_grid < p_work:
                         charge_at_home += q_ow
-                    charge_at_home = max(charge_at_home, 0)
+                    charge_at_home \
+                        = max(min(charge_at_home, home_stay_duration*cr_h),
+                              charge_needed_next_route, 0)
                 else:
-                    charge_needed = max(q_ow + q_res - soc, 0)
+                    charge_needed = max(charge_needed_next_route, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
         
@@ -593,7 +584,6 @@ class ChargingStrategy():
             shifts_going_back.reverse()
             for it_rev, shift_rev in enumerate(shifts_going_back):
                 next_shift_length = self.calc_shift_length(shift_rev)
-                time_at_home = self.calc_time_at_home(shift_rev)
                 
                 if not (it_rev == 0 and start_at_work):
                     tmp_soc += self.q_one_way
