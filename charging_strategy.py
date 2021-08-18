@@ -7,7 +7,7 @@ Created on Wed Jul 28 15:05:58 2021
 
 import math
 import numpy as np
-from scipy.special import erf, erfinv
+from scipy.special import erfinv
 
 """
 PARAMETER EXPLANATION
@@ -41,58 +41,13 @@ phi
     value at risk
 """
 
-# TODO update in draw.io ClassDiagram
-
-def parm_cost_fct_charging_at_home_anal(q_ow, q_res, p_f, p_g, p_em, p_w, soc,
-                                        c, mu, sig):
-    q_tw, q_th = q_ow + q_res, q_ow
-    sqrt2sig = math.sqrt(2) * sig
-    # performance helper
-    thresh = mu + sqrt2sig * erfinv(1 - 2*c)
-    # shorthands
-    dp = p_g - p_f
-    dp_div = dp / (2 * (1 - c))
-    
-    instruction = 0
-    if thresh < q_tw - soc:
-        if p_g < p_w:
-            instruction = q_tw + q_th - soc
-        elif p_g == p_w:
-            instruction = q_tw - soc
-        else:
-            instruction = q_tw - soc
-    elif q_tw + q_th - soc < thresh:
-        if p_w <= p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1):
-            instruction = q_tw - soc
-        elif p_w >= p_f + dp_div * (erf((q_tw + q_th - soc - mu) / sqrt2sig) + 1):
-            instruction = q_tw + q_th - soc
-        else:
-            instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
-    else:
-        if p_w > p_g:
-            instruction = q_tw + q_th - soc
-        elif p_w == p_g:
-            instruction = q_tw + q_th - soc
-        elif p_f + dp_div * (erf((q_tw - soc - mu) / sqrt2sig) + 1) < p_w < p_g:
-            instruction = sqrt2sig * erfinv((p_w - p_f) / dp_div - 1) + mu
-        else:
-            instruction = q_tw - soc
-            
-    return max(0, instruction)
-
 def parm_cost_fct_charging_at_work_anal(q_ow, q_res, p_f, p_g, p_em, p_w, soc,
                                         c, mu, sig):
     q_tw, q_th = q_ow, q_ow + q_res
-    sqrt2sig = math.sqrt(2) * sig
-    # performance helper
-    thresh = mu + sqrt2sig * erfinv(1 - 2*c)
-    # shorthands
-    dp = p_g - p_f
-    dp_div = dp / (2 * (1 - c))
     
     instruction = 0
-    
-    value = q_th + q_tw - soc - mu - math.sqrt(2) * sig * erfinv(2*(1-c)*(1-(p_g-p_w)/(p_g-p_f))-1)
+    value = q_th + q_tw - soc - mu \
+        - math.sqrt(2) * sig * erfinv(2*(1-c) * (1 - (p_g-p_w)/(p_g-p_f)) - 1)
     clamped_value = min(max(value,
                    q_th - soc),
                q_th + q_tw - soc)
@@ -163,7 +118,8 @@ class ChargingStrategy():
         self.charge_rate_at_work \
             = car_agent.company.ccm.max_charge_rate(car_agent.car_model)
         self.charge_rate_at_public \
-            = car_agent.whereabouts.cur_location.companies[0].ccm.max_charge_rate(car_agent.car_model)
+            = car_agent.whereabouts.cur_location.companies[0].ccm \
+                .max_charge_rate(car_agent.car_model)
         self.minimum_soc = max(car_agent.car_model.battery_capacity * \
             self.parameters.get("minimum_relative_state_of_charge", "float"),
                                self.reserve_charge)
