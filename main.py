@@ -49,7 +49,7 @@ if not run_parameter_scan:
 # parameter scan
 else:
     scan_parameters = {"employees_per_charger" : range(1,1,2),
-                "company_charger_cost_per_kWh" : np.arange (0.2, 0.225, 0.005)}
+                "company_charger_cost_per_kWh" : np.arange (0.08, 0.25, 0.01)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],
