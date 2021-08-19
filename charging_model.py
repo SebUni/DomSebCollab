@@ -176,7 +176,7 @@ class ChargingModel(Model):
         max_abs_dist = int(len(lst) * max_rel_dist)
         for it in range(len(lst)):
             move_by = random.randint(-max_abs_dist, max_abs_dist)
-            if not 0 < it + move_by <= len(lst):
+            if not 0 <= it + move_by < len(lst):
                 move_by *= -1
             cur_value = lst[it]
             lst[it] = lst[it+move_by]
