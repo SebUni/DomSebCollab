@@ -139,15 +139,17 @@ class ChargingModel(Model):
             car_agent = self.schedule_cars.agents[assign_order[car_it]]
             self.co.progress("calendar_creation", car_it)
             success = car_agent.generate_calendar_entries()
-            if not success:
+            if success:
+                car_agent.whereabouts.set_activity_and_location( \
+                                    car_agent.calendar.cur_scheduled_activity,
+                                    car_agent.calendar.cur_scheduled_location)
+                car_it += 1
+            else:
                 self.co.t_print("Calendar creation reseted!")
                 self.cp.prepare_schedule_generation()
                 assign_order = self.mild_shuffle(assign_order)
                 car_it = 0
-            car_agent.whereabouts.set_activity_and_location( \
-                                    car_agent.calendar.cur_scheduled_activity,
-                                    car_agent.calendar.cur_scheduled_location)
-            car_it += 1
+                
         self.co.endProgress("calendar_creation",
                             "Completed agent's work schedule")
         self.co.t_print("Agent creation complete")
