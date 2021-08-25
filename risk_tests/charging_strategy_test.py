@@ -26,7 +26,7 @@ pv_cap = 4
 work_stay_duration = 8
 home_stay_duration = 16
 
-soc = 7.5
+soc = 5
 q_ow = 10
 q_res = 5
 
