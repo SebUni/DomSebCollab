@@ -135,6 +135,7 @@ class ChargingModel(Model):
         self.cp.prepare_schedule_generation()
         car_it = 0
         assign_order = self.det_assign_order()
+        assign_order = self.mild_shuffle(assign_order)
         while car_it < len(self.schedule_cars.agents):
             car_agent = self.schedule_cars.agents[assign_order[car_it]]
             self.co.progress("calendar_creation", car_it)

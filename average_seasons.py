@@ -7,17 +7,22 @@ Created on Wed Aug 11 11:00:09 2021
 
 import os
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.patches
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 from console_output import ConsoleOutput
 from cast import Cast
 from csv_helper import CSVHelper
 
-def file_name(model, nbr_of_agents, season, identifier):
-    return "model_{}_nbr_agents_{}_season_{}_{}.csv".format(model,
-                                            nbr_of_agents, season, identifier)
+def file_name(model, nbr_of_agents, season, identifier, ending):
+    return "model_{}_nbr_agents_{}_season_{}_{}.{}".format(model,
+                                    nbr_of_agents, season, identifier, ending)
 
-def path_file_name(path, model, nbr_of_agents, season, identifier):
+def path_file_name(path, model, nbr_of_agents, season, identifier, ending):
     return "{}/{}".format(path, file_name(model, nbr_of_agents, season,
-                                         identifier))
+                                         identifier, ending))
 
 def read_data(relative_path, file_name):
     cast = Cast("average_season")
@@ -56,7 +61,7 @@ def determine_missing_files(identifiers, seasons):
     for identifier in identifiers:
         for season in seasons:
             if not os.path.isfile(path_file_name(PATH, model, nbr_of_agents,
-                                                 season, identifier)):
+                                                 season, identifier, "csv")):
                 if identifier not in missing_files:
                     missing_files[identifier] = [season]
                 else:
@@ -74,23 +79,127 @@ def write_to_csv(pf_name, header, front_col, data):
                 line += "," + str(cell)
             print(line, file=f)
             
-def handle_averaging_all_identifiers(identifiers):
+def handle_averaging_all_identifiers(identifiers, sweep_dimension):
     for identifier in identifiers:
         header, front_col = "", []
         data = []
         for season in SEASONS:
-            fname = file_name(model, nbr_of_agents, season, identifier)
+            fname = file_name(model, nbr_of_agents, season, identifier, "csv")
             header, front_col, tmp_data = read_data(PATH, fname)
             data.append(tmp_data)
         data_avg = avg_2d_matrix(data)
-        pf_name = path_file_name(PATH, model, nbr_of_agents, "avg", identifier)
-        write_to_csv(pf_name, header, front_col, data_avg)
-        
-def decide_what_to_do(co, identifiers, title, seasons):
+        pf_name_csv = path_file_name(PATH, model, nbr_of_agents, "avg",
+                                     identifier, "csv")
+        write_to_csv(pf_name_csv, header, front_col, data_avg)
+        if sweep_dimension == 1:
+            plot_1D_sweep_results(header, front_col, data_avg, model,
+                                  nbr_of_agents)
+        if sweep_dimension == 2:
+            pf_name_png = path_file_name(PATH, model, nbr_of_agents, "avg",
+                                         identifier, "png")
+            plot_2D_sweep_results(identifier, header, front_col, data_avg,
+                                  pf_name_png)
+            
+def plot_1D_sweep_results(header, front_col, data, model, nbr_of_agents):
+    cast = Cast("average_season")
+    # assign data
+    data_dict = dict()
+    for header_it, header_element in enumerate(header.split(",")[1:]):
+        data_dict[header_element] = [row[header_it] for row in data]
+    # single parameter scan
+    x_data = [cast.to_float(front_col_element, "front col element")
+               for front_col_element in front_col]
+    x_label = header.split(',')[0]
+    # charge delivered by source
+    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+                            "charge_delivered_avg", "png")
+    fig, ax = plt.subplots()
+    ax.plot(x_data, data_dict["charge_pv"], label="charge_pv")
+    ax.plot(x_data, data_dict["charge_work"], label="charge_work")
+    ax.plot(x_data, data_dict["charge_grid"], label="charge_grid")
+    ax.plot(x_data, data_dict["charge_emergency"], label="charge_emergency")
+    ax.plot(x_data, data_dict["charge_held_back"], label="charge_held_back")
+    ax.set(xlabel=x_label, ylabel="kWh / 5 min")
+    plt.title("Charge delivered by source")
+    plt.legend()
+    plt.show()
+    fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
+    # average charger utilisation
+    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+                            "avg_charger_utilisation", "png")
+    fig, ax = plt.subplots()
+    ax.plot(x_data, data_dict["utilisation"])
+    ax.set(xlabel=x_label, ylabel="utilisation in %")
+    plt.title("Average charger utilisation")
+    plt.show()
+    fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
+    # total revenue
+    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+                            "total_revenue", "png")
+    fig, ax = plt.subplots()
+    ax.plot(x_data, data_dict["total_revenue"])
+    ax.set(xlabel=x_label, ylabel="Total Revenue in $")
+    plt.title("Total Revenue")
+    plt.show()
+    fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
+    # revenue per charger
+    fname = file_name(model, nbr_of_agents, "avg", "revenue_per_charger",
+                      "png")
+    fig, ax = plt.subplots()
+    ax.plot(x_data, data_dict["revenue_per_charger"])
+    ax.set(xlabel=x_label, ylabel="Revenue per Charger in $")
+    plt.title("Revenue per Charger")
+    plt.show()
+    fig.savefig(fname, bbox_inches='tight', pad_inches=0.1)
+    # average cost per km
+    pfname = path_file_name(PATH, model, nbr_of_agents, "avg", "cost", "png")
+    fig, ax = plt.subplots()
+    ax.plot(x_data, data_dict["avg_cost_apartment"],
+            label="avg_cost_apartment")
+    ax.plot(x_data, data_dict["avg_cost_house_pv"], 
+            label="avg_cost_house_pv")
+    ax.plot(x_data, data_dict["avg_cost_house_no_pv"],
+            label="avg_cost_house_no_pv")
+    ax.plot(x_data, data_dict["avg_cost"],
+            label="avg_cost")
+    ax.set(xlabel=x_label, ylabel="$/km")
+    plt.legend()
+    plt.title("Average cost per km")
+    plt.show()
+    fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
+            
+def plot_2D_sweep_results(identifier, header, front_col, data, pf_name):
+    cast = Cast("average_season")
+    y_label = header.split(',')[0].split('\\')[0]
+    x_label = header.split(',')[0].split('\\')[1]
+    x_ticks = [cast.to_float(header_element, "header element")
+               for header_element in header.split(',')[1:]]
+    y_ticks = [cast.to_int(front_col_element, "front col element")
+               for front_col_element in front_col]
+    cmap = mpl.cm.viridis
+    fig, ax = plt.subplots()
+    vmin=min([min(row) for row in data])
+    vmax=max([max(row) for row in data])
+    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+    ax.pcolormesh(x_ticks, y_ticks, data, cmap=cmap, shading='gouraud',
+                  vmin=vmin, vmax=vmax)
+    ax.set(xlabel=x_label, ylabel=y_label)
+    
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                        cax=cax)
+    cbar.set_label(identifier)
+    
+    ax.set_title(identifier)
+    plt.show()
+    fig.savefig(pf_name, bbox_inches='tight', pad_inches=0.1)
+    
+def decide_what_to_do(co, identifiers, title, seasons, sweep_dimension):
     nbr_missing_files, missing_files \
         = determine_missing_files(identifiers, seasons)
     if nbr_missing_files == 0:
-        handle_averaging_all_identifiers(identifiers)
+        handle_averaging_all_identifiers(identifiers, sweep_dimension)
         co.t_print("Averaged {}".format(title))
     elif nbr_missing_files != len(identifiers) * len(seasons):
         co.t_print("Files missing to average {}:".format(title))
@@ -121,15 +230,18 @@ nbr_of_agents = 12000
 no_files_found = True
 
 # Average Single-Run-Session
-files_found = decide_what_to_do(co, SINGLE_RUN, "Single-Run-Session", SEASONS)
+files_found = decide_what_to_do(co, SINGLE_RUN, "Single-Run-Session", SEASONS,
+                                0)
 if files_found: no_files_found = False
 
 # Average 1-Dimensional-Sweep
-files_found = decide_what_to_do(co, D1_SWEEP, "1-Dimensional-Sweep", SEASONS)
+files_found = decide_what_to_do(co, D1_SWEEP, "1-Dimensional-Sweep", SEASONS,
+                                1)
 if files_found: no_files_found = False
 
 # Average 2-Dimensional-Sweep
-files_found = decide_what_to_do(co, D2_SWEEP, "2-Dimensional-Sweep", SEASONS)
+files_found = decide_what_to_do(co, D2_SWEEP, "2-Dimensional-Sweep", SEASONS,
+                                2)
 if files_found: no_files_found = False
 
 if no_files_found:
