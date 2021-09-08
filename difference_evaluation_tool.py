@@ -10,6 +10,9 @@ import fiona
 
 import matplotlib.pyplot as plt
 import matplotlib.patches
+import matplotlib as mpl
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 from parameters import Parameters
 from output_data import OutputData
@@ -30,14 +33,14 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 2400
+nbr_of_agents = 12000
 # run A
-season_a = "1"
+season_a = "avg"
 model_a = 1
 addendum_a = ""
 
 # run B
-season_b = "1"
+season_b = "avg"
 model_b = 6
 addendum_b = ""
 
@@ -136,9 +139,10 @@ def time_axis_labels(time_steps):
     
     return lbl_time_steps, lbl_hour_steps
 
-def get_color(value, min_value, max_value):
+def get_color(cmap, value, min_value, max_value):
     _max = max(abs(min_value), max_value)
-    rel_value = value / _max
+    rel_value = 0.5 + value / _max
+    return list(cmap(rel_value))[:3]
     if rel_value <= 0:
         return [1+rel_value,1+rel_value,1]
     else:
@@ -326,6 +330,14 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
     _file_path \
         = "data\\generators\\locations\\sa_code, sa_names, cooridnates\\"
     
+    # choose color map
+    cmap = mpl.cm.bwr
+    # get map dimensions
+    parameters = Parameters()
+    co = ConsoleOutput()
+    od = OutputData(co, parameters)
+    map_dimensions = od.map_dimensions
+    
     # plot total charge
     fig = plt.figure(figsize=(1080 / MY_DPI, 1080 / MY_DPI))
     ax = fig.add_subplot(111)
@@ -342,7 +354,7 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
             if is_in_selected_SA4_region:
                 elr_code = int(elr['properties'][_code])
                 charge_value = SA3_total[elr_code]
-                color_data = get_color(charge_value,
+                color_data = get_color(cmap, charge_value,
                                        min_total_charge_delivered,
                                        max_total_charge_delivered)
                 for patch_data in elr['geometry']['coordinates']:
@@ -353,18 +365,28 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
                     ax.add_patch(p)
                     ax.plot(x, y, color='black', linewidth=1)    
                 nbr_of_drawn_sas += 1
+            
+                abs_limit = max(-abs(min_total_charge_delivered),
+                                max_total_charge_delivered) / 1000
+                
+                norm = mpl.colors.Normalize(vmin=-abs_limit, vmax=abs_limit)
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size="5%", pad=0.05)
+                cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                                    cax=cax)
+                cbar.set_label("Charge withdrawn in MWh", fontsize=18)
+                cbar.ax.tick_params(labelsize=18)
     
     ax.margins(0.1)
+    ax.set_xlim([map_dimensions["min_x"] ,map_dimensions["max_x"]])
+    ax.set_ylim([map_dimensions["min_y"] ,map_dimensions["max_y"]])
+    print(map_dimensions)
     ax.axis('off')
     plt.show()
     fig.savefig(pf_name, bbox_inches='tight', pad_inches=0.1, dpi=MY_DPI)
     
     # plot individual steps
     if plot_all_time_steps_to_map:
-        parameters = Parameters()
-        co = ConsoleOutput()
-        od = OutputData(co, parameters)
-        map_dimensions = od.map_dimensions
         min_ind_charge_delivered \
             = min(min([min(SA3.values()) for SA3 in SA_data_ts.values()]))
         max_ind_charge_delivered \
@@ -393,7 +415,7 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
                     if is_in_selected_SA4_region:
                         elr_code = int(elr['properties'][_code])
                         charge_value = SA3_data[elr_code]
-                        color_data = get_color(charge_value,
+                        color_data = get_color(cmap, charge_value,
                                                min_ind_charge_delivered,
                                                max_ind_charge_delivered)
                         for patch_data in elr['geometry']['coordinates']:
@@ -405,6 +427,16 @@ def analyse_single_run_diff(identifiers, first_row, front_col, data_diff):
                             ax.plot(x, y, color='black', linewidth=1)    
                         nbr_of_drawn_sas += 1
             
+            abs_limit = max(-abs(min_ind_charge_delivered),
+                            max_ind_charge_delivered)
+            
+            norm = mpl.colors.Normalize(vmin=-abs_limit, vmax=abs_limit)
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                                cax=cax)
+            cbar.set_label("Charge with drawn in kWh")
+        
             ax.set_xlim([map_dimensions["min_x"] ,map_dimensions["max_x"]])
             ax.set_ylim([map_dimensions["min_y"] ,map_dimensions["max_y"]])
             ax.axis('off')
@@ -433,7 +465,36 @@ def analyse_1d_sweep_diff(identifiers, first_row, front_col, data_diff):
             pf_name_wo_identifier_and_ending=pf_name_wo_identifier_and_ending)
 
 def analyse_2d_sweep_diff(identifiers, first_row, front_col, data_diff):
-    co.t_print("2-Dimensional-Sweep comparison plot not implement yet!")
+    cast = Cast("Analysis")
+    cmap = mpl.cm.viridis
+    for identifier in identifiers:
+        print(identifier)
+        x_label = first_row[identifier][0].split('\\')[1]
+        y_label = first_row[identifier][0].split('\\')[0]
+        x_ticks = [cast.to_float(i, "first_row_cell")\
+                   for i in first_row[identifier][1:]]
+        y_ticks = [cast.to_int(i, "front_col_cell")\
+                   for i in front_col[identifier]]
+        fig, ax = plt.subplots()
+        vmin=min([min(row) for row in data_diff[identifier]])
+        vmax=max([max(row) for row in data_diff[identifier]])
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        ax.pcolormesh(x_ticks, y_ticks, data_diff[identifier], cmap=cmap,
+                      shading='gouraud', vmin=vmin, vmax=vmax)
+        ax.set(xlabel=x_label, ylabel=y_label)
+        
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                            cax=cax)
+        cbar.set_label(identifier)
+        
+        ax.set_title(identifier)
+        plt.show()
+        
+        pf_name = path_file_name(frmt(models), nbr_of_agents, frmt(seasons),
+                                 "diff_", identifier, "png")
+        fig.savefig(pf_name, bbox_inches='tight', pad_inches=0.1)
             
 # formated output
 co = ConsoleOutput()

@@ -109,7 +109,7 @@ def add_cbar(ax, plt, norm, cmap, label):
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
                         cax=cax)
-    cbar.set_label("q^w_0 in kWh")
+    cbar.set_label(label)
 
 # LOW RESOLUTION RUN - visualise dependency of optimal charging amount at work
 #                      of mu
@@ -123,8 +123,8 @@ for p_work in p_works_rough:
             p_em, q_ow, q_res, c, pv_cap, cr_h, cr_w, cr_p, mu, sig, activity,
             has_charger, work_stay_duration, home_stay_duration)
         charge_at_work[-1].append(caw)
-    ax.plot(mus, charge_at_work[-1], label="p_w = ${:.02f}".format(p_work))
-ax.set(xlabel="mu in kWh", ylabel="q^w_0 in kWh")
+    ax.plot(mus, charge_at_work[-1], label="$p^w$ = \${:.02f}".format(p_work))
+ax.set(xlabel="$\mu$ in kWh", ylabel="$q^w_0$ in kWh")
 plt.legend()
 plt.title("Optimal charge quantity at work")
 plt.show()
@@ -136,8 +136,8 @@ fig, ax = plt.subplots()
 norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
 ax.pcolormesh(mus, p_works_rough, charge_at_work, cmap=cmap, shading='nearest',
               vmin=min_charge, vmax=max_charge)
-ax.set(xlabel="mu in kWh", ylabel="p_w in $")
-add_cbar(ax, plt, norm, cmap, "q^w_0 in kWh")
+ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
+add_cbar(ax, plt, norm, cmap, "$q^w_0$ in kWh")
 ax.set_title("Optimal charge quantity at work")
 plt.show()
 
@@ -166,8 +166,8 @@ fig, ax = plt.subplots()
 norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
 ax.pcolormesh(mus, p_works_fine, charge_at_work, cmap=cmap, shading='gouraud',
               vmin=min_charge, vmax=max_charge)
-ax.set(xlabel="mu in kWh", ylabel="p_w in $")
-add_cbar(ax, plt, norm, cmap, "q^w_0 in kWh")
+ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
+add_cbar(ax, plt, norm, cmap, "$q^w_0$ in kWh")
 ax.set_title("Optimal charge quantity at work")
 plt.show()
 
@@ -179,7 +179,7 @@ fig, ax = plt.subplots()
 norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
 ax.pcolormesh(mus, p_works_fine, charge_held_back, cmap=cmap,shading='gouraud',
               vmin=min_charge, vmax=max_charge)
-ax.set(xlabel="mu in kWh", ylabel="p_w in $")
-add_cbar(ax, plt, norm, cmap, "q^hb in kWh")
+ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
+add_cbar(ax, plt, norm, cmap, "$q^{hb}_0$ in kWh")
 ax.set_title("Charge held back at work")
 plt.show()

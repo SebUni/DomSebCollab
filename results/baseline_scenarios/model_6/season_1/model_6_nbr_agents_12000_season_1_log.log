@@ -1,0 +1,41 @@
+INFO:root:[14:45:43] INITIALISING CHARGING MODEL
+INFO:root:[14:45:44] Selected number of agents: 12000, season: summer, time step: 5 min
+INFO:root:[14:45:44] Selected charging strategy: Charge where cheaper advanced
+INFO:root:[14:45:44] Selected work charge price: 0.12 $/kWh, employees per charger: 1
+INFO:root:[14:45:44] Start to create agents
+INFO:root:[14:45:48] Agent creation complete
+INFO:root:[14:45:48] Create agent's work schedule
+INFO:root:[14:46:13] INITIALISING CHARGING MODEL
+INFO:root:[14:46:14] Selected number of agents: 12000, season: summer, time step: 5 min
+INFO:root:[14:46:14] Selected charging strategy: Charge where cheaper advanced
+INFO:root:[14:46:14] Selected work charge price: 0.20 $/kWh, employees per charger: 1
+INFO:root:[14:46:14] Start to create agents
+INFO:root:[14:46:18] Agent creation complete
+INFO:root:[14:46:18] Create agent's work schedule
+INFO:root:[14:47:51] Completed agent's work schedule
+INFO:root:[14:47:51] Agent creation complete
+INFO:root:[14:47:51] INITIALISATION COMPLETE
+INFO:root:[14:47:51] 
+INFO:root:[14:47:51] COMMENCING STEP CALCULATION
+INFO:root:[16:38:40] STEP CALCULATION COMPLETE
+INFO:root:[16:38:40] 
+INFO:root:[16:38:40] Summary
+INFO:root:[16:38:40] Memory useage | Base: 65 MB Agents: 3196 MB Steps: 2615 MB Total: 6696 MB
+INFO:root:[16:38:40] Cars that would run flat: None
+INFO:root:[16:38:42] Route (min / avg / max) = 2.0 km / 17.3 km / 102.7 km
+INFO:root:[16:38:51] Average Consumption 36.1 kWh
+INFO:root:[16:38:51] Apartments: 1392, Houses wo PV: 8471, Houses w PV: 2137
+INFO:root:[16:38:51] COMMENCING DATA EVALUATION
+INFO:root:[16:39:27] charge_received_work: 364987.5 kWh
+INFO:root:[16:39:27] charge_received_pv: 70334.1 kWh
+INFO:root:[16:39:27] charge_received_grid: 2021.7 kWh
+INFO:root:[16:39:27] charge_received_public: 125.1 kWh
+INFO:root:[16:39:27] charge_held_back: 9185.1 kWh
+INFO:root:[16:39:27] Company Charger Utilisation: 1.94%
+INFO:root:[16:39:27] Total Company Total Revenue: $72997.49
+INFO:root:[16:39:27] Total Company Revenue per Charger: $230.36
+INFO:root:[16:39:27] Average Electricity Cost Apartments: $/km 0.0383
+INFO:root:[16:39:27] Average Electricity Cost House wo PV: $/km 0.0380
+INFO:root:[16:39:27] Average Electricity Cost House w PV: $/km 0.0252
+INFO:root:[16:39:27] Average Electricity Cost: $/km 0.0372
+INFO:root:[16:39:27] DATA EVALUATION COMPLETE

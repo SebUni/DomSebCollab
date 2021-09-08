@@ -17,7 +17,7 @@ plot_extraced_data = True
 plot_extraced_data_details = True
 store_to_csv = True
 
-run_parameter_scan = True
+run_parameter_scan = False
 
 parameters = Parameters()
 co = ConsoleOutput(parameters.path_file_name("log", ".log"))
