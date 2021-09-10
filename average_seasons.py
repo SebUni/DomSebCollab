@@ -224,7 +224,7 @@ PATH = "results"
 SEASONS = [0,1,2,3]
 
 # specify runs to average over
-model = 4
+model = 6
 nbr_of_agents = 12000
 
 no_files_found = True
