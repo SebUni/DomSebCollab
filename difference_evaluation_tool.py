@@ -35,12 +35,12 @@ MY_DPI = 96
 # general
 nbr_of_agents = 12000
 # run A
-season_a = "avg"
+season_a = "1"
 model_a = 1
 addendum_a = ""
 
 # run B
-season_b = "avg"
+season_b = "1"
 model_b = 6
 addendum_b = ""
 
