@@ -1,0 +1,36 @@
+INFO:root:[19:47:32] INITIALISING CHARGING MODEL
+INFO:root:[19:47:32] Selected number of agents: 12000, season: winter, time step: 5 min
+INFO:root:[19:47:32] Selected charging strategy: Charge where cheaper advanced
+INFO:root:[19:47:32] Selected work charge price: 0.27 $/kWh, employees per charger: 1
+INFO:root:[19:47:32] Start to create agents
+INFO:root:[19:47:35] Agent creation complete
+INFO:root:[19:47:35] Create agent's work schedule
+INFO:root:[19:47:40] Calendar creation reseted!
+INFO:root:[19:47:44] Calendar creation reseted!
+INFO:root:[19:48:26] Completed agent's work schedule
+INFO:root:[19:48:26] Agent creation complete
+INFO:root:[19:48:26] INITIALISATION COMPLETE
+INFO:root:[19:48:26] 
+INFO:root:[19:48:26] COMMENCING STEP CALCULATION
+INFO:root:[20:28:50] STEP CALCULATION COMPLETE
+INFO:root:[20:28:50] 
+INFO:root:[20:28:50] Summary
+INFO:root:[20:28:50] Memory useage | Base: 78 MB Agents: 3263 MB Steps: 8689 MB Total: 12310 MB
+INFO:root:[20:28:50] Cars that would run flat: None
+INFO:root:[20:28:51] Route (min / avg / max) = 2.0 km / 17.5 km / 102.7 km
+INFO:root:[20:28:51] Average Consumption 33.4 kWh
+INFO:root:[20:28:51] Apartments: 1377, Houses wo PV: 8516, Houses w PV: 2107
+INFO:root:[20:28:51] COMMENCING DATA EVALUATION
+INFO:root:[20:28:53] charge_received_work: 319111.3 kWh
+INFO:root:[20:28:53] charge_received_pv: 45651.3 kWh
+INFO:root:[20:28:53] charge_received_grid: 43901.3 kWh
+INFO:root:[20:28:53] charge_received_public: 3.2 kWh
+INFO:root:[20:28:53] charge_held_back: 22464.5 kWh
+INFO:root:[20:28:53] Company Charger Utilisation: 1.71%
+INFO:root:[20:28:53] Total Company Total Revenue: $86160.05
+INFO:root:[20:28:53] Total Company Revenue per Charger: $273.99
+INFO:root:[20:28:53] Average Electricity Cost Apartments: $/km 0.0514
+INFO:root:[20:28:53] Average Electricity Cost House wo PV: $/km 0.0515
+INFO:root:[20:28:53] Average Electricity Cost House w PV: $/km 0.0343
+INFO:root:[20:28:53] Average Electricity Cost: $/km 0.0504
+INFO:root:[20:28:53] DATA EVALUATION COMPLETE

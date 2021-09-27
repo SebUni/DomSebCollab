@@ -1,0 +1,99 @@
+INFO:root:[21:28:16] INITIALISING CHARGING MODEL
+INFO:root:[21:28:16] Selected number of agents: 12000, season: winter, time step: 5 min
+INFO:root:[21:28:16] Selected charging strategy: Always charge where cheaper
+INFO:root:[21:28:16] Selected work charge price: 0.28 $/kWh, employees per charger: 1
+INFO:root:[21:28:16] Start to create agents
+INFO:root:[21:28:19] Agent creation complete
+INFO:root:[21:28:19] Create agent's work schedule
+INFO:root:[21:28:24] Calendar creation reseted!
+INFO:root:[21:28:30] Calendar creation reseted!
+INFO:root:[21:28:36] Calendar creation reseted!
+INFO:root:[21:28:40] Calendar creation reseted!
+INFO:root:[21:29:00] Calendar creation reseted!
+INFO:root:[21:29:19] Calendar creation reseted!
+INFO:root:[21:29:47] Calendar creation reseted!
+INFO:root:[21:29:57] Calendar creation reseted!
+INFO:root:[21:30:37] Calendar creation reseted!
+INFO:root:[21:30:41] Calendar creation reseted!
+INFO:root:[21:31:12] Calendar creation reseted!
+INFO:root:[21:31:55] Calendar creation reseted!
+INFO:root:[21:32:28] Calendar creation reseted!
+INFO:root:[21:32:36] Calendar creation reseted!
+INFO:root:[21:32:51] Calendar creation reseted!
+INFO:root:[21:33:17] Calendar creation reseted!
+INFO:root:[21:33:21] Calendar creation reseted!
+INFO:root:[21:34:12] Calendar creation reseted!
+INFO:root:[21:34:52] Calendar creation reseted!
+INFO:root:[21:35:01] Calendar creation reseted!
+INFO:root:[21:35:29] Calendar creation reseted!
+INFO:root:[21:35:49] Calendar creation reseted!
+INFO:root:[21:36:07] Calendar creation reseted!
+INFO:root:[21:36:55] Calendar creation reseted!
+INFO:root:[21:37:08] Calendar creation reseted!
+INFO:root:[21:37:12] Calendar creation reseted!
+INFO:root:[21:37:28] Calendar creation reseted!
+INFO:root:[21:38:03] Calendar creation reseted!
+INFO:root:[21:38:38] Calendar creation reseted!
+INFO:root:[21:38:50] Calendar creation reseted!
+INFO:root:[21:39:37] Calendar creation reseted!
+INFO:root:[21:40:33] Calendar creation reseted!
+INFO:root:[21:40:42] Calendar creation reseted!
+INFO:root:[21:40:50] Calendar creation reseted!
+INFO:root:[21:41:14] Calendar creation reseted!
+INFO:root:[21:41:43] Calendar creation reseted!
+INFO:root:[21:41:49] Calendar creation reseted!
+INFO:root:[21:42:34] Calendar creation reseted!
+INFO:root:[21:43:27] Calendar creation reseted!
+INFO:root:[21:43:50] Calendar creation reseted!
+INFO:root:[21:43:59] Calendar creation reseted!
+INFO:root:[21:44:28] Calendar creation reseted!
+INFO:root:[21:44:39] Calendar creation reseted!
+INFO:root:[21:44:49] Calendar creation reseted!
+INFO:root:[21:45:22] Calendar creation reseted!
+INFO:root:[21:45:54] Calendar creation reseted!
+INFO:root:[21:45:59] Calendar creation reseted!
+INFO:root:[21:46:42] Calendar creation reseted!
+INFO:root:[21:47:09] Calendar creation reseted!
+INFO:root:[21:47:58] Calendar creation reseted!
+INFO:root:[21:48:26] Calendar creation reseted!
+INFO:root:[21:49:43] Calendar creation reseted!
+INFO:root:[21:50:18] Calendar creation reseted!
+INFO:root:[21:50:25] Calendar creation reseted!
+INFO:root:[21:51:02] Calendar creation reseted!
+INFO:root:[21:51:23] Calendar creation reseted!
+INFO:root:[23:20:21] INITIALISING CHARGING MODEL
+INFO:root:[23:20:22] Selected number of agents: 12000, season: winter, time step: 5 min
+INFO:root:[23:20:22] Selected charging strategy: Always charge where cheaper
+INFO:root:[23:20:22] Selected work charge price: 0.28 $/kWh, employees per charger: 1
+INFO:root:[23:20:22] Start to create agents
+INFO:root:[23:20:24] Agent creation complete
+INFO:root:[23:20:24] Create agent's work schedule
+INFO:root:[23:20:29] Calendar creation reseted!
+INFO:root:[23:20:33] Calendar creation reseted!
+INFO:root:[23:21:11] Completed agent's work schedule
+INFO:root:[23:21:11] Agent creation complete
+INFO:root:[23:21:11] INITIALISATION COMPLETE
+INFO:root:[23:21:11] 
+INFO:root:[23:21:11] COMMENCING STEP CALCULATION
+INFO:root:[23:55:13] STEP CALCULATION COMPLETE
+INFO:root:[23:55:13] 
+INFO:root:[23:55:13] Summary
+INFO:root:[23:55:13] Memory useage | Base: 76 MB Agents: 3259 MB Steps: 8794 MB Total: 15543 MB
+INFO:root:[23:55:13] Cars that would run flat: None
+INFO:root:[23:55:13] Route (min / avg / max) = 2.0 km / 17.4 km / 100.7 km
+INFO:root:[23:55:13] Average Consumption 33.0 kWh
+INFO:root:[23:55:13] Apartments: 1374, Houses wo PV: 8473, Houses w PV: 2153
+INFO:root:[23:55:13] COMMENCING DATA EVALUATION
+INFO:root:[23:55:15] charge_received_work: 34229.6 kWh
+INFO:root:[23:55:15] charge_received_pv: 7949.4 kWh
+INFO:root:[23:55:15] charge_received_grid: 354935.2 kWh
+INFO:root:[23:55:15] charge_received_public: 0.0 kWh
+INFO:root:[23:55:15] charge_held_back: 0.0 kWh
+INFO:root:[23:55:15] Company Charger Utilisation: 0.19%
+INFO:root:[23:55:15] Total Company Total Revenue: $9584.29
+INFO:root:[23:55:15] Total Company Revenue per Charger: $31.45
+INFO:root:[23:55:15] Average Electricity Cost Apartments: $/km 0.0536
+INFO:root:[23:55:15] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[23:55:15] Average Electricity Cost House w PV: $/km 0.0479
+INFO:root:[23:55:15] Average Electricity Cost: $/km 0.0511
+INFO:root:[23:55:15] DATA EVALUATION COMPLETE

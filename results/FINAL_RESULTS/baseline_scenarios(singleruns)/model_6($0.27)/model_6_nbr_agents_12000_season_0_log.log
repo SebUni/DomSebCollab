@@ -1,0 +1,37 @@
+INFO:root:[18:43:25] INITIALISING CHARGING MODEL
+INFO:root:[18:43:26] Selected number of agents: 12000, season: spring, time step: 5 min
+INFO:root:[18:43:26] Selected charging strategy: Charge where cheaper advanced
+INFO:root:[18:43:26] Selected work charge price: 0.27 $/kWh, employees per charger: 1
+INFO:root:[18:43:26] Start to create agents
+INFO:root:[18:43:28] Agent creation complete
+INFO:root:[18:43:28] Create agent's work schedule
+INFO:root:[18:43:33] Calendar creation reseted!
+INFO:root:[18:43:39] Calendar creation reseted!
+INFO:root:[18:43:43] Calendar creation reseted!
+INFO:root:[18:44:21] Completed agent's work schedule
+INFO:root:[18:44:21] Agent creation complete
+INFO:root:[18:44:21] INITIALISATION COMPLETE
+INFO:root:[18:44:21] 
+INFO:root:[18:44:21] COMMENCING STEP CALCULATION
+INFO:root:[19:26:24] STEP CALCULATION COMPLETE
+INFO:root:[19:26:24] 
+INFO:root:[19:26:24] Summary
+INFO:root:[19:26:24] Memory useage | Base: 75 MB Agents: 3265 MB Steps: 8690 MB Total: 12309 MB
+INFO:root:[19:26:24] Cars that would run flat: None
+INFO:root:[19:26:25] Route (min / avg / max) = 2.0 km / 17.8 km / 102.9 km
+INFO:root:[19:26:25] Average Consumption 33.9 kWh
+INFO:root:[19:26:25] Apartments: 1362, Houses wo PV: 8615, Houses w PV: 2023
+INFO:root:[19:26:25] COMMENCING DATA EVALUATION
+INFO:root:[19:26:27] charge_received_work: 312077.0 kWh
+INFO:root:[19:26:27] charge_received_pv: 66749.1 kWh
+INFO:root:[19:26:27] charge_received_grid: 39104.1 kWh
+INFO:root:[19:26:27] charge_received_public: 2.8 kWh
+INFO:root:[19:26:27] charge_held_back: 15401.1 kWh
+INFO:root:[19:26:27] Company Charger Utilisation: 1.71%
+INFO:root:[19:26:27] Total Company Total Revenue: $84260.80
+INFO:root:[19:26:27] Total Company Revenue per Charger: $268.71
+INFO:root:[19:26:27] Average Electricity Cost Apartments: $/km 0.0518
+INFO:root:[19:26:27] Average Electricity Cost House wo PV: $/km 0.0518
+INFO:root:[19:26:27] Average Electricity Cost House w PV: $/km 0.0252
+INFO:root:[19:26:27] Average Electricity Cost: $/km 0.0503
+INFO:root:[19:26:27] DATA EVALUATION COMPLETE

@@ -1,0 +1,36 @@
+INFO:root:[17:41:30] INITIALISING CHARGING MODEL
+INFO:root:[17:41:31] Selected number of agents: 12000, season: winter, time step: 5 min
+INFO:root:[17:41:31] Selected charging strategy: Charge where cheaper advanced
+INFO:root:[17:41:31] Selected work charge price: 0.28 $/kWh, employees per charger: 1
+INFO:root:[17:41:31] Start to create agents
+INFO:root:[17:41:33] Agent creation complete
+INFO:root:[17:41:33] Create agent's work schedule
+INFO:root:[17:41:39] Calendar creation reseted!
+INFO:root:[17:41:49] Calendar creation reseted!
+INFO:root:[17:42:37] Completed agent's work schedule
+INFO:root:[17:42:37] Agent creation complete
+INFO:root:[17:42:37] INITIALISATION COMPLETE
+INFO:root:[17:42:37] 
+INFO:root:[17:42:37] COMMENCING STEP CALCULATION
+INFO:root:[18:21:06] STEP CALCULATION COMPLETE
+INFO:root:[18:21:06] 
+INFO:root:[18:21:06] Summary
+INFO:root:[18:21:06] Memory useage | Base: 80 MB Agents: 3261 MB Steps: 8881 MB Total: 12500 MB
+INFO:root:[18:21:06] Cars that would run flat: None
+INFO:root:[18:21:07] Route (min / avg / max) = 2.0 km / 17.6 km / 102.9 km
+INFO:root:[18:21:07] Average Consumption 33.2 kWh
+INFO:root:[18:21:07] Apartments: 1375, Houses wo PV: 8558, Houses w PV: 2067
+INFO:root:[18:21:07] COMMENCING DATA EVALUATION
+INFO:root:[18:21:09] charge_received_work: 32776.9 kWh
+INFO:root:[18:21:09] charge_received_pv: 44962.4 kWh
+INFO:root:[18:21:09] charge_received_grid: 328225.2 kWh
+INFO:root:[18:21:09] charge_received_public: 6.4 kWh
+INFO:root:[18:21:09] charge_held_back: 0.0 kWh
+INFO:root:[18:21:09] Company Charger Utilisation: 0.21%
+INFO:root:[18:21:09] Total Company Total Revenue: $9177.52
+INFO:root:[18:21:09] Total Company Revenue per Charger: $28.31
+INFO:root:[18:21:09] Average Electricity Cost Apartments: $/km 0.0532
+INFO:root:[18:21:09] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[18:21:09] Average Electricity Cost House w PV: $/km 0.0340
+INFO:root:[18:21:09] Average Electricity Cost: $/km 0.0503
+INFO:root:[18:21:09] DATA EVALUATION COMPLETE

@@ -1,0 +1,38 @@
+INFO:root:[20:02:24] INITIALISING CHARGING MODEL
+INFO:root:[20:02:25] Selected number of agents: 12000, season: autumn, time step: 5 min
+INFO:root:[20:02:25] Selected charging strategy: Always charge where cheaper
+INFO:root:[20:02:25] Selected work charge price: 0.28 $/kWh, employees per charger: 1
+INFO:root:[20:02:25] Start to create agents
+INFO:root:[20:02:27] Agent creation complete
+INFO:root:[20:02:27] Create agent's work schedule
+INFO:root:[20:02:32] Calendar creation reseted!
+INFO:root:[20:02:40] Calendar creation reseted!
+INFO:root:[20:02:55] Calendar creation reseted!
+INFO:root:[20:03:02] Calendar creation reseted!
+INFO:root:[20:04:02] Completed agent's work schedule
+INFO:root:[20:04:02] Agent creation complete
+INFO:root:[20:04:02] INITIALISATION COMPLETE
+INFO:root:[20:04:02] 
+INFO:root:[20:04:02] COMMENCING STEP CALCULATION
+INFO:root:[21:15:08] STEP CALCULATION COMPLETE
+INFO:root:[21:15:08] 
+INFO:root:[21:15:08] Summary
+INFO:root:[21:15:08] Memory useage | Base: 74 MB Agents: 3266 MB Steps: 8405 MB Total: 12025 MB
+INFO:root:[21:15:08] Cars that would run flat: None
+INFO:root:[21:15:09] Route (min / avg / max) = 2.0 km / 17.4 km / 102.9 km
+INFO:root:[21:15:09] Average Consumption 32.8 kWh
+INFO:root:[21:15:09] Apartments: 1315, Houses wo PV: 8553, Houses w PV: 2132
+INFO:root:[21:15:09] COMMENCING DATA EVALUATION
+INFO:root:[21:15:12] charge_received_work: 33308.3 kWh
+INFO:root:[21:15:12] charge_received_pv: 12354.0 kWh
+INFO:root:[21:15:12] charge_received_grid: 348842.4 kWh
+INFO:root:[21:15:12] charge_received_public: 0.0 kWh
+INFO:root:[21:15:12] charge_held_back: 0.0 kWh
+INFO:root:[21:15:12] Company Charger Utilisation: 0.18%
+INFO:root:[21:15:12] Total Company Total Revenue: $9326.33
+INFO:root:[21:15:12] Total Company Revenue per Charger: $29.18
+INFO:root:[21:15:12] Average Electricity Cost Apartments: $/km 0.0536
+INFO:root:[21:15:12] Average Electricity Cost House wo PV: $/km 0.0518
+INFO:root:[21:15:12] Average Electricity Cost House w PV: $/km 0.0451
+INFO:root:[21:15:12] Average Electricity Cost: $/km 0.0514
+INFO:root:[21:15:12] DATA EVALUATION COMPLETE

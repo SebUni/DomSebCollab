@@ -1,0 +1,37 @@
+INFO:root:[18:44:50] INITIALISING CHARGING MODEL
+INFO:root:[18:44:50] Selected number of agents: 12000, season: spring, time step: 5 min
+INFO:root:[18:44:50] Selected charging strategy: Always charge where cheaper
+INFO:root:[18:44:50] Selected work charge price: 0.28 $/kWh, employees per charger: 1
+INFO:root:[18:44:50] Start to create agents
+INFO:root:[18:44:52] Agent creation complete
+INFO:root:[18:44:52] Create agent's work schedule
+INFO:root:[18:44:57] Calendar creation reseted!
+INFO:root:[18:45:01] Calendar creation reseted!
+INFO:root:[18:45:07] Calendar creation reseted!
+INFO:root:[18:45:46] Completed agent's work schedule
+INFO:root:[18:45:46] Agent creation complete
+INFO:root:[18:45:46] INITIALISATION COMPLETE
+INFO:root:[18:45:46] 
+INFO:root:[18:45:46] COMMENCING STEP CALCULATION
+INFO:root:[19:23:54] STEP CALCULATION COMPLETE
+INFO:root:[19:23:54] 
+INFO:root:[19:23:54] Summary
+INFO:root:[19:23:54] Memory useage | Base: 75 MB Agents: 3266 MB Steps: 8813 MB Total: 12433 MB
+INFO:root:[19:23:54] Cars that would run flat: None
+INFO:root:[19:23:54] Route (min / avg / max) = 2.0 km / 17.7 km / 102.7 km
+INFO:root:[19:23:54] Average Consumption 33.1 kWh
+INFO:root:[19:23:54] Apartments: 1339, Houses wo PV: 8523, Houses w PV: 2138
+INFO:root:[19:23:54] COMMENCING DATA EVALUATION
+INFO:root:[19:23:56] charge_received_work: 33172.5 kWh
+INFO:root:[19:23:56] charge_received_pv: 18158.1 kWh
+INFO:root:[19:23:56] charge_received_grid: 346215.3 kWh
+INFO:root:[19:23:56] charge_received_public: 0.0 kWh
+INFO:root:[19:23:56] charge_held_back: 0.0 kWh
+INFO:root:[19:23:56] Company Charger Utilisation: 0.19%
+INFO:root:[19:23:56] Total Company Total Revenue: $9288.30
+INFO:root:[19:23:56] Total Company Revenue per Charger: $30.50
+INFO:root:[19:23:56] Average Electricity Cost Apartments: $/km 0.0532
+INFO:root:[19:23:56] Average Electricity Cost House wo PV: $/km 0.0516
+INFO:root:[19:23:56] Average Electricity Cost House w PV: $/km 0.0426
+INFO:root:[19:23:56] Average Electricity Cost: $/km 0.0510
+INFO:root:[19:23:56] DATA EVALUATION COMPLETE
