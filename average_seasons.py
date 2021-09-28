@@ -225,7 +225,7 @@ SEASONS = [0,1,2,3]
 
 # specify runs to average over
 model = 6
-nbr_of_agents = 12000
+nbr_of_agents = 2400
 
 no_files_found = True
 
