@@ -35,16 +35,19 @@ cr_w = 11
 cr_p = 50
 
 p_work = 0.115
-p_feed = 0.11
-p_grid = 0.206
+p_feed = 0.07
+p_grid = 0.27
 p_em = 0.5
 
 c = 0.9
 
+mpl.rcParams['figure.dpi'] = 300
+
 # sweep parameters
-mus = list(np.arange(0, 25, 0.01))
-p_works_rough = list(np.arange(0.08, 0.25, 0.04))
-p_works_fine = list(np.arange(0.08,0.25,0.001))
+mus = list(np.arange(0, 25, 0.1))
+p_works_rough = list(np.arange(0.02, 0.33, 0.04))
+p_works_fine = list(np.arange(0.02,0.33,0.001))
+p_works_cents_fine = list(np.arange(2,33,0.1))
 
 # DEFINE FUNCTIONS
 def parm_cost_fct_charging_at_work_anal(q_ow, q_res, p_f, p_g, p_em, p_w, soc,
@@ -156,30 +159,90 @@ for p_work in p_works_fine:
         charge_at_work[-1].append(caw)
         without_forecast \
             = 2 * q_ow + q_res - soc if p_work < p_grid else q_ow + q_res - soc
-        charge_held_back[-1].append(without_forecast - caw)
+        charge_held_back[-1].append((without_forecast - caw))
         
-# plot optimal charge at work
-min_charge = min([min(row) for row in charge_at_work])
-max_charge = max([max(row) for row in charge_at_work])
+# # plot optimal charge at work
+# min_charge = min([min(row) for row in charge_at_work])
+# max_charge = max([max(row) for row in charge_at_work])
 
-fig, ax = plt.subplots()
-norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
-ax.pcolormesh(mus, p_works_fine, charge_at_work, cmap=cmap, shading='gouraud',
-              vmin=min_charge, vmax=max_charge)
-ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
-add_cbar(ax, plt, norm, cmap, "$q^w_0$ in kWh")
-ax.set_title("Optimal charge quantity at work")
+# fig, ax = plt.subplots()
+# norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
+# ax.pcolormesh(mus, p_works_fine, charge_at_work, cmap=cmap, shading='gouraud',
+#               vmin=min_charge, vmax=max_charge)
+# ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
+# add_cbar(ax, plt, norm, cmap, "$q^w_0$ in kWh")
+# ax.set_title("Optimal charge quantity at work")
+# plt.show()
+
+# # plot how much charge is held back when considering forecasts 
+# min_charge = min([min(row) for row in charge_held_back])
+# max_charge = max([max(row) for row in charge_held_back])
+
+# fig, ax = plt.subplots()
+# norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
+# ax.pcolormesh(mus, p_works_fine, charge_held_back, cmap=cmap,shading='gouraud',
+#               vmin=min_charge, vmax=max_charge)
+# ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
+# add_cbar(ax, plt, norm, cmap, "$q^{hb}_0$ in kWh")
+# ax.set_title("Charge held back at work")
+# plt.show()
+
+fontsize=8
+cm = 1/2.54
+
+cmap = mpl.cm.viridis
+x_label = "$\mu$ in kWh"
+y_label = "$p^w$ in $10^{-2}$ \$/kWh"
+z_label_left = "$q^w$ in kWh"
+z_label_right = "$q^{hb}$ in kWh"
+
+fig = plt.figure(figsize=(16*cm, 5*cm))
+gs = fig.add_gridspec(1, 2, wspace=1.4*cm)
+ax = gs.subplots(sharex=False, sharey=False)
+
+vmin_left=min([min(row) for row in charge_at_work])
+vmin_right=min([min(row) for row in charge_held_back])
+vmax_left=max([max(row) for row in charge_at_work])
+vmax_right=max([max(row) for row in charge_held_back])
+norm_left = mpl.colors.Normalize(vmin=vmin_left, vmax=vmax_left)
+norm_right = mpl.colors.Normalize(vmin=vmin_left, vmax=vmax_right)
+
+ax[0].pcolormesh(mus, p_works_cents_fine, charge_at_work, cmap=cmap,
+              shading='gouraud', vmin=vmin_left, vmax=vmax_left)
+ax[0].set_xlabel(x_label, fontsize=fontsize)
+ax[0].set_ylabel(y_label, fontsize=fontsize)
+ax[0].minorticks_on()
+ax[0].tick_params(labelsize=fontsize)
+
+divider = make_axes_locatable(ax[0])
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_left,cmap=cmap),
+                    cax=cax)
+cbar.minorticks_on()
+cbar.ax.tick_params(labelsize=fontsize)
+cbar.set_label(z_label_left, fontsize=fontsize)
+ax[0].text(24, 32, "a)", va="top", ha="right", fontsize=fontsize, color='w')
+
+ax[1].pcolormesh(mus, p_works_cents_fine, charge_held_back, cmap=cmap,
+              shading='gouraud', vmin=vmin_right, vmax=vmax_right)
+ax[1].set_xlabel(x_label, fontsize=fontsize)
+ax[1].set_ylabel(y_label, fontsize=fontsize)
+ax[1].minorticks_on()
+ax[1].tick_params(labelsize=fontsize)
+ax[1].text(24, 32, "b)", va="top", ha="right", fontsize=fontsize, color='w')
+
+divider = make_axes_locatable(ax[1])
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_right,cmap=cmap),
+                    cax=cax)
+cbar.minorticks_on()
+cbar.ax.tick_params(labelsize=fontsize)
+cbar.set_label(z_label_right, fontsize=fontsize)
+
 plt.show()
 
-# plot how much charge is held back when considering forecasts 
-min_charge = min([min(row) for row in charge_held_back])
-max_charge = max([max(row) for row in charge_held_back])
+file_name = "cost_fct_anal.pdf"
+fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
+file_name = "cost_fct_anal.png"
+fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
 
-fig, ax = plt.subplots()
-norm = mpl.colors.Normalize(vmin=min_charge, vmax=max_charge)
-ax.pcolormesh(mus, p_works_fine, charge_held_back, cmap=cmap,shading='gouraud',
-              vmin=min_charge, vmax=max_charge)
-ax.set(xlabel="$\mu$ in kWh", ylabel="$p^w$ in \$")
-add_cbar(ax, plt, norm, cmap, "$q^{hb}_0$ in kWh")
-ax.set_title("Charge held back at work")
-plt.show()

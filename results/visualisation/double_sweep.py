@@ -74,10 +74,10 @@ for i, _ in enumerate(data_right):
 cmap = mpl.cm.viridis
 x_label_left = "$p^w$ in \$/kWh"
 x_label_right = "$p^w$ in \$/kWh"
-y_label_left = "employees per charger"
-y_label_right = "employees per charger"
-z_label_left = "$C^{avg}_{ac}$ in $10^{-2}$ \$ / km"
-z_label_right = "$C^{avg}_{bc} - C^{avg}_ac$ in $10^{-2}$ \$ / km"
+y_label_left = "Employees per charger"
+y_label_right = "Employees per charger"
+z_label_left = "$C^{avg}_{adv}$ in $10^{-2}$ \$/km"
+z_label_right = "$C^{avg}_{bsc} - C^{avg}_{adv}$ in $10^{-2}$ \$/km"
 
 x_ticks_left = [cast.to_float(i, "first_row_cell")\
                 for i in first_row_left[1:]]
@@ -89,10 +89,10 @@ y_ticks_right = [cast.to_int(i, "front_col_cell") \
                  for i in front_col_right]
 
 cm = 1/2.54
-fontsize=10
+fontsize=8
 
-fig = plt.figure(figsize=(16*cm, 6*cm))
-gs = fig.add_gridspec(1, 2, wspace=1.9*cm)
+fig = plt.figure(figsize=(16*cm, 5*cm))
+gs = fig.add_gridspec(1, 2, wspace=1.3*cm)
 ax = gs.subplots(sharex=False, sharey=False)
 
 vmin_left=min([min(row) for row in data_left])
@@ -116,6 +116,7 @@ cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_left,cmap=cmap),
 cbar.minorticks_on()
 cbar.ax.tick_params(labelsize=fontsize)
 cbar.set_label(z_label_left, fontsize=fontsize)
+ax[0].text(.32, 81, "a)", va="top", ha="right", fontsize=fontsize)
 
 ax[1].pcolormesh(x_ticks_right, y_ticks_right, data_right, cmap=cmap,
               shading='gouraud', vmin=vmin_right, vmax=vmax_right)
@@ -123,6 +124,7 @@ ax[1].set_xlabel(x_label_right, fontsize=fontsize)
 ax[1].set_ylabel(y_label_right, fontsize=fontsize)
 ax[1].minorticks_on()
 ax[1].tick_params(labelsize=fontsize)
+ax[1].text(.32, 81, "b)", va="top", ha="right", fontsize=fontsize, color='w')
 
 divider = make_axes_locatable(ax[1])
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -135,6 +137,6 @@ cbar.set_label(z_label_right, fontsize=fontsize)
 plt.show()
 
 file_name = "double_sweep.pdf"
-fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
+fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
 file_name = "double_sweep.png"
-fig.savefig(file_name, bbox_inches='tight', pad_inches=0.1)
+fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
