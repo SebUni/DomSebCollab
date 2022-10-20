@@ -76,56 +76,56 @@ data_diff["diff"] = [(data["m4"]["avg_cost"][it] - data["m6"]["avg_cost"][it]) *
 cast = Cast("Analysis")
 
 x_label = "$p^w$ in \$/kWh"
-y_label = "$C$ in $10^{-2}$ \$/km"
-y_label_small = "$C$ in \n $10^{-2}$ \$/km"
+y_label = "$C_{\u2020,\u2217}$ in \n$10^{-2}$ \$/km"
+y_label_small = "$C_{\u2020}$ in \n $10^{-2}$ \$/km"
 y_label_diff = "$C_{bsc} - C_{adv}$ in \n $10^{-3}$ \$/km"
 
 linewidth = .8
 cm = 1/2.54
 fontsize=8
 
-fig = plt.figure(figsize=(16*cm, 4.5*cm))
-ax_dwell = plt.subplot(121)
-ax_avg = plt.subplot(222)
-ax_diff = plt.subplot(224)
-fig.subplots_adjust(hspace=0.0, wspace=1*cm)
+fig = plt.figure(figsize=(3.5, 7.5*cm))
+heights = [4, 3, 3]
+gs = fig.add_gridspec(3, 1, hspace=0*cm, height_ratios=heights)
+ax = gs.subplots(sharex=True, sharey=False)
 
-line1, = ax_dwell.plot(data["m6"]["x_value"], data["m6"]["avg_cost_apartment"], label="m6 apt", linewidth=linewidth, color="b")
-ax_dwell.plot(data["m4"]["x_value"], data["m4"]["avg_cost_apartment"], label="m4 apt", linewidth=linewidth, color="b", linestyle='--')
-line2, = ax_dwell.plot(data["m6"]["x_value"], data["m6"]["avg_cost_house_no_pv"], label="m6 noPV", linewidth=linewidth, color="r")
-ax_dwell.plot(data["m4"]["x_value"], data["m4"]["avg_cost_house_no_pv"], label="m4 npPV", linewidth=linewidth, color="r", linestyle='--')
-line3, = ax_dwell.plot(data["m6"]["x_value"], data["m6"]["avg_cost_house_pv"], label="m6 PV", linewidth=linewidth, color="g")
-ax_dwell.plot(data["m4"]["x_value"], data["m4"]["avg_cost_house_pv"], label="m4 PV", linewidth=linewidth, color="g", linestyle='--')
-ax_dwell.set_xlabel(x_label, fontsize=fontsize)
-ax_dwell.xaxis.set_minor_locator(AutoMinorLocator())
-ax_dwell.set_ylabel(y_label, fontsize=fontsize)
-ax_dwell.yaxis.set_minor_locator(AutoMinorLocator())
-ax_dwell.grid(True)
-ax_dwell.tick_params(labelsize=fontsize)
-ax_dwell.legend([line1, line2, line3], ['Apartment', 'House without PV', 'House with PV'], fontsize=fontsize, loc=2)
-ax_dwell.text(.33, .4, "a)", va="bottom", ha="right", fontsize=fontsize)
 
-ax_avg.plot(data["m6"]["x_value"], data["m6"]["avg_cost"], label="Approach: adv", linewidth=linewidth, color="k")
-ax_avg.plot(data["m4"]["x_value"], data["m4"]["avg_cost"], label="Approach: bsc", linewidth=linewidth, color="k", linestyle='--')
-ax_avg.set_xlabel(x_label, fontsize=fontsize)
-ax_avg.xaxis.set_minor_locator(AutoMinorLocator())
-ax_avg.set_ylabel(y_label_small, fontsize=fontsize)
-ax_avg.yaxis.set_minor_locator(AutoMinorLocator())
-ax_avg.grid(True)
-ax_avg.tick_params(labelsize=fontsize)
-ax_avg.legend(fontsize=fontsize, loc=4)
-ax_avg.text(.03, 4.8, "b)", va="top", ha="left", fontsize=fontsize)
+line1, = ax[0].plot(data["m6"]["x_value"], data["m6"]["avg_cost_apartment"], label="m6 apt", linewidth=linewidth, color="b")
+ax[0].plot(data["m4"]["x_value"], data["m4"]["avg_cost_apartment"], label="m4 apt", linewidth=linewidth, color="b", linestyle='--')
+line2, = ax[0].plot(data["m6"]["x_value"], data["m6"]["avg_cost_house_no_pv"], label="m6 noPV", linewidth=linewidth, color="r")
+ax[0].plot(data["m4"]["x_value"], data["m4"]["avg_cost_house_no_pv"], label="m4 npPV", linewidth=linewidth, color="r", linestyle='--')
+line3, = ax[0].plot(data["m6"]["x_value"], data["m6"]["avg_cost_house_pv"], label="m6 PV", linewidth=linewidth, color="g")
+ax[0].plot(data["m4"]["x_value"], data["m4"]["avg_cost_house_pv"], label="m4 PV", linewidth=linewidth, color="g", linestyle='--')
+ax[0].set_xlabel(x_label, fontsize=fontsize)
+ax[0].xaxis.set_minor_locator(AutoMinorLocator())
+ax[0].set_ylabel(y_label, fontsize=fontsize)
+ax[0].yaxis.set_minor_locator(AutoMinorLocator())
+ax[0].grid(True)
+ax[0].tick_params(labelsize=fontsize)
+ax[0].legend([line1, line2, line3], ['Apartment', 'House without PV', 'House with PV'], fontsize=fontsize, loc=2)
+ax[0].text(.33, .4, "a)", va="bottom", ha="right", fontsize=fontsize)
 
-ax_diff.plot(data_diff["x_value"], data_diff["diff"], label="m6", linewidth=linewidth, color="k")
-ax_diff.set_xlabel(x_label, fontsize=fontsize)
-ax_diff.xaxis.set_minor_locator(AutoMinorLocator())
-ax_diff.set_ylabel(y_label_diff, fontsize=fontsize)
-ax_diff.set_yticks([0,1])
-ax_diff.set_yticklabels([0,1])
-ax_diff.yaxis.set_minor_locator(AutoMinorLocator())
-ax_diff.grid(True)
-ax_diff.tick_params(labelsize=fontsize)
-ax_diff.text(.03, 1.8, "c)", va="top", ha="left", fontsize=fontsize)
+ax[1].plot(data["m6"]["x_value"], data["m6"]["avg_cost"], label="adv", linewidth=linewidth, color="k")
+ax[1].plot(data["m4"]["x_value"], data["m4"]["avg_cost"], label="bsc", linewidth=linewidth, color="k", linestyle='--')
+ax[1].set_xlabel(x_label, fontsize=fontsize)
+ax[1].xaxis.set_minor_locator(AutoMinorLocator())
+ax[1].set_ylabel(y_label_small, fontsize=fontsize)
+ax[1].yaxis.set_minor_locator(AutoMinorLocator())
+ax[1].grid(True)
+ax[1].tick_params(labelsize=fontsize)
+ax[1].legend(fontsize=fontsize, loc=4)
+ax[1].text(.03, 4.8, "b)", va="top", ha="left", fontsize=fontsize)
+
+ax[2].plot(data_diff["x_value"], data_diff["diff"], label="m6", linewidth=linewidth, color="k")
+ax[2].set_xlabel(x_label, fontsize=fontsize)
+ax[2].xaxis.set_minor_locator(AutoMinorLocator())
+ax[2].set_ylabel(y_label_diff, fontsize=fontsize)
+ax[2].set_yticks([0,1])
+ax[2].set_yticklabels([0,1])
+ax[2].yaxis.set_minor_locator(AutoMinorLocator())
+ax[2].grid(True)
+ax[2].tick_params(labelsize=fontsize)
+ax[2].text(.03, 1.8, "c)", va="top", ha="left", fontsize=fontsize)
 
 plt.show()
 

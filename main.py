@@ -17,7 +17,7 @@ plot_extraced_data = True
 plot_extraced_data_details = True
 store_to_csv = True
 
-run_parameter_scan = False
+run_parameter_scan = True
 
 parameters = Parameters()
 co = ConsoleOutput(parameters.path_file_name("log", ".log"))
@@ -48,8 +48,8 @@ if not run_parameter_scan:
 
 # parameter scan
 else:
-    scan_parameters = {"employees_per_charger" : range(1,1,2),
-                "company_charger_cost_per_kWh" : np.arange (0.12, 0.23, 0.04)}
+    scan_parameters = {"employees_per_charger" : range(1,90,7),
+                "company_charger_cost_per_kWh" : np.arange (0.04, 0.31, 0.01)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],

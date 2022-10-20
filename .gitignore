@@ -8,3 +8,15 @@ test.py
 
 .spyproject/
 
+data/generators/VIC consumption/PRICE_AND_DEMAND_202012_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202011_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202010_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202009_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202008_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202007_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202006_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202005_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202004_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202003_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202002_VIC1.csv
+data/generators/VIC consumption/PRICE_AND_DEMAND_202001_VIC1.csv

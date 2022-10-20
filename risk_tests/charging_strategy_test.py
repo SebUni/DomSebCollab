@@ -44,7 +44,7 @@ c = 0.9
 mpl.rcParams['figure.dpi'] = 300
 
 # sweep parameters
-mus = list(np.arange(0, 25, 0.1))
+mus = list(np.arange(0, 20, 0.1))
 p_works_rough = list(np.arange(0.02, 0.33, 0.04))
 p_works_fine = list(np.arange(0.02,0.33,0.001))
 p_works_cents_fine = list(np.arange(2,33,0.1))
@@ -152,7 +152,7 @@ for p_work in p_works_fine:
     charge_at_work.append([])
     charge_held_back.append([])
     for mu in mus:
-        sig = mu / 6
+        sig = mu / 3
         _, caw = determine_charge_instructions(soc, p_work, p_feed, p_grid,
             p_em, q_ow, q_res, c, pv_cap, cr_h, cr_w, cr_p, mu, sig, activity,
             has_charger, work_stay_duration, home_stay_duration)
@@ -187,6 +187,65 @@ for p_work in p_works_fine:
 # ax.set_title("Charge held back at work")
 # plt.show()
 
+# fontsize=8
+# cm = 1/2.54
+
+# cmap = mpl.cm.viridis
+# x_label = "$\mu$ in kWh"
+# y_label = "$p^w$ in $10^{-2}$ \$/kWh"
+# z_label_left = "$q^w$ in kWh"
+# z_label_right = "$q^{hb}$ in kWh"
+
+# fig = plt.figure(figsize=(16*cm, 5*cm))
+# gs = fig.add_gridspec(1, 2, wspace=1.4*cm)
+# ax = gs.subplots(sharex=False, sharey=False)
+
+# vmin_left=min([min(row) for row in charge_at_work])
+# vmin_right=min([min(row) for row in charge_held_back])
+# vmax_left=max([max(row) for row in charge_at_work])
+# vmax_right=max([max(row) for row in charge_held_back])
+# norm_left = mpl.colors.Normalize(vmin=vmin_left, vmax=vmax_left)
+# norm_right = mpl.colors.Normalize(vmin=vmin_left, vmax=vmax_right)
+
+# ax[0].pcolormesh(mus, p_works_cents_fine, charge_at_work, cmap=cmap,
+#               shading='gouraud', vmin=vmin_left, vmax=vmax_left)
+# ax[0].set_xlabel(x_label, fontsize=fontsize)
+# ax[0].set_ylabel(y_label, fontsize=fontsize)
+# ax[0].minorticks_on()
+# ax[0].tick_params(labelsize=fontsize)
+
+# divider = make_axes_locatable(ax[0])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_left,cmap=cmap),
+#                     cax=cax)
+# cbar.minorticks_on()
+# cbar.ax.tick_params(labelsize=fontsize)
+# cbar.set_label(z_label_left, fontsize=fontsize)
+# ax[0].text(24, 32, "a)", va="top", ha="right", fontsize=fontsize, color='w')
+
+# ax[1].pcolormesh(mus, p_works_cents_fine, charge_held_back, cmap=cmap,
+#               shading='gouraud', vmin=vmin_right, vmax=vmax_right)
+# ax[1].set_xlabel(x_label, fontsize=fontsize)
+# ax[1].set_ylabel(y_label, fontsize=fontsize)
+# ax[1].minorticks_on()
+# ax[1].tick_params(labelsize=fontsize)
+# ax[1].text(24, 32, "b)", va="top", ha="right", fontsize=fontsize, color='w')
+
+# divider = make_axes_locatable(ax[1])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_right,cmap=cmap),
+#                     cax=cax)
+# cbar.minorticks_on()
+# cbar.ax.tick_params(labelsize=fontsize)
+# cbar.set_label(z_label_right, fontsize=fontsize)
+
+# plt.show()
+
+# file_name = "cost_fct_anal.pdf"
+# fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
+# file_name = "cost_fct_anal.png"
+# fig.savefig(file_name, bbox_inches='tight', pad_inches=0.01)
+
 fontsize=8
 cm = 1/2.54
 
@@ -196,8 +255,8 @@ y_label = "$p^w$ in $10^{-2}$ \$/kWh"
 z_label_left = "$q^w$ in kWh"
 z_label_right = "$q^{hb}$ in kWh"
 
-fig = plt.figure(figsize=(16*cm, 5*cm))
-gs = fig.add_gridspec(1, 2, wspace=1.4*cm)
+fig = plt.figure(figsize=(8*cm, 10*cm))
+gs = fig.add_gridspec(2, 1, hspace=1.2*cm)
 ax = gs.subplots(sharex=False, sharey=False)
 
 vmin_left=min([min(row) for row in charge_at_work])
@@ -217,6 +276,7 @@ ax[0].tick_params(labelsize=fontsize)
 divider = make_axes_locatable(ax[0])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_left,cmap=cmap),
+                    fraction=0.046,
                     cax=cax)
 cbar.minorticks_on()
 cbar.ax.tick_params(labelsize=fontsize)

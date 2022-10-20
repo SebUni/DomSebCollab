@@ -79,7 +79,7 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
     ax[y_pos,x_pos].set_xticks(range(0, 24*8, 24))
     ax[y_pos,x_pos].set_xlim(0,167)
     ax[y_pos,x_pos].set_yscale('log')
-    ax[y_pos,x_pos].set_ylim(5,1.5*10**4)
+    ax[y_pos,x_pos].set_ylim(5*10**2,1.5*10**6)
     ax[y_pos,x_pos].grid(True)
     if not y_labels:
         for tick in ax[y_pos,x_pos].yaxis.get_major_ticks():
@@ -91,7 +91,7 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
         ax[y_pos,x_pos].yaxis.set_minor_locator(AutoMinorLocator())
     ax[y_pos,x_pos].grid(True)
     ax[y_pos,x_pos].tick_params(labelsize=fontsize)
-    ax[y_pos,x_pos].text(160, 10**4, labeltext, va="top", ha="right", fontsize=fontsize)
+    ax[y_pos,x_pos].text(160, 10**6, labeltext, va="top", ha="right", fontsize=fontsize)
 
 data_raw = dict()
 first_row = dict()
@@ -105,7 +105,7 @@ for it, name in enumerate(names):
         else:
             data_raw[name][first_row_cell] = []
             for data_row in data_tmp:
-                data_raw[name][first_row_cell].append(data_row[it-1]*12)
+                data_raw[name][first_row_cell].append(data_row[it-1]*12*100)
 
 # moving average
 data = dict()
@@ -127,8 +127,8 @@ for name, data_set in data_raw.items():
 
 cast = Cast("Analysis")
 
-x_label = "time in hours"
-y_label = "$cr_{total}$ in kW"
+x_label = "$t$ in h"
+y_label = "$cr^{ts}_{\u2020,\u26AA}$ in kW"
 
 linewidth = .6
 cm = 1/2.54

@@ -79,17 +79,18 @@ for it, name in enumerate(names):
 cast = Cast("Analysis")
 
 x_label = "$p^w$ in \$/kWh"
-y_label_charge = "Acc. charge delivered in $10^{5}$ kWh"
-y_label_revenue = "Rev$_{tot}$ in \$ $10^4$"
-y_label_utilisation = "Util. in %"
+y_label_charge = "$E_{\u2020,\u26AA}$ in 10 GWh"
+y_label_revenue = "$R_{\u2020,\u2217}$ in \$$10^6$"
+y_label_utilisation = "$U_{\u2020,\u2217}$ in %"
 
 linewidth = 1
 cm = 1/2.54
 fontsize=8
 
-fig = plt.figure(figsize=(16*cm, 5.5*cm))
+fig = plt.figure(figsize=(3.5, 8.3*cm))
 
-gs0 = gridspec.GridSpec(1, 2, figure=fig, wspace=.7*cm)
+gs0 = gridspec.GridSpec(2, 1, figure=fig, hspace=0, wspace=0*cm,
+                        height_ratios=[.45,.55])
 gs00 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs0[0], wspace=0)
 
 ax_charge = fig.add_subplot(gs00[0, 0])
@@ -110,6 +111,12 @@ ax_rev_PV = fig.add_subplot(gs01[0, 1])
 
 line1, = ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_grid"], label="m6 Grid", linewidth=linewidth, color="k")
 line2, = ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_grid"], label="m4 Grid", linewidth=linewidth, color="k", linestyle='--')
+
+line1_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_grid"], label="m6 Grid", linewidth=linewidth, color="k")
+line2_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
+line3_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_work"], label="m6 Work", linewidth=linewidth, color="r")
+line4_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_held_back"], label="m6 HeldB", linewidth=linewidth, color="orange")
+
 ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
 ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_pv"], label="m4 PV", linewidth=linewidth, color="g", linestyle='--')
 ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_work"], label="m6 Work", linewidth=linewidth, color="r")
@@ -124,13 +131,11 @@ ax_charge.set_ylabel(y_label_charge, fontsize=fontsize)
 ax_charge.yaxis.set_minor_locator(AutoMinorLocator())
 ax_charge.grid(True)
 ax_charge.tick_params(labelsize=fontsize)
-ax_charge.legend([line1, line2], ['App.: adv', 'App.: bsc'], fontsize=fontsize, loc=6)
+ax_charge.legend([line1_PV, line2_PV, line3_PV, line4_PV],
+                 ['Grid', 'PV', 'Work', 'HB'],
+                 fontsize=fontsize, loc=6) # , bbox_to_anchor=(1, .55))
 ax_charge.text(.33, 2, "a)", va="top", ha="right", fontsize=fontsize)
 
-line1, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_grid"], label="m6 Grid", linewidth=linewidth, color="k")
-line2, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
-line3, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_work"], label="m6 Work", linewidth=linewidth, color="r")
-line4, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_held_back"], label="m6 HeldB", linewidth=linewidth, color="orange")
 ax_charge_PV.set_xlabel(x_label, fontsize=fontsize)
 ax_charge_PV.xaxis.set_minor_locator(AutoMinorLocator())
 ax_charge_PV.set_yticks([0, 1, 2])
@@ -141,8 +146,7 @@ ax_charge_PV.yaxis.tick_right()
 ax_charge_PV.grid(True)
 ax_charge_PV.tick_params(labelsize=fontsize)
 ax_charge_PV.yaxis.set_ticks_position('none')
-ax_charge_PV.legend([line1, line2, line3, line4], ['Grid', 'PV', 'Work', 'HB'],
-                    fontsize=fontsize, loc=7, bbox_to_anchor=(1, .55))
+ax_charge_PV.legend([line1, line2], ['adv', 'bsc'], fontsize=fontsize, loc=7)
 ax_charge_PV.text(.33, 2, "b)", va="top", ha="right", fontsize=fontsize)
 
 ax_ut.plot(data["m6"]["x_value"], data["m6"]["utilisation"], label="m6 Ut", linewidth=linewidth, color="k")

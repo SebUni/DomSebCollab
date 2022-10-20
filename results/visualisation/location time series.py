@@ -14,6 +14,7 @@ import matplotlib as mpl
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 
+import numpy as np
 
 from parameters import Parameters
 from output_data import OutputData
@@ -81,9 +82,9 @@ for it, name in enumerate(names):
             data_raw[name][first_row_cell] = []
             for data_row in data_tmp:
                 if name == "location":
-                    data_raw[name][first_row_cell].append(-data_row[it-1]*12/1000)
+                    data_raw[name][first_row_cell].append(-data_row[it-1]*12*100/10**6)
                 else:
-                    data_raw[name][first_row_cell].append(data_row[it-1]*12/1000)
+                    data_raw[name][first_row_cell].append(data_row[it-1]*12*100/10**6)
 
 # add sum for locations
 data_raw["location"]["summ"] = []
@@ -136,23 +137,38 @@ for name, data_set in data_raw.items():
                 avg_value = _sum / maw
                 data_maw12[name][col_name].append(avg_value)
 
+demand_VIC = []
+demand_VIC_time_step = np.arange(0,168,.5)
+cast = Cast("demand VIC")
+csv_helper = CSVHelper("results", "demand_VIC.csv", skip_header=True)
+for row in csv_helper.data:
+    demand_VIC.append(cast.to_float(row[2],"demand"))
+# min_value = min(demand_VIC)
+# demand_VIC = [value - min_value for value in demand_VIC]
+max_value = max(demand_VIC)
+max_total = max(data_maw12["location"]["summ"])
+print(max_total / max_value)
+demand_VIC = [value * max_total / max_value for value in demand_VIC]
+
 cast = Cast("Analysis")
 
-x_label = "Time in hours"
-y_label = "$cr_{total}$ in kW"
+x_label = "$t$ in h"
 
 linewidth = .8
 linewidth_map = 0.3
 cm = 1/2.54
 fontsize=8
 
-fig = plt.figure(figsize=(16*cm, 16*cm))
+fig = plt.figure(figsize=(7.5, 16*cm))
 
-ax_source = fig.add_axes([0.125, 0.58, 0.3, 0.3])
-ax_map = fig.add_axes([0.45, 0.54, 0.352, 0.34])
-ax_location = fig.add_axes([0.125, 0.356, 0.775, 0.15])
+ax_source = fig.add_axes([0.125, 0.58, 0.38, 0.3])
+ax_map = fig.add_axes([0.54, 0.54, 0.302, 0.34])
+ax_location = fig.add_axes([0.125, 0.356, 0.60, 0.15])
+# ax_location = fig.add_axes([0.125, 0.356, 0.775, 0.15])
+"""
 ax_location_zoom_left = fig.add_axes([0.125, 0.125, 0.385, 0.15])
 ax_location_zoom_right = fig.add_axes([0.515, 0.125, 0.385, 0.15])
+"""
 
 # ax_source = plt.subplot(221)
 # ax_map = plt.subplot(222)
@@ -164,49 +180,55 @@ ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_rec
 ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_pv"], label="PV", linewidth=linewidth, color='g')
 ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_work"], label="Work", linewidth=linewidth, color='r')
 ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_public"], label="Public", linewidth=linewidth, color='b')
-ax_source.set_xlabel("time in hours", fontsize=fontsize)
+ax_source.set_xlabel(x_label, fontsize=fontsize)
 ax_source.xaxis.set_minor_locator(AutoMinorLocator())
 ax_source.set_xticks(range(0, 24*8, 24))
 ax_source.set_xlim(0,168)
-ax_source.set_ylabel("$cr^{total}_{adv} - cr^{total}_{nw}$ in MW", fontsize=fontsize)
+ax_source.set_ylabel("$P_{adv,\u26AA} - P_{nw,\u26AA}$ in GW", fontsize=fontsize)
 # ax_source.set_ylim(5,1.5*10**4)
 ax_source.yaxis.set_minor_locator(AutoMinorLocator())
 ax_source.tick_params(labelsize=fontsize)
 ax_source.grid(True)
 ax_source.legend(fontsize=fontsize,loc=1)
-ax_source.text(160, -9, "a)", va="bottom", ha="right", fontsize=fontsize)
+ax_source.text(160, -0.9, "a)", va="bottom", ha="right", fontsize=fontsize)
 
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["summ"], label="Total", linewidth=linewidth, color='k')
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["20604"], label="20604", linewidth=linewidth, color='r')
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["21203"], label="21203", linewidth=linewidth, color='b')
-ax_location.set_xlabel("time in hours", fontsize=fontsize)
+ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["summ"], label="Total $\u00B7 10^{-1}$", linewidth=linewidth, color='k')
+ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["20604"], label="Code 20604", linewidth=linewidth, color='r')
+ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["21203"], label="Code 21203", linewidth=linewidth, color='b')
+ax_location.plot(demand_VIC_time_step, demand_VIC, label="dVIC $\u00B7 2 \u00B7 10^{-2}$", linewidth=linewidth, color='grey', linestyle='--')
+ax_location.set_xlabel(x_label, fontsize=fontsize)
 ax_location.xaxis.set_minor_locator(AutoMinorLocator())
 ax_location.set_xticks(range(0, 24*8, 24))
 ax_location.set_xlim(0,168)
-ax_location.set_ylabel("$cr^{total}_{adv} - cr^{total}_{nw}$ in MW", fontsize=fontsize)
+ax_location.set_ylabel("$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW", fontsize=fontsize)
 # ax_location.set_ylim(5,1.5*10**4)
 ax_location.yaxis.set_minor_locator(AutoMinorLocator())
 ax_location.tick_params(labelsize=fontsize)
 ax_location.grid(True)
-ax_location.text(164, -.7, "c)", va="bottom", ha="right", fontsize=fontsize)
+ax_location.legend(fontsize=fontsize, loc='center right',
+                              bbox_to_anchor=(1.3, 0.5))
+ax_location.text(164, -.07, "c)", va="bottom", ha="right", fontsize=fontsize)
 
+"""
 ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["summ"], label="Total", linewidth=linewidth, color='k')
 ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["20604"], label="20604", linewidth=linewidth, color='r')
 ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["21203"], label="21203", linewidth=linewidth, color='b')
-ax_location_zoom_left.set_xlabel("time in hours", fontsize=fontsize)
+ax_location_zoom_left.plot(demand_VIC_time_step, demand_VIC, label="demand VIC", linewidth=linewidth, color='grey', linestyle='--')
+ax_location_zoom_left.set_xlabel(x_label, fontsize=fontsize)
 ax_location_zoom_left.xaxis.set_minor_locator(AutoMinorLocator())
 ax_location_zoom_left.set_xticks(range(0, 24*8, 24))
 ax_location_zoom_left.set_xlim(0,25)
-ax_location_zoom_left.set_ylabel("$cr^{total}_{adv} - cr^{total}_{nw}$ in MW", fontsize=fontsize)
+ax_location_zoom_left.set_ylabel("$cr^{ts}_{adv,\u2B26} - cr^{ts}_{nw,\u2B26}$ in GW", fontsize=fontsize)
 # ax_location_zoom_left.set_ylim(5,1.5*10**4)
 ax_location_zoom_left.yaxis.set_minor_locator(AutoMinorLocator())
 ax_location_zoom_left.tick_params(labelsize=fontsize)
 ax_location_zoom_left.grid(True)
 
 ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["summ"], label="Total $*10^{-1}$", linewidth=linewidth, color='k')
-ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["20604"], label="SA3 code 20604", linewidth=linewidth, color='r')
-ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["21203"], label="SA3 code 21203", linewidth=linewidth, color='b')
-ax_location_zoom_right.set_xlabel("time in hours", fontsize=fontsize)
+ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["20604"], label="Code 20604", linewidth=linewidth, color='r')
+ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["21203"], label="Code 21203", linewidth=linewidth, color='b')
+ax_location_zoom_right.plot(demand_VIC_time_step, demand_VIC, label="dVIC * 0.02", linewidth=linewidth, color='grey', linestyle='--')
+ax_location_zoom_right.set_xlabel(x_label, fontsize=fontsize)
 ax_location_zoom_right.xaxis.set_minor_locator(AutoMinorLocator())
 ax_location_zoom_right.set_xlim(143,168)
 ax_location_zoom_right.set_xticks([144,168])
@@ -217,17 +239,17 @@ ax_location_zoom_right.yaxis.tick_right()
 ax_location_zoom_right.tick_params(labelsize=fontsize)
 ax_location_zoom_right.grid(True)
 ax_location_zoom_right.legend(fontsize=fontsize, loc='upper left',
-                              bbox_to_anchor=(-.31, 1.02))
+                              bbox_to_anchor=(-.16, 1.02))
 
 ax_location_zoom_left.spines['right'].set_visible(False)
 ax_location_zoom_right.spines['left'].set_visible(False)
-
 d = 3  # proportion of vertical to horizontal extent of the slanted line
 kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
               linestyle="none", color='k', mec='k', mew=1, clip_on=False)
 ax_location_zoom_left.plot([1, 1], [1, 0], transform=ax_location_zoom_left.transAxes, **kwargs)
 ax_location_zoom_right.plot([0, 0], [1, 0], transform=ax_location_zoom_right.transAxes, **kwargs)
-ax_location_zoom_right.text(167, -.8, "d)", va="bottom", ha="right", fontsize=fontsize)
+ax_location_zoom_right.text(167, -.08, "d)", va="bottom", ha="right", fontsize=fontsize)
+"""
 
 # plot data - geographic
 # parameters to retrieve area border gps data
@@ -295,7 +317,7 @@ with fiona.open(_file_path + _file_name, layer=_layer) as layer:
             cax = divider.append_axes("right", size="5%", pad=0.05)
             cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
                                 cax=cax)
-            cbar.set_label("$cr^{total}_{adv} - cr^{total}_{nw}$ in MW", fontsize=fontsize)
+            cbar.set_label("$E_{adv,\u2B26} - E_{nw,\u2B26}$ in GWh", fontsize=fontsize)
             cbar.ax.tick_params(labelsize=fontsize)
 
 ax_map.margins(0)
