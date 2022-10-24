@@ -11,24 +11,22 @@ import charging_model
 from parameters import Parameters
 from output_data import OutputData
 from console_output import ConsoleOutput
+import average_seasons
+import gc
 
 draw_agents_on_map = False
-plot_extraced_data = True
-plot_extraced_data_details = True
+plot_extraced_data = False
+plot_extraced_data_details = False
 store_to_csv = True
 
-run_parameter_scan = True
-
-parameters = Parameters()
-co = ConsoleOutput(parameters.path_file_name("log", ".log"))
-od = OutputData(co, parameters)
-nbr_of_agents = parameters.get("nbr_of_agents","int")
-
-# single run
-if not run_parameter_scan:
+sweep_season = True
+sweep_parameters = False
+    
+def exec_single_run(parameters, co, od):
+    nbr_of_agents = parameters.get("nbr_of_agents","int")
     cm = charging_model.ChargingModel(nbr_of_agents, co, parameters)
     for i in range(cm.clock.time_step_limit):
-        if i == 2016:
+        if i == 3024:
             test = 0
         cm.step()
         if draw_agents_on_map and i>=parameters.get("pre_heat_steps", "int"):
@@ -46,10 +44,10 @@ if not run_parameter_scan:
     if store_to_csv:
         od.store_time_series_to_csv(cm)
 
-# parameter scan
-else:
+def exec_parameter_sweep(parameters, co, od):
+    nbr_of_agents = parameters.get("nbr_of_agents","int")
     scan_parameters = {"employees_per_charger" : range(1,90,7),
-                "company_charger_cost_per_kWh" : np.arange (0.04, 0.31, 0.01)}
+                "company_charger_cost_per_kWh" : np.arange (0.27, 0.28, 0.02)}
     scan_order = ["employees_per_charger","company_charger_cost_per_kWh"]
     scan_collected_data = {"charge_pv":[], "charge_work": [], "charge_grid":[],
                            "charge_emergency": [], "charge_held_back": [],
@@ -94,6 +92,26 @@ else:
                                          scan_collected_data)
     if plot_extraced_data:
         od.plot_sweep_parameters(scan_parameters, scan_order,
-                                 scan_collected_data)
-        
-co.clean_logger()
+                                 scan_collected_data) 
+
+# prepare parameters
+parameters = Parameters()
+seasons = list(range(4)) if sweep_season else [parameters.get("season","int")]
+for season in seasons:
+    # clear previous garbage
+    gc.collect()
+    parameters.setter("season", season)
+    co = ConsoleOutput(parameters.path_file_name("log", ".log"))
+    od = OutputData(co, parameters)
+    # conduct simulation
+    if not sweep_parameters:
+        exec_single_run(parameters, co, od)
+    else:
+        exec_parameter_sweep(parameters, co, od)
+    # clean up logger
+    co.clean_logger()
+# if season sweep average results
+if sweep_season:
+    model = parameters.get("charging_model","int")
+    nbr_of_agents = parameters.get("nbr_of_agents","int")
+    average_seasons.exec_avg(model, nbr_of_agents, plot_extraced_data)

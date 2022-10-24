@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jul 28 15:05:58 2021
-
 @author: S3739258
 """
 
@@ -11,7 +10,6 @@ from scipy.special import erfinv
 
 """
 PARAMETER EXPLANATION
-
 q_h (q_home) 
     quantity charged at home
 q_ow (q_one_way)
@@ -74,7 +72,7 @@ class ChargingStrategy():
         self.ALWAYS_CHARGE_WHERE_CHEAPER = 4
         self.CHARGE_WHERE_CHEAPER_BASIC = 5
         self.CHARGE_WHERE_CHEAPER_ADVANCED = 6
-        self.CHARGE_WHERE_CHEAPER_ADVANCED_WO_PV = 7
+        self.CHARGE_WHERE_CHEAPER_ADVANCED_NO_RISK = 7
         self.charging_model = parameters.get("charging_model", "int")
         self.charging_model_names = {0: "Always charge",
                                      1: "Always charge (no work chargers)",
@@ -82,8 +80,8 @@ class ChargingStrategy():
                                      3: "Always charge at work",
                                      4: "Always charge where cheaper",
                                      5: "Charge where cheaper basic",
-                                     6: "Charge where cheaper advanced incl PV",
-                                     7: "Charge where cheaper advanced excl PV"}
+                                     6: "Charge where cheaper advanced",
+                                     7: "Charge where cheaper advanced no risk"}
         if car_agent == None: return
         
         
@@ -241,14 +239,14 @@ class ChargingStrategy():
             charge_needed_next_route = q_ow + q_res - soc
             if self.whereabouts.destination_activity == self.cp.WORK:
                 # when agents earn more by selling PV than using it to charge
-                if p_feed > p_work or self.house_agent.charger == None:
+                if p_feed >= p_work:
                     charge_at_work = 2 * q_ow + q_res - soc
                 # when charging from grid is more expensive than at work but
                 # charging from PV is better than selling PV at feed in cost
                 elif p_grid > p_work:
                     # car can charge at home also from PV and forecast is not 0
                     if pv_cap != 0 and self.house_agent.charger != None \
-                        and mu > 0:
+                        and sig > 0:
                         charge_at_work \
                             = parm_cost_fct_charging_at_work_anal(q_ow, q_res,
                                 p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
@@ -261,6 +259,8 @@ class ChargingStrategy():
                 # when only public charging is more expen. than work charging
                 else:
                     charge_at_work = charge_needed_next_route
+                    if self.house_agent.charger == None:
+                        charge_at_work += q_ow
                 # ensure charge suffices to reach home, but uses as little 
                 # public charging as possible
                 work_stay_duration \
@@ -284,21 +284,41 @@ class ChargingStrategy():
                     charge_needed = max(charge_needed_next_route, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
-                        
+        
         # model #7: advanced - excluding PV
-        if self.charging_model == self.CHARGE_WHERE_CHEAPER_ADVANCED_WO_PV:
+        if self.charging_model == self.CHARGE_WHERE_CHEAPER_ADVANCED_NO_RISK:
+            next_home_stay_start, next_home_stay_end \
+                = self.det_next_home_stay()
+            forcast_begin = max(self.clock.elapsed_time, next_home_stay_start)
+            mu, sig \
+                = self.ca.calc_forcast_mean_and_std_dev(forcast_begin,
+                                                        next_home_stay_end)
             charge_needed_next_route = q_ow + q_res - soc
             if self.whereabouts.destination_activity == self.cp.WORK:
                 # when agents earn more by selling PV than using it to charge
-                if p_feed > p_work or self.house_agent.charger == None:
+                if p_feed >= p_work:
                     charge_at_work = 2 * q_ow + q_res - soc
                 # when charging from grid is more expensive than at work but
                 # charging from PV is better than selling PV at feed in cost
                 elif p_grid > p_work:
-                    charge_at_work = 2 * q_ow + q_res - soc
+                    # car can charge at home also from PV and forecast is not 0
+                    if pv_cap != 0 and self.house_agent.charger != None \
+                        and sig > 0:
+                        charge_at_work \
+                            = parm_cost_fct_charging_at_work_anal(q_ow, q_res,
+                                p_feed, p_grid, p_em, p_work,soc,c,mu,sig)
+                        charge_at_work = 2 * q_ow + q_res - soc
+                        charge_held_back \
+                            = (2 * q_ow + q_res - soc) - charge_at_work
+                    # car can charge at home but NOT from PV or car can NOT\
+                    # charge at home
+                    else:
+                        charge_at_work = 2 * q_ow + q_res - soc
                 # when only public charging is more expen. than work charging
                 else:
                     charge_at_work = charge_needed_next_route
+                    if self.house_agent.charger == None:
+                        charge_at_work += q_ow
                 # ensure charge suffices to reach home, but uses as little 
                 # public charging as possible
                 work_stay_duration \

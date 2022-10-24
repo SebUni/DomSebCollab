@@ -141,3 +141,18 @@ class HouseAgent(Agent):
                 
         self.location.cur_charge_delivered_to_house += power_to_purchase
         self.location.cur_feed_in += feed_in_quantity
+        
+    def __repr__(self):
+        msg = "Uid: {}, Lid: {}, Is house: {}, Is owned: {} ".format( \
+                self.uid, self.location.uid, self.is_house,
+                self.is_house_owned)
+        # msg += "Latest History: \n"
+        # for time_step, hist in list(self.extracted_data_hist.items())[-3:]:
+        #     msg += str(time_step) + " | "
+        #     for key in hist.keys():
+        #         if key != "whereabouts":
+        #             msg += "{}: {:0.2f} ".format(key, hist[key])
+        #         else:
+        #             msg += "\n" + str(hist[key])
+        #     msg+= "\n"
+        return msg

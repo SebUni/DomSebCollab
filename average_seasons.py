@@ -56,11 +56,11 @@ def avg_2d_matrix(matrix):
             matrix_avg[-1].append(avg)
     return matrix_avg
     
-def determine_missing_files(identifiers, seasons):
+def determine_missing_files(identifiers, seasons, model, nbr_of_agents):
     missing_files = dict()
     for identifier in identifiers:
         for season in seasons:
-            if not os.path.isfile(path_file_name(PATH, model, nbr_of_agents,
+            if not os.path.isfile(path_file_name(AS_PATH, model, nbr_of_agents,
                                                  season, identifier, "csv")):
                 if identifier not in missing_files:
                     missing_files[identifier] = [season]
@@ -79,23 +79,24 @@ def write_to_csv(pf_name, header, front_col, data):
                 line += "," + str(cell)
             print(line, file=f)
             
-def handle_averaging_all_identifiers(identifiers, sweep_dimension):
+def handle_averaging_all_identifiers(identifiers, sweep_dimension, model,
+                                     nbr_of_agents):
     for identifier in identifiers:
         header, front_col = "", []
         data = []
-        for season in SEASONS:
+        for season in AS_SEASONS:
             fname = file_name(model, nbr_of_agents, season, identifier, "csv")
-            header, front_col, tmp_data = read_data(PATH, fname)
+            header, front_col, tmp_data = read_data(AS_PATH, fname)
             data.append(tmp_data)
         data_avg = avg_2d_matrix(data)
-        pf_name_csv = path_file_name(PATH, model, nbr_of_agents, "avg",
+        pf_name_csv = path_file_name(AS_PATH, model, nbr_of_agents, "avg",
                                      identifier, "csv")
         write_to_csv(pf_name_csv, header, front_col, data_avg)
         if sweep_dimension == 1:
             plot_1D_sweep_results(header, front_col, data_avg, model,
                                   nbr_of_agents)
         if sweep_dimension == 2:
-            pf_name_png = path_file_name(PATH, model, nbr_of_agents, "avg",
+            pf_name_png = path_file_name(AS_PATH, model, nbr_of_agents, "avg",
                                          identifier, "png")
             plot_2D_sweep_results(identifier, header, front_col, data_avg,
                                   pf_name_png)
@@ -111,7 +112,7 @@ def plot_1D_sweep_results(header, front_col, data, model, nbr_of_agents):
                for front_col_element in front_col]
     x_label = header.split(',')[0]
     # charge delivered by source
-    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+    pfname = path_file_name(AS_PATH, model, nbr_of_agents, "avg",
                             "charge_delivered_avg", "png")
     fig, ax = plt.subplots()
     ax.plot(x_data, data_dict["charge_pv"], label="charge_pv")
@@ -125,7 +126,7 @@ def plot_1D_sweep_results(header, front_col, data, model, nbr_of_agents):
     plt.show()
     fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
     # average charger utilisation
-    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+    pfname = path_file_name(AS_PATH, model, nbr_of_agents, "avg",
                             "avg_charger_utilisation", "png")
     fig, ax = plt.subplots()
     ax.plot(x_data, data_dict["utilisation"])
@@ -134,7 +135,7 @@ def plot_1D_sweep_results(header, front_col, data, model, nbr_of_agents):
     plt.show()
     fig.savefig(pfname, bbox_inches='tight', pad_inches=0.1)
     # total revenue
-    pfname = path_file_name(PATH, model, nbr_of_agents, "avg",
+    pfname = path_file_name(AS_PATH, model, nbr_of_agents, "avg",
                             "total_revenue", "png")
     fig, ax = plt.subplots()
     ax.plot(x_data, data_dict["total_revenue"])
@@ -152,7 +153,8 @@ def plot_1D_sweep_results(header, front_col, data, model, nbr_of_agents):
     plt.show()
     fig.savefig(fname, bbox_inches='tight', pad_inches=0.1)
     # average cost per km
-    pfname = path_file_name(PATH, model, nbr_of_agents, "avg", "cost", "png")
+    pfname = path_file_name(AS_PATH, model, nbr_of_agents, "avg", "cost",
+                            "png")
     fig, ax = plt.subplots()
     ax.plot(x_data, data_dict["avg_cost_apartment"],
             label="avg_cost_apartment")
@@ -195,11 +197,13 @@ def plot_2D_sweep_results(identifier, header, front_col, data, pf_name):
     plt.show()
     fig.savefig(pf_name, bbox_inches='tight', pad_inches=0.1)
     
-def decide_what_to_do(co, identifiers, title, seasons, sweep_dimension):
+def decide_what_to_do(co, identifiers, title, seasons, sweep_dimension,
+                      model, nbr_of_agents):
     nbr_missing_files, missing_files \
-        = determine_missing_files(identifiers, seasons)
+        = determine_missing_files(identifiers, seasons, model, nbr_of_agents)
     if nbr_missing_files == 0:
-        handle_averaging_all_identifiers(identifiers, sweep_dimension)
+        handle_averaging_all_identifiers(identifiers, sweep_dimension,
+                                         model, nbr_of_agents)
         co.t_print("Averaged {}".format(title))
     elif nbr_missing_files != len(identifiers) * len(seasons):
         co.t_print("Files missing to average {}:".format(title))
@@ -210,39 +214,42 @@ def decide_what_to_do(co, identifiers, title, seasons, sweep_dimension):
         return False
     return True
 
+def exec_avg(model, nbr_of_agents, plot_results=True):
+    no_files_found = True
+    # Average Single-Run-Session
+    files_found = decide_what_to_do(AS_co, AS_SINGLE_RUN, "Single-Run-Session",
+                                    AS_SEASONS, 0, model, nbr_of_agents)
+    if files_found: no_files_found = False
+    
+    # Average 1-Dimensional-Sweep
+    files_found = decide_what_to_do(AS_co, AS_D1_SWEEP, "1-Dimensional-Sweep", 
+                                    AS_SEASONS, 1, model, nbr_of_agents)
+    if files_found: no_files_found = False
+    
+    # Average 2-Dimensional-Sweep
+    files_found = decide_what_to_do(AS_co, AS_D2_SWEEP, "2-Dimensional-Sweep",
+                                    AS_SEASONS, 2, model, nbr_of_agents)
+    if files_found: no_files_found = False
+    
+    if no_files_found:
+        AS_co.t_print("No matching set of files found!")
+    
+
 # formated output
-co = ConsoleOutput()
+AS_co = ConsoleOutput()
 
 # constants
-SINGLE_RUN = ["charge_received_time_series", "charger_utilisation_time_series",
+AS_SINGLE_RUN = ["charge_received_time_series",
+              "charger_utilisation_time_series",
               "location_time_series"]
-D1_SWEEP = ["sweep_data"]
-D2_SWEEP = ["avg_cost", "avg_cost_apartment", "avg_cost_house_no_pv",
+AS_D1_SWEEP = ["sweep_data"]
+AS_D2_SWEEP = ["avg_cost", "avg_cost_apartment", "avg_cost_house_no_pv",
             "avg_cost_house_pv", "charge_emergency", "charge_grid",
             "charge_held_back", "charge_pv", "charge_work", "utilisation"]
-PATH = "results"
-SEASONS = [0,1,2,3]
+AS_PATH = "results"
+AS_SEASONS = [0,1,2,3]
 
-# specify runs to average over
-model = 6
-nbr_of_agents = 6000
-
-no_files_found = True
-
-# Average Single-Run-Session
-files_found = decide_what_to_do(co, SINGLE_RUN, "Single-Run-Session", SEASONS,
-                                0)
-if files_found: no_files_found = False
-
-# Average 1-Dimensional-Sweep
-files_found = decide_what_to_do(co, D1_SWEEP, "1-Dimensional-Sweep", SEASONS,
-                                1)
-if files_found: no_files_found = False
-
-# Average 2-Dimensional-Sweep
-files_found = decide_what_to_do(co, D2_SWEEP, "2-Dimensional-Sweep", SEASONS,
-                                2)
-if files_found: no_files_found = False
-
-if no_files_found:
-    co.t_print("No matching set of files found!")
+if __name__ == "__main__":
+    model = 6
+    nbr_of_agents = 12000
+    exec_avg(model, nbr_of_agents)

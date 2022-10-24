@@ -33,10 +33,10 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 12000
+nbr_of_agents = 2400
 # run A
 season_a = "avg"
-model_a = 1
+model_a = 4
 addendum_a = ""
 
 # run B
@@ -45,7 +45,7 @@ model_b = 6
 addendum_b = ""
 
 # use moving avg? (0 is no)
-half_avg_over = 10
+half_avg_over = 0
 plot_all_time_steps_to_map = False
 
 frmt = lambda lst : str(lst[0]) + "-" + str(lst[1])

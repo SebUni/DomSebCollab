@@ -97,6 +97,8 @@ class CarAgent(Agent):
         self.charge_at_work = 0.0
         self.charge_held_back = 0.0
         
+        self.total_charge = {"GRID": 0, "PV": 0, "WORK": 0, "PUBLIC": 0 }
+        
         self.electricity_cost = 0 # in $ i guess ^^
         self.cur_electricity_cost = 0
         self.cp = calendar_planer
@@ -631,6 +633,14 @@ class CarAgent(Agent):
         return mu, math.sqrt(sig_sqr)
     
     def __repr__(self):
+        c_g = self.extracted_data.sum_over_agent("charge_received_grid",
+                                                 self.tracking_id)
+        c_pv = self.extracted_data.sum_over_agent("charge_received_pv",
+                                                 self.tracking_id)
+        c_w = self.extracted_data.sum_over_agent("charge_received_work",
+                                                 self.tracking_id)
+        c_p = self.extracted_data.sum_over_agent("charge_received_public",
+                                                 self.tracking_id)
         msg = "Uid: {}, Residency uid: {}, Employment uid: {} ".format( \
                 self.uid, self.house_agent.location.uid,
                 self.company.location.uid)
@@ -639,6 +649,9 @@ class CarAgent(Agent):
                 self.charge_at_home, self.charge_at_work)
         msg += "Emergency: {:.02f}\n".format( \
                 self.emergency_charging)
+        msg += "Received charge - Grid: {:.02f}, ".format(c_g)
+        msg += "PV: {:.02f}, Work: {:.02f}, Public: {:.02f}\n".format(
+                c_pv,c_w, c_p)
         # msg += "Latest History: \n"
         # for time_step, hist in list(self.extracted_data_hist.items())[-3:]:
         #     msg += str(time_step) + " | "

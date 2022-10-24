@@ -34,6 +34,9 @@ class Parameters():
         self.uid_to_check = -1
         self.next_stop = -1
         self.result_path = "results/"
+        self.set_file_name_prefix()
+                
+    def set_file_name_prefix(self):
         self.file_name_prefix = "model_{}_nbr_agents_{}_season_{}_".format(\
                                         self.parameters["charging_model"],
                                         self.parameters["nbr_of_agents"],
@@ -82,6 +85,11 @@ class Parameters():
         else:
             sys.exit("Type '" + parameter_type + "' for parameter " \
                      + parameter_name + " is not recognised")
+    def setter(self, parameter_name, new_value):
+        self.parameters[parameter_name] = new_value
+        if parameter_name in ["charging_model", "nbr_of_agents", "season",
+                              "file_name_prefix_addendum"]:
+            self.set_file_name_prefix()
                 
     def overwrite_value(self, parameter_name):
         overwrite_value = self.get(parameter_name, "string")
