@@ -68,8 +68,9 @@ class Whereabouts():
         
     
     def __repr__(self):
-        msg = "Cur activity: {}, Cur location: {}\n".format(self.cur_activity,
-                                                             self.cur_location)
+        act = ["Transit", "Home", "Work", "Emergency"][self.cur_activity]
+        msg = "Cur activity: {} ({})), Cur location: {}\n"\
+            .format(self.cur_activity, act, self.cur_location)
         msg += "Cur edge: {}, Cur coordinates: {:.04f},{:.04f}\n".format( \
                 self.cur_edge, self.cur_location_coordinates[0],
                 self.cur_location_coordinates[1])

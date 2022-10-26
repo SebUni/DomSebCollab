@@ -6,6 +6,7 @@ Created on Fri Dec 25 23:47:02 2020
 """
 
 import sys
+import gc
 
 class Clock():
     """
@@ -93,3 +94,15 @@ class Clock():
             self.time_of_week = self.calc_time_of_week()
         else:
             self.first_step_call = False
+            
+    def clear(self):
+        attrs = ["elapsed_time", "cur_time_step", "pre_heat_steps",
+                 "is_pre_heated", "season", "time_step", "time_step_limit", 
+                 "forecast_horizon", "first_step_call", "time_of_day", 
+                 "time_of_week", "season_names", "season_in_min"]
+        for attr in attrs:
+            if hasattr(self, attr):
+                if hasattr(getattr(self, attr), "clear"):
+                    getattr(self, attr).clear()
+                delattr(self, attr)
+        gc.collect()

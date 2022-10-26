@@ -52,6 +52,7 @@ class Cal():
         self.next_departure_time = None
         self.next_activity_start_time = None
         self.next_route, self.next_route_length = None, None
+        self.stop_at = -1
     
     def generate_schedule(self, min_shift_lengh):
         self.calendar, self.starts, self.ends \
@@ -142,6 +143,8 @@ class Cal():
     
     def step(self):        
         if self.clock.elapsed_time >= self.next_activity_start_time:
+            if self.stop_at != -1:
+                test = 0
             self.cur_scheduled_activity = self.next_activity
             self.cur_scheduled_location = self.next_location
             self.cur_scheduled_activity_start_time \

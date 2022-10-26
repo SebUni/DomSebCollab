@@ -135,6 +135,8 @@ class CarAgent(Agent):
         self.activity_before_emergency_charging = None
         self.distance_travelled = 0
         
+        self.stop_at = -1
+        
     def step(self):
         if self.uid == self.parameters.uid_to_check:
             test = 0
@@ -167,20 +169,38 @@ class CarAgent(Agent):
     def plan(self):
         """ This function determines if the agent should start a new journey
         in this time step and when to charge. """
+        if self.uid == self.stop_at:
+            test = 0
         # Decide on new destination
         if self.emergency_charging == 0 and not self.whereabouts.is_travelling:
             if self.whereabouts.has_arrived: # Case: Normal departure
                 if self.whereabouts.cur_activity == self.calendar.cur_scheduled_activity:
                     if self.calendar.next_departure_time <= self.clock.elapsed_time:
+                        if self.uid == self.stop_at:
+                            print("\n" + str(self))
+                            print("\n" + str(self.whereabouts))
+                            test = 0
                         self.whereabouts.set_destination(self.calendar.next_activity,
                                                          self.calendar.next_location,
                                                          self.calendar.next_activity_start_time)
+                        if self.uid == self.stop_at:
+                            print("\n" + str(self.whereabouts))
+                            test = 0
                 else: # Case: Delayed departure
                     if self.whereabouts.destination_activity_start_time <= self.clock.elapsed_time:
+                        if self.uid == self.stop_at:
+                            print("\n" + str(self))
+                            print("\n" + str(self.whereabouts))
+                            test = 0
                         self.whereabouts.set_destination(self.calendar.cur_scheduled_activity,
                                                          self.calendar.cur_scheduled_location,
                                                          self.calendar.cur_scheduled_activity_start_time)
+                        if self.uid == self.stop_at:
+                            print("\n" + str(self.whereabouts))
+                            test = 0
             else: # Case: After trip interuption
+                if self.uid == self.stop_at:
+                    test = 0
                 self.whereabouts.set_destination(self.whereabouts.destination_activity,
                                                  self.whereabouts.destination_location,
                                                  self.whereabouts.destination_activity_start_time)        
@@ -234,7 +254,13 @@ class CarAgent(Agent):
             # short hand critical parameters
             (start, end) = wa.cur_edge
             if start == end:
-                print("\nRoute not valid for Agent {}".format(self.uid))
+                #print("\nRoute not valid for Agent {}".format(self.uid))
+                self.stop_at = self.uid
+                self.calendar.stop_at = self.uid
+                print("")
+                print(self)
+                wa.terminate_trip(True)
+                break
             # correct edge
             cur_velocity = tn[start][end]['current_velocity']
             speed_limit = tn[start][end]['speed_limit']

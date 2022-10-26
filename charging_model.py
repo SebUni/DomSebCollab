@@ -6,6 +6,7 @@ Created on Sun Nov  1 17:46:52 2020
 """
 
 import random
+import gc
 
 from mesa import Model
 from mesa.time import RandomActivation
@@ -259,3 +260,20 @@ class ChargingModel(Model):
             total_charge["work"] += agent.total_charge["work"]
             total_charge["emergency"] += agent.total_charge["emergency"]
         return total_charge
+    
+    def clear(self):
+        for agent in self.schedule_houses.agents:
+            self.schedule_houses.remove(agent)
+        for agent in self.schedule_cars.agents:
+            self.space.remove_agent(agent)
+            self.schedule_cars.remove(agent)
+        attrs = ["memory_tracker", "clock", "chm", "epm",
+                 "extracted_company_data", "cpm", "extracted_location_data",
+                 "lrm", "cmm", "cp", "wm", "hcm", "hgm", "schedule_cars",
+                 "schedule_houses", "space", "extracted_car_data"]
+        for attr in attrs:
+            if hasattr(self, attr):
+                if hasattr(getattr(self, attr), "clear"):
+                    getattr(self, attr).clear()
+                delattr(self, attr)
+        gc.collect()

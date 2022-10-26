@@ -69,7 +69,9 @@ for it, name in enumerate(names):
         else:
             data[name][first_row_cell] = []
             for data_row in data_tmp:
-                if first_row_cell in ["charge_grid", "charge_held_back", "charge_pv", "charge_work"]:
+                if first_row_cell in ["charge_grid", "charge_held_back",
+                                      "charge_pv", "charge_work",
+                                      "charge_emergency"]:
                     data[name][first_row_cell].append(data_row[it-1]/10**5)
                 elif first_row_cell == "total_revenue":
                     data[name][first_row_cell].append(data_row[it-1]/10**4)
@@ -116,6 +118,7 @@ line1_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_grid
 line2_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
 line3_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_work"], label="m6 Work", linewidth=linewidth, color="r")
 line4_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_held_back"], label="m6 HeldB", linewidth=linewidth, color="orange")
+#line4_PV, = ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_emergency"], label="m6 public", linewidth=linewidth, color="orange")
 
 ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
 ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_pv"], label="m4 PV", linewidth=linewidth, color="g", linestyle='--')
@@ -123,6 +126,8 @@ ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_work"], label="m6 Work"
 ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_work"], label="m4 Work", linewidth=linewidth, color="r", linestyle='--')
 ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_held_back"], label="m6 HeldB", linewidth=linewidth, color="orange")
 ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_held_back"], label="m4 HeldB", linewidth=linewidth, color="orange", linestyle='--')
+#ax_charge.plot(data["m6"]["x_value"], data["m6"]["charge_emergency"], label="m6 HeldB", linewidth=linewidth, color="orange")
+#ax_charge.plot(data["m4"]["x_value"], data["m4"]["charge_emergency"], label="m4 HeldB", linewidth=linewidth, color="orange", linestyle='--')
 ax_charge.set_xlabel(x_label, fontsize=fontsize)
 ax_charge.xaxis.set_minor_locator(AutoMinorLocator())
 ax_charge.set_yticks([0, 1, 2])
@@ -132,7 +137,7 @@ ax_charge.yaxis.set_minor_locator(AutoMinorLocator())
 ax_charge.grid(True)
 ax_charge.tick_params(labelsize=fontsize)
 ax_charge.legend([line1_PV, line2_PV, line3_PV, line4_PV],
-                 ['Grid', 'PV', 'Work', 'HB'],
+                 ['Grid', 'PV', 'Work', 'Held back'],
                  fontsize=fontsize, loc=6) # , bbox_to_anchor=(1, .55))
 ax_charge.text(.33, 2, "a)", va="top", ha="right", fontsize=fontsize)
 

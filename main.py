@@ -19,14 +19,14 @@ plot_extraced_data = False
 plot_extraced_data_details = False
 store_to_csv = True
 
-sweep_season = True
+sweep_season = False
 sweep_parameters = False
     
 def exec_single_run(parameters, co, od):
     nbr_of_agents = parameters.get("nbr_of_agents","int")
     cm = charging_model.ChargingModel(nbr_of_agents, co, parameters)
     for i in range(cm.clock.time_step_limit):
-        if i == 3024:
+        if i == 2016:
             test = 0
         cm.step()
         if draw_agents_on_map and i>=parameters.get("pre_heat_steps", "int"):
@@ -43,6 +43,9 @@ def exec_single_run(parameters, co, od):
         od.plot_extracted_data(cm)
     if store_to_csv:
         od.store_time_series_to_csv(cm)
+    cm.clear()
+    del cm
+    gc.collect()
 
 def exec_parameter_sweep(parameters, co, od):
     nbr_of_agents = parameters.get("nbr_of_agents","int")
@@ -86,6 +89,9 @@ def exec_parameter_sweep(parameters, co, od):
             scan_collected_data["avg_cost_house_pv"].append(avg_cost_house_pv)
             scan_collected_data["avg_cost_house_no_pv"].append(avg_cost_house_no_pv)
             scan_collected_data["avg_cost"].append(avg_cost)
+            cm.clear()
+            del cm
+            gc.collect()
     
     if store_to_csv:
         od.store_sweep_parameters_to_csv(scan_parameters, scan_order,
@@ -98,8 +104,6 @@ def exec_parameter_sweep(parameters, co, od):
 parameters = Parameters()
 seasons = list(range(4)) if sweep_season else [parameters.get("season","int")]
 for season in seasons:
-    # clear previous garbage
-    gc.collect()
     parameters.setter("season", season)
     co = ConsoleOutput(parameters.path_file_name("log", ".log"))
     od = OutputData(co, parameters)

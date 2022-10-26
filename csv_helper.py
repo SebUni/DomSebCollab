@@ -7,6 +7,7 @@ Created on Mon Dec 14 20:00:11 2020
 
 import csv
 import sys
+import os
 
 class CSVHelper():
     """
@@ -29,7 +30,7 @@ class CSVHelper():
         Populates self.reader an iteratable object holding the data.
 
         """
-        path_and_file = str(relative_path) + "\\" + str(filename)
+        path_and_file = os.path.join(str(relative_path), str(filename))
         if str(relative_path) == "":
             path_and_file = str(filename)
         # acquire data

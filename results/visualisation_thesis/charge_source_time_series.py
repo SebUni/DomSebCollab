@@ -38,9 +38,9 @@ maw = 2*12
 #model 1 (nw) low price (lp)
 file_m1_lp = "model_1_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
 #model 4 (bc) low price (lp)
-file_m4_lp = "model_4_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
+file_m4_lp = "model_7_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
 #model 4 (bc) high price (hp)
-file_m4_hp = "model_4_nbr_agents_12000_hp_season_avg_charge_received_time_series.csv"
+file_m4_hp = "model_7_nbr_agents_12000_hp_season_avg_charge_received_time_series.csv"
 #model 6 (ac) low price (lp)
 file_m6_lp = "model_6_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
 #model 6 (ac) high price (hp)
@@ -79,7 +79,7 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
     ax[y_pos,x_pos].set_xticks(range(0, 24*8, 24))
     ax[y_pos,x_pos].set_xlim(0,167)
     ax[y_pos,x_pos].set_yscale('log')
-    ax[y_pos,x_pos].set_ylim(5*10**2,1.5*10**6)
+    ax[y_pos,x_pos].set_ylim(5*10**2,4*10**6)
     ax[y_pos,x_pos].grid(True)
     if not y_labels:
         for tick in ax[y_pos,x_pos].yaxis.get_major_ticks():
@@ -91,7 +91,8 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
         ax[y_pos,x_pos].yaxis.set_minor_locator(AutoMinorLocator())
     ax[y_pos,x_pos].grid(True)
     ax[y_pos,x_pos].tick_params(labelsize=fontsize)
-    ax[y_pos,x_pos].text(160, 10**6, labeltext, va="top", ha="right", fontsize=fontsize)
+    ax[y_pos,x_pos].text(160, 3*10**6, labeltext, va="top", ha="right",
+                         fontsize=fontsize)
 
 data_raw = dict()
 first_row = dict()
@@ -130,19 +131,25 @@ cast = Cast("Analysis")
 x_label = "$t$ in h"
 y_label = "$P_{\u2020,\u26AA}$ in kW"
 
+label_fig_a = "$p^w$ = 0.27 \$/kWh\n adv\n a)"
+label_fig_b = "$p^w$ = 0.27 \$/kWh\n bsc\n b)"
+label_fig_c = "$p^w$ = 0.28 \$/kWh\n adv\n c)"
+label_fig_d = "$p^w$ = 0.28 \$/kWh\n bsc\n d)"
+label_fig_e = "\n nw\n e)"
+
 linewidth = .6
 cm = 1/2.54
 fontsize=8
 
-fig = plt.figure(figsize=(14.6*cm, 9*cm))
+fig = plt.figure(figsize=(14.6*cm, 10*cm))
 gs = fig.add_gridspec(2, 3, hspace=0, wspace=0)
 ax = gs.subplots(sharex=False, sharey=False)
 
-plot_data(ax, 'a)', 0, 0, "m6_lp", False, True, linewidth, fontsize)
-plot_data(ax, 'c)', 0, 1, "m6_hp", True, True, linewidth, fontsize)
-plot_data(ax, 'b)', 1, 0, "m4_lp", False, False, linewidth, fontsize)
-plot_data(ax, 'd)', 1, 1, "m4_hp", True, False, linewidth, fontsize)
-plot_data(ax, 'e)', 2, 1, "m1_lp", True, False, linewidth, fontsize)
+plot_data(ax, label_fig_a, 0, 0, "m6_lp", False, True, linewidth, fontsize)
+plot_data(ax, label_fig_c, 0, 1, "m6_hp", True, True, linewidth, fontsize)
+plot_data(ax, label_fig_b, 1, 0, "m4_lp", False, False, linewidth, fontsize)
+plot_data(ax, label_fig_d, 1, 1, "m4_hp", True, False, linewidth, fontsize)
+plot_data(ax, label_fig_e, 2, 1, "m1_lp", True, False, linewidth, fontsize)
 
 ax[0, 2].plot([0, 1], [0, 1], label="Grid", linewidth=linewidth, color='k')
 ax[0, 2].plot([0, 1], [0, 1], label="PV", linewidth=linewidth, color='g')

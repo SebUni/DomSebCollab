@@ -7,6 +7,7 @@ Created on Tue Aug 10 19:49:46 2021
 
 import os
 import psutil
+import gc
 
 class MemoryTracker():
     def __init__(self):
@@ -38,3 +39,7 @@ class MemoryTracker():
         mem = self.RAM[snap_shot_title][0]  / float(2 ** 20)
         vmem = self.RAM[snap_shot_title][1] / float(2 ** 20)
         return "{:.00f} MB".format(mem + vmem)
+    
+    def clear(self):
+        del self.RAM
+        gc.collect()

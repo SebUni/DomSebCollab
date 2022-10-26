@@ -10,6 +10,7 @@ from csv_helper import CSVHelper
 import random
 from charger_model import ChargerModel
 from charger import Charger
+import gc
 
 
 class ChargerManager():
@@ -51,3 +52,12 @@ class ChargerManager():
         
     def draw_charger_at_random(self, charger_classification):
         return random.choice(self.charger_models[charger_classification])
+    
+    def clear(self):
+        attrs = ["HOME_CHARGER", "WORK_CHARGER", "PUBLIC_CHARGER", "chargers",
+                 "charger_models"]
+        for attr in attrs:
+            if hasattr(getattr(self, attr), "clear"):
+                getattr(self, attr).clear()
+            delattr(self, attr)
+        gc.collect()

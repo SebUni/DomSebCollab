@@ -5,6 +5,8 @@ Created on Mon Aug  9 12:45:13 2021
 @author: S3739258
 """
 
+import gc
+
 def avg(values):
     return sum(values) / len(values)
 
@@ -133,3 +135,21 @@ class ExtractedData():
             var_data.append(list())
             for agent_it in range(len(self.tracked_agents)):
                 var_data[-1].append(self.default_value[var_it])
+                
+    def clear(self):
+        while len(self.time_steps) != 0:
+            del self.time_steps[-1]
+        while len(self.data)!=0:
+            while len(self.data[-1])!=0:
+                while len(self.data[-1][-1])!=0:
+                    del self.data[-1][-1][-1]
+                del[self.data[-1][-1]]
+            del[self.data[-1]]
+        attrs = ["clock", "tracked_agents", "time_steps", "var_assignment",
+                 "default_value", "data"]
+        for attr in attrs:
+            if hasattr(self, attr):
+                if hasattr(getattr(self, attr), "clear"):
+                    getattr(self, attr).clear()
+                delattr(self, attr)
+        gc.collect()

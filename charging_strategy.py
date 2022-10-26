@@ -73,6 +73,9 @@ class ChargingStrategy():
         self.CHARGE_WHERE_CHEAPER_BASIC = 5
         self.CHARGE_WHERE_CHEAPER_ADVANCED = 6
         self.CHARGE_WHERE_CHEAPER_ADVANCED_NO_RISK = 7
+        self.ADVANCED_OVERHAULED_WITH_RISK = 8
+        self.ADVANCED_OVERHAULED_NO_RISK = 9
+        self.BASIC_OVERHAULED_NO_WORK = 10
         self.charging_model = parameters.get("charging_model", "int")
         self.charging_model_names = {0: "Always charge",
                                      1: "Always charge (no work chargers)",
@@ -81,7 +84,10 @@ class ChargingStrategy():
                                      4: "Always charge where cheaper",
                                      5: "Charge where cheaper basic",
                                      6: "Charge where cheaper advanced",
-                                     7: "Charge where cheaper advanced no risk"}
+                                     7: "Charge where cheaper advanced no risk",
+                                     8: "Advanced Overhauled - with risk",
+                                     9: "Advanced Overhauled - no risk",
+                                     10: "Basic Overhauled - no work"}
         if car_agent == None: return
         
         
@@ -126,7 +132,8 @@ class ChargingStrategy():
         self.always_charge_from_pv \
             = True if self.cost_work_charging > self.feed_in_tariff else False
         if self.charging_model not in [self.CHARGE_WHERE_CHEAPER_BASIC,
-                                       self.CHARGE_WHERE_CHEAPER_ADVANCED] \
+                                       self.CHARGE_WHERE_CHEAPER_ADVANCED,
+                                       self.ADVANCED_OVERHAULED_WITH_RISK] \
             or not self.house_agent.is_house:
             self.always_charge_from_pv = False
     
@@ -342,6 +349,54 @@ class ChargingStrategy():
                     charge_needed = max(charge_needed_next_route, 0)
                     if charge_needed != 0:
                         self.ca.initiate_emergency_charging(charge_needed)
+                        
+        # model #8: advanced OH
+        float_point_error_tolerance = 0.001
+        if self.charging_model in [self.ADVANCED_OVERHAULED_WITH_RISK,
+                                   self.ADVANCED_OVERHAULED_NO_RISK,
+                                   self.BASIC_OVERHAULED_NO_WORK]:
+            next_home_stay_start, next_home_stay_end \
+                = self.det_next_home_stay()
+            forcast_begin = max(self.clock.elapsed_time, next_home_stay_start)
+            mu, sig \
+                = self.ca.calc_forcast_mean_and_std_dev(forcast_begin,
+                                                        next_home_stay_end)
+            charge_needed_next_route = q_ow + q_res - soc
+            
+            acts, dur = self.det_upcoming_stops()
+            acts, dur = self.det_upcoming_stops()
+            if self.whereabouts.destination_activity == self.cp.WORK \
+                and self.charging_model != self.BASIC_OVERHAULED_NO_WORK:
+                Ew = self.E(p_work, acts, dur)
+                charge_at_work = max(Ew - soc, 0)
+                Eh = 0
+                if self.charging_model == self.ADVANCED_OVERHAULED_WITH_RISK \
+                    and p_feed < p_work <= p_grid:
+                    Eh = mu + (math.sqrt(2)
+                                 * sig * erfinv(2*(1-c)
+                                                * (1 - (p_grid-p_work)
+                                                       /(p_grid-p_feed)) - 1))
+                charge_at_work_unadj = max(charge_needed_next_route,
+                                         charge_at_work, 0)
+                charge_at_work = max(charge_needed_next_route,
+                                         charge_at_work - Eh, 0)
+                charge_held_back = charge_at_work_unadj - charge_at_work
+                if charge_at_work < float_point_error_tolerance:
+                    charge_at_work == 0
+                
+            if self.whereabouts.destination_activity == self.cp.HOME:
+                if self.charge_rate_at_home != 0:
+                    Eh = self.E(p_grid, acts, dur)
+                    charge_at_home = max(Eh - soc,0)
+                    if charge_at_home < float_point_error_tolerance:
+                        charge_at_home == 0
+                else:
+                    Ep = self.E(p_em, acts, dur)
+                    charge_at_public = max(Ep - soc,0)
+                    if charge_at_public >= float_point_error_tolerance:
+                        self.ca.initiate_emergency_charging(charge_at_public)
+                    return 0, 0, 0
+            return charge_at_home, charge_at_work, charge_held_back 
         
         # boost charge by using public chargers if needed to reach next
         # destination
@@ -538,6 +593,62 @@ class ChargingStrategy():
                             
         return charge_at_home, charge_at_work, charge_held_back       
     
+    def det_upcoming_stops(self):
+        tow = self.ca.clock.time_of_week
+        dt = self.parameters.get("time_step","int")
+        starts = self.ca.calendar.starts
+        ends = self.ca.calendar.ends
+        cal = self.ca.calendar.calendar
+        acts = []
+        durs = []
+        nxt_start = 0
+        if self.ca.whereabouts.cur_activity == self.ca.cp.HOME:
+            if self.ca.whereabouts.cur_activity == cal[tow]:
+                l = [(tow // 60 - e) % (7*24) for e in ends]
+                nxt_start = l.index(min(l))
+            else:
+                l = [(e - tow // 60 ) % (7*24) for e in ends]
+                nxt_start = l.index(min(l))
+        else:
+            if self.ca.whereabouts.cur_activity == cal[tow]:
+                l = [(tow // 60 - s) % (7*24) for s in starts]
+                nxt_start = l.index(min(l))
+            else:
+                l = [(s - tow // 60) % (7*24) for s in starts]
+                nxt_start = l.index(min(l))
+        """
+        for t_it in np.arange(self.ca.clock.elapsed_time / 5,
+                              (self.ca.clock.elapsed_time + 7*24*60) / 5, 1):
+            if self.cal[t_it % len(self.cal)] == self.ca.whereabouts.cur_activity:
+                nxt_start = t_it % len(self.cal) * 5 / 60
+        """
+        cur_act = nxt_start*2
+        cur_act += 1 if self.ca.whereabouts.cur_activity == self.ca.cp.HOME else 0
+        for i in range(cur_act, cur_act + len(starts)*2, 1):
+            j = i // 2
+            if i % 2 == 1:
+                acts.append(self.ca.cp.HOME)
+                dur = (starts[(j+1) % len(ends)] - ends[j % len(ends)]) % (7*24)
+                dur -= 2 * self.commute_duration
+                durs.append(dur)
+            else:
+                acts.append(self.ca.cp.WORK)
+                dur = (ends[j % len(ends)] - starts[j % len(ends)]) % (7*24)
+                durs.append(dur)
+        """     
+        for time in np.arange(nxt_start // 60, nxt_start // 60 + 7*24, 1):
+            for it, start in enumerate(starts):
+                if time % (7*24) == start % (7*24):
+                    acts.append(2)
+                    durs.append((ends[it] - start) % (7*24))
+            for it, end in enumerate(ends):
+                if time % (7*24) == end % (7*24):
+                    acts.append(1)
+                    durs.append((starts[(it+1) % len(starts)] - end) % (7*24)
+                                 - 2 * self.commute_duration)
+        """
+        return acts, durs
+    
     def det_shifts_to_come(self):
         shifts_to_come = []
         cur_time_in_hours = round(self.clock.elapsed_time / 60)
@@ -693,3 +804,66 @@ class ChargingStrategy():
                     if tmp_soc > self.ca.car_model.battery_capacity: break
                     return charge_missing
         return 0
+    
+    def E(self, p, acts, dur):
+        tilEs = [self.tilE(acts[m],p,dur[m]) for m in range(len(acts))]
+        max_ls = []
+        barE = self.reserve_charge + self.q_one_way
+        uBarEs= [self.ca.car_model.battery_capacity]
+        max_ls = [min([barE] + uBarEs)]
+        for hm in range(1, len(acts)):
+            barE += self.q_one_way - tilEs[hm]
+            uBarEs.append(uBarEs[-1] + self.q_one_way - tilEs[hm])
+            max_ls.append(min([barE] + uBarEs))
+        """
+        max_ls_a = max_ls
+        max_ls = []
+        for hm in range(0, len(acts)):
+            barE = self.barE(p, hm, tilEs)
+            uBarEs = [self.uBarE(p, tm, tilEs) for tm in range(0, hm + 1)]
+            max_ls.append(min([barE] + uBarEs))
+        """
+        return max(0, max(max_ls))
+    
+    def barE(self, p, m, tilEs):
+        summ = 0
+        for hm in range(1,m+1):
+            summ += self.q_one_way - tilEs[hm]
+        return self.reserve_charge + self.q_one_way + summ
+    
+    def uBarE(self, p, m, tilEs):
+        summ = 0
+        for hm in range(1,m+1):
+            summ += self.q_one_way - tilEs[hm]
+        return self.ca.car_model.battery_capacity + summ
+      
+    def tilE(self,act,p,stay_dur):
+        #Iversion bracket
+        I = lambda v_bool: (1 if (v_bool if isinstance(v_bool, (bool))
+                                         else v_bool == 0)
+                              else 0)
+        pw = self.cost_work_charging
+        pg = self.cost_home_charging
+        pp = self.cost_public_charging
+        AR = 1 # activity home
+        AW = 2 # activivy work
+        u = I(self.charging_model != self.BASIC_OVERHAULED_NO_WORK)
+        return (self.charge_rate_at_home * I(act == AR) * I(pg <= p)
+                + self.charge_rate_at_work * I(act == AW)
+                                           * I(pw <= p) * I(I(u)) * I(pw < pp)
+                + self.charge_rate_at_public * I(pp <= p) *
+                    (
+                        I(act == AR) * I(not self.ca.house_agent.is_house)
+                        + I(act == AW) * I(pw >= pp * I(I(u)))
+                     )
+                )*stay_dur
+    
+def minn(v, l):
+    if len(l) == 0:
+        return v
+    else:
+        min(v, min(l))
+        
+def min_it(l): # returns iterator of minimum element in list l
+    temp = min(l)
+    return l.index(temp)
