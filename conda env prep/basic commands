@@ -1,0 +1,18 @@
+Basic conda commands:
+
+# Create environment from yml file (in dict which has abm.yml)
+# File abm.yml creates abm environment
+conda env create --file abm.yml
+
+# activate environment
+conda activate abm
+
+# deactivate environment
+conda deactivate
+
+# remove environment
+conda env remove -n abm
+
+# start script execution
+# change to directory containing the main.py and enter
+pythonm main.py
