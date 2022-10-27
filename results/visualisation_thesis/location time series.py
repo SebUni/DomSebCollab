@@ -133,7 +133,7 @@ for name, data_set in data_raw.items():
                 data_maw[name][col_name].append(avg_value)
 
 demand_VIC = []
-demand_VIC_time_step = np.arange(0,168.5,.5)
+demand_VIC_time_step = np.arange(0,168,.5)
 cast = Cast("demand VIC")
 csv_helper = CSVHelper("results", "demand_VIC.csv", skip_header=True)
 for row in csv_helper.data:

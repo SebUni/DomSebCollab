@@ -35,20 +35,24 @@ MY_DPI = 96
 # moving average over maw time steps
 maw = 2*12
 
+data_set_name = ["charge_received_grid", "charge_received_public",
+            "charge_received_pv", "charge_received_work"]
+labels = ["Grid", "Public", "PV", "Work"]
+colors = ['k','b', 'g', 'r']
+
 #model 1 (nw) low price (lp)
-file_m1_lp = "model_1_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
+file_m1_lp = "model_10_nbr_agents_12000_26c_season_avg_charge_received_time_series.csv"
 #model 4 (bc) low price (lp)
-file_m4_lp = "model_7_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
+file_m4_lp = "model_9_nbr_agents_12000_26c_season_avg_charge_received_time_series.csv"
 #model 4 (bc) high price (hp)
-file_m4_hp = "model_7_nbr_agents_12000_hp_season_avg_charge_received_time_series.csv"
+file_m4_hp = "model_9_nbr_agents_12000_28c_season_avg_charge_received_time_series.csv"
 #model 6 (ac) low price (lp)
-file_m6_lp = "model_6_nbr_agents_12000_lp_season_avg_charge_received_time_series.csv"
+file_m6_lp = "model_8_nbr_agents_12000_26c_season_avg_charge_received_time_series.csv"
 #model 6 (ac) high price (hp)
-file_m6_hp = "model_6_nbr_agents_12000_hp_season_avg_charge_received_time_series.csv"
+file_m6_hp = "model_8_nbr_agents_12000_28c_season_avg_charge_received_time_series.csv"
 
 names = ["m1_lp","m4_lp","m4_hp","m6_lp","m6_hp"]
 files = [file_m1_lp, file_m4_lp, file_m4_hp, file_m6_lp, file_m6_hp]
-
             
 def read_data(relative_path, file_name):
     cast = Cast("difference_tool")
@@ -65,10 +69,15 @@ def read_data(relative_path, file_name):
     return first_row, front_col, data
 
 def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth, fontsize):
-    ax[y_pos,x_pos].plot(data[model]["x_value"], data[model]["charge_received_grid"], label="Grid", linewidth=linewidth, color='k')
-    ax[y_pos,x_pos].plot(data[model]["x_value"], data[model]["charge_received_public"], label="Public", linewidth=linewidth, color='b')
-    ax[y_pos,x_pos].plot(data[model]["x_value"], data[model]["charge_received_pv"], label="PV", linewidth=linewidth, color='g')
-    ax[y_pos,x_pos].plot(data[model]["x_value"], data[model]["charge_received_work"], label="Work", linewidth=linewidth, color='r')
+    dm = data[model]
+    for i, ds in enumerate(data_set_name):    
+        ax[y_pos,x_pos].plot(dm["x_value"], dm[ds], label=labels[i],
+                             linewidth=linewidth, color=colors[i])
+        avg = sum(dm[ds]) / len(dm[ds])
+        ax[y_pos,x_pos].plot([dm["x_value"][0], dm["x_value"][-1]], [avg, avg],
+                             linewidth=linewidth, color=colors[i],
+                             linestyle='--')
+    
     if x_labels:
         ax[y_pos,x_pos].set_xlabel(x_label, fontsize=fontsize)
         ax[y_pos,x_pos].xaxis.set_minor_locator(AutoMinorLocator())
@@ -79,7 +88,7 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
     ax[y_pos,x_pos].set_xticks(range(0, 24*8, 24))
     ax[y_pos,x_pos].set_xlim(0,167)
     ax[y_pos,x_pos].set_yscale('log')
-    ax[y_pos,x_pos].set_ylim(5*10**2,4*10**6)
+    ax[y_pos,x_pos].set_ylim(5*10**0,9*10**6)
     ax[y_pos,x_pos].grid(True)
     if not y_labels:
         for tick in ax[y_pos,x_pos].yaxis.get_major_ticks():
@@ -91,7 +100,9 @@ def plot_data(ax, labeltext, x_pos, y_pos, model, x_labels, y_labels, linewidth,
         ax[y_pos,x_pos].yaxis.set_minor_locator(AutoMinorLocator())
     ax[y_pos,x_pos].grid(True)
     ax[y_pos,x_pos].tick_params(labelsize=fontsize)
-    ax[y_pos,x_pos].text(160, 3*10**6, labeltext, va="top", ha="right",
+    ax[y_pos,x_pos].text(164, 6.5*10**6, labeltext[0], va="top", ha="right",
+                         fontsize=fontsize)
+    ax[y_pos,x_pos].text(4, 7*10**6, labeltext[1], va="top", ha="left",
                          fontsize=fontsize)
 
 data_raw = dict()
@@ -131,11 +142,11 @@ cast = Cast("Analysis")
 x_label = "$t$ in h"
 y_label = "$P_{\u2020,\u26AA}$ in kW"
 
-label_fig_a = "$p^w$ = 0.27 \$/kWh\n adv\n a)"
-label_fig_b = "$p^w$ = 0.27 \$/kWh\n bsc\n b)"
-label_fig_c = "$p^w$ = 0.28 \$/kWh\n adv\n c)"
-label_fig_d = "$p^w$ = 0.28 \$/kWh\n bsc\n d)"
-label_fig_e = "\n nw\n e)"
+label_fig_a = ("$p^w$ = 0.26 \$/kWh\n adv","a)")
+label_fig_b = ("$p^w$ = 0.26 \$/kWh\n bsc","b)")
+label_fig_c = ("$p^w$ = 0.28 \$/kWh\n adv","c)")
+label_fig_d = ("$p^w$ = 0.28 \$/kWh\n bsc","d)")
+label_fig_e = ("nw","e)")
 
 linewidth = .6
 cm = 1/2.54
@@ -151,14 +162,22 @@ plot_data(ax, label_fig_b, 1, 0, "m4_lp", False, False, linewidth, fontsize)
 plot_data(ax, label_fig_d, 1, 1, "m4_hp", True, False, linewidth, fontsize)
 plot_data(ax, label_fig_e, 2, 1, "m1_lp", True, False, linewidth, fontsize)
 
-ax[0, 2].plot([0, 1], [0, 1], label="Grid", linewidth=linewidth, color='k')
-ax[0, 2].plot([0, 1], [0, 1], label="PV", linewidth=linewidth, color='g')
-ax[0, 2].plot([0, 1], [0, 1], label="Work", linewidth=linewidth, color='r')
-ax[0, 2].plot([0, 1], [0, 1], label="Public", linewidth=linewidth, color='b')
+ln_grid, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='k')
+ln_pv, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='g')
+ln_work, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='r')
+ln_publ, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='b')
+ln_ts, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='k')
+ln_avg, = ax[0, 2].plot([0, 1], [0, 1], linewidth=linewidth, color='k',
+                       linestyle='--')
 ax[0, 2].set_xlim(2,3)
 ax[0, 2].set_ylim(2,3)
 ax[0, 2].set_axis_off()
-ax[0, 2].legend(fontsize=fontsize, loc=10)
+leg1 = ax[0, 2].legend([ln_grid, ln_pv, ln_work, ln_publ],
+                       ["Grid", "PV", "Work", "Public"],fontsize=fontsize,
+                       loc="upper center")
+leg2 = ax[0, 2].legend([ln_ts, ln_avg], ["Time series","Average"],
+                       fontsize=fontsize, loc="lower center")
+ax[0, 2].add_artist(leg1)
 
 plt.show()
 
