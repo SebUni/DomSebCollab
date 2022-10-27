@@ -376,6 +376,7 @@ class ChargingStrategy():
                                  * sig * erfinv(2*(1-c)
                                                 * (1 - (p_grid-p_work)
                                                        /(p_grid-p_feed)) - 1))
+                    Eh = max(0,Eh)
                 charge_at_work_unadj = max(charge_needed_next_route,
                                          charge_at_work, 0)
                 charge_at_work = max(charge_needed_next_route,
