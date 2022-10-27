@@ -33,15 +33,15 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 2400
+nbr_of_agents = 12000
 # run A
 season_a = "avg"
-model_a = 4
+model_a = 10
 addendum_a = ""
 
 # run B
 season_b = "avg"
-model_b = 6
+model_b = 8
 addendum_b = ""
 
 # use moving avg? (0 is no)

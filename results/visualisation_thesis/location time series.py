@@ -11,6 +11,7 @@ import fiona
 import matplotlib.pyplot as plt
 import matplotlib.patches
 import matplotlib as mpl
+import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 
@@ -35,16 +36,23 @@ MY_DPI = 96
 mpl.rcParams['figure.dpi'] = 300
 
 # moving average over maw time steps
-maw = 6
+maw = 12
 
 # charge recieved by source
-file_source = "model_1-6_nbr_agents_12000_season_avg-avg_-_diff_charge_received_time_series.csv"
+file_source = "model_10-8_nbr_agents_12000_26c_season_avg-avg_-_diff_charge_received_time_series.csv"
 # charge received by location
-file_location = "model_1-6_nbr_agents_12000_season_avg-avg_-_diff_location_time_series.csv"
+file_location = "model_10-8_nbr_agents_12000_26c_season_avg-avg_-_diff_location_time_series.csv"
 
 names = ["source","location"]
 files = [file_source, file_location]
 
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                         Read and Pre-Process Data                         ##
+##                                                                           ##
+###############################################################################
+###############################################################################
             
 def read_data(relative_path, file_name):
     cast = Cast("difference_tool")
@@ -99,17 +107,22 @@ location_sum = dict()
 for name, data_set in data_raw["location"].items():
     if name != "summ" and name != "x_value":
         location_sum[name] = sum(data_set) / 12
-        
-# moving average
-maw = 6
-data_maw6 = dict()
+   
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                         Calculate Moving Average                          ##
+##                                                                           ##
+###############################################################################
+###############################################################################
+data_maw = dict()
 for name, data_set in data_raw.items():
-    data_maw6[name] = dict()
+    data_maw[name] = dict()
     for col_name, col_data in data_set.items():
         if col_name == "x_value":
-            data_maw6[name][col_name] = col_data
+            data_maw[name][col_name] = col_data
         else:
-            data_maw6[name][col_name] = []
+            data_maw[name][col_name] = []
             for it, value in enumerate(col_data):
                 start_it = it - maw // 2
                 end_it = start_it + maw
@@ -117,139 +130,189 @@ for name, data_set in data_raw.items():
                 for i in range(0, maw):
                     _sum += col_data[(start_it + i) % len(col_data)]
                 avg_value = _sum / maw
-                data_maw6[name][col_name].append(avg_value)
-  
-maw = 12
-data_maw12 = dict()
-for name, data_set in data_raw.items():
-    data_maw12[name] = dict()
-    for col_name, col_data in data_set.items():
-        if col_name == "x_value":
-            data_maw12[name][col_name] = col_data
-        else:
-            data_maw12[name][col_name] = []
-            for it, value in enumerate(col_data):
-                start_it = it - maw // 2
-                end_it = start_it + maw
-                _sum = 0
-                for i in range(0, maw):
-                    _sum += col_data[(start_it + i) % len(col_data)]
-                avg_value = _sum / maw
-                data_maw12[name][col_name].append(avg_value)
+                data_maw[name][col_name].append(avg_value)
 
 demand_VIC = []
-demand_VIC_time_step = np.arange(0,168,.5)
+demand_VIC_time_step = np.arange(0,168.5,.5)
 cast = Cast("demand VIC")
 csv_helper = CSVHelper("results", "demand_VIC.csv", skip_header=True)
 for row in csv_helper.data:
     demand_VIC.append(cast.to_float(row[2],"demand"))
 # min_value = min(demand_VIC)
 # demand_VIC = [value - min_value for value in demand_VIC]
-max_value = max(demand_VIC)
-max_total = max(data_maw12["location"]["summ"])
-print(max_total / max_value)
-demand_VIC = [value * max_total / max_value for value in demand_VIC]
+demand_VIC = [value / 1000 for value in demand_VIC]
+demand_VIC_adp = [dVIC + 10
+                  * sum([data_maw["location"]["summ"]
+                         [(i * 6 + j) % len(data_maw["location"]["summ"])]
+                         for j in range(6)]) / 6
+                  for i, dVIC in enumerate(demand_VIC)]
 
 cast = Cast("Analysis")
 
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                               Set Up Layout                               ##
+##                                                                           ##
+###############################################################################
+###############################################################################
+
 x_label = "$t$ in h"
 
-linewidth = .8
+linewidth = 1
 linewidth_map = 0.3
 cm = 1/2.54
-fontsize=8
+fontsize = 8
+fontsize_leg = 4
 
 fig = plt.figure(figsize=(14.65*cm, 20.5*cm))
 
-ax_map = fig.add_axes([0.10, 0.55, 0.7, 0.45])
-ax_source = fig.add_axes([0, 0.275, 1, 0.20])
-# ax_location = fig.add_axes([0.125, 0.356, 0.60, 0.15])
-ax_location = fig.add_axes([0, 0.0, 0.79, 0.20])
-"""
-ax_location_zoom_left = fig.add_axes([0.125, 0.125, 0.385, 0.15])
-ax_location_zoom_right = fig.add_axes([0.515, 0.125, 0.385, 0.15])
-"""
+gsMain = gridspec.GridSpec(2, 1, figure=fig, hspace=.3*cm,
+                           height_ratios=[50, 50])
+gsTop = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gsMain[0],
+                                         wspace=0, width_ratios=[10, 65, 25])
+gsMidBot = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gsMain[1],
+                                           hspace=0*cm,wspace=0,
+                                           height_ratios=[40, 60],
+                                           width_ratios=[75, 25])
+gsBotAx = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gsMidBot[2],
+                                           hspace=.2*cm,
+                                           height_ratios=[50, 50])
 
-# ax_source = plt.subplot(221)
-# ax_map = plt.subplot(222)
-# ax_location = plt.subplot(413)
-# ax_location_zoom_left = plt.subplot(427)
-# ax_location_zoom_right = plt.subplot(428)
+ax_source = fig.add_subplot(gsMidBot[0, 0])
+ax_locations = [0, 1]
+ax_locations[1] = fig.add_subplot(gsBotAx[1, 0])
+ax_locations[0] = fig.add_subplot(gsBotAx[0, 0])
+ax_map = fig.add_subplot(gsTop[0, 1])
+ax_hide = fig.add_subplot(gsTop[0, 2])
 
-ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_grid"], label="Grid", linewidth=linewidth, color='k')
-ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_pv"], label="PV", linewidth=linewidth, color='g')
-ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_work"], label="Work", linewidth=linewidth, color='r')
-ax_source.plot(data_maw12["source"]["x_value"], data_maw12["source"]["charge_received_public"], label="Public", linewidth=linewidth, color='b')
-ax_source.set_xlabel(x_label, fontsize=fontsize)
+ax_hide.axis('off')
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                          Difference Source Plot                           ##
+##                                                                           ##
+###############################################################################
+###############################################################################
+
+ds = data_maw["source"]
+ax_source.plot(ds["x_value"], ds["charge_received_grid"], label="Grid",
+               linewidth=linewidth, color='k')
+ax_source.plot(ds["x_value"], ds["charge_received_pv"], label="PV",
+               linewidth=linewidth, color='g')
+ax_source.plot(ds["x_value"], ds["charge_received_work"], label="Work",
+               linewidth=linewidth, color='r')
+ax_source.plot(ds["x_value"], ds["charge_received_public"], label="Public",
+               linewidth=linewidth, color='b')
 ax_source.xaxis.set_minor_locator(AutoMinorLocator())
 ax_source.set_xticks(range(0, 24*8, 24))
 ax_source.set_xlim(0,168)
-ax_source.set_ylabel("$P_{adv,\u26AA} - P_{nw,\u26AA}$ in GW", fontsize=fontsize)
-# ax_source.set_ylim(5,1.5*10**4)
 ax_source.yaxis.set_minor_locator(AutoMinorLocator())
 ax_source.tick_params(labelsize=fontsize)
 ax_source.grid(True)
-ax_source.legend(fontsize=fontsize,loc=1)
-ax_source.text(160, -0.9, "b)", va="bottom", ha="right", fontsize=fontsize)
 
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["summ"], label="Total $\u00B7 10^{-1}$", linewidth=linewidth, color='k')
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["20604"], label="Code 20604", linewidth=linewidth, color='r')
-ax_location.plot(data_maw12["location"]["x_value"], data_maw12["location"]["21203"], label="Code 21203", linewidth=linewidth, color='b')
-ax_location.plot(demand_VIC_time_step, demand_VIC, label="dVIC $\u00B7 2 \u00B7 10^{-2}$", linewidth=linewidth, color='grey', linestyle='--')
-ax_location.set_xlabel(x_label, fontsize=fontsize)
-ax_location.xaxis.set_minor_locator(AutoMinorLocator())
-ax_location.set_xticks(range(0, 24*8, 24))
-ax_location.set_xlim(0,168)
-ax_location.set_ylabel("$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW", fontsize=fontsize)
-# ax_location.set_ylim(5,1.5*10**4)
-ax_location.yaxis.set_minor_locator(AutoMinorLocator())
-ax_location.tick_params(labelsize=fontsize)
-ax_location.grid(True)
-ax_location.legend(fontsize=fontsize, loc='center right',
-                              bbox_to_anchor=(1.28, 0.5))
-ax_location.text(164, -.07, "c)", va="bottom", ha="right", fontsize=fontsize)
+# Remove Bottom Axis Clutter
+ax_source.xaxis.set_ticks_position('none')
+ax_source.set_xticklabels([])
 
-"""
-ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["summ"], label="Total", linewidth=linewidth, color='k')
-ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["20604"], label="20604", linewidth=linewidth, color='r')
-ax_location_zoom_left.plot(data_maw6["location"]["x_value"], data_maw6["location"]["21203"], label="21203", linewidth=linewidth, color='b')
-ax_location_zoom_left.plot(demand_VIC_time_step, demand_VIC, label="demand VIC", linewidth=linewidth, color='grey', linestyle='--')
-ax_location_zoom_left.set_xlabel(x_label, fontsize=fontsize)
-ax_location_zoom_left.xaxis.set_minor_locator(AutoMinorLocator())
-ax_location_zoom_left.set_xticks(range(0, 24*8, 24))
-ax_location_zoom_left.set_xlim(0,25)
-ax_location_zoom_left.set_ylabel("$cr^{ts}_{adv,\u2B26} - cr^{ts}_{nw,\u2B26}$ in GW", fontsize=fontsize)
-# ax_location_zoom_left.set_ylim(5,1.5*10**4)
-ax_location_zoom_left.yaxis.set_minor_locator(AutoMinorLocator())
-ax_location_zoom_left.tick_params(labelsize=fontsize)
-ax_location_zoom_left.grid(True)
+# set labels
+ax_source.set_xlabel(x_label, fontsize=fontsize)
+ax_source.text(-20, sum(ax_source.get_ylim()) / 2,
+               "$P_{adv,\u26AA} - P_{nw,\u26AA}$ in GW", va="center",
+               ha="center", rotation="vertical", fontsize=fontsize)
+# set legend
+ax_source.legend(fontsize=fontsize,loc="center right",
+                 bbox_to_anchor=(1.35, .5))
+ax_source.text(164, -0.9, "b)", va="bottom", ha="right", fontsize=fontsize)
 
-ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["summ"], label="Total $*10^{-1}$", linewidth=linewidth, color='k')
-ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["20604"], label="Code 20604", linewidth=linewidth, color='r')
-ax_location_zoom_right.plot(data_maw6["location"]["x_value"], data_maw6["location"]["21203"], label="Code 21203", linewidth=linewidth, color='b')
-ax_location_zoom_right.plot(demand_VIC_time_step, demand_VIC, label="dVIC * 0.02", linewidth=linewidth, color='grey', linestyle='--')
-ax_location_zoom_right.set_xlabel(x_label, fontsize=fontsize)
-ax_location_zoom_right.xaxis.set_minor_locator(AutoMinorLocator())
-ax_location_zoom_right.set_xlim(143,168)
-ax_location_zoom_right.set_xticks([144,168])
-# ax_location_zoom_right.set_yticks()
-ax_location_zoom_right.set_yticklabels([])
-ax_location_zoom_right.yaxis.tick_right()
-# ax_location_zoom_right.set_ylim(5,1.5*10**4)
-ax_location_zoom_right.tick_params(labelsize=fontsize)
-ax_location_zoom_right.grid(True)
-ax_location_zoom_right.legend(fontsize=fontsize, loc='upper left',
-                              bbox_to_anchor=(-.16, 1.02))
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                         Difference Location Plot                          ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
-ax_location_zoom_left.spines['right'].set_visible(False)
-ax_location_zoom_right.spines['left'].set_visible(False)
-d = 3  # proportion of vertical to horizontal extent of the slanted line
-kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
+dl = data_maw["location"]
+ln_loc_tot, ln_loc_206, ln_loc_212,  ln_loc_dVIC, ln_loc_dAdp = 0, 0, 0, 0, 0
+for ax in ax_locations:
+    ln_loc_tot, = ax.plot(dl["x_value"], dl["summ"],
+                          label="Total $\u00B7 10^{-1}$", linewidth=linewidth,
+                          color='k')
+    ln_loc_206, = ax.plot(dl["x_value"], dl["20604"], label="Code 20604",
+                          linewidth=linewidth, color='r', linestyle='--')
+    ln_loc_212, = ax.plot(dl["x_value"], dl["21203"], label="Code 21203",
+                          linewidth=linewidth, color='b', linestyle='--')
+    ln_loc_dVIC, = ax.plot(demand_VIC_time_step, demand_VIC,
+                           label="dVIC $\u00B7 2 \u00B7 10^{-2}$",
+                           linewidth=linewidth, color='grey')
+    ln_loc_dAdp, = ax.plot(demand_VIC_time_step, demand_VIC_adp,
+                           label="dVIC + Total", linewidth=linewidth,
+                           color='orange')
+    ax.set_xticks(range(0, 24*8, 24))
+    ax.set_xlim(0,168)
+    # ax.set_ylabel("$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW", fontsize=fontsize)
+    # ax_location.set_ylim(5,1.5*10**4)
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.tick_params(labelsize=fontsize)
+    ax.grid(True)
+
+
+offset = .05
+min_top = min(min(demand_VIC), min(demand_VIC_adp))
+max_top = max(max(demand_VIC), max(demand_VIC_adp))
+min_bot = min(min(dl["summ"]), min(dl["20604"]), min(dl["21203"]))
+max_bot = max(max(dl["summ"]), max(dl["20604"]), max(dl["21203"]))
+top_ylim = [min_top - (max_top-min_top)*offset,
+            max_top + (max_top-min_top)*offset]
+bot_ylim = [min_bot - (max_bot-min_bot)*offset,
+            max_bot + (max_bot-min_bot)*offset]
+
+ax_locations[0].set_ylim(*top_ylim)  # outliers only
+ax_locations[1].set_ylim(*bot_ylim)  # most of the data
+
+# hide the spines between ax and ax2
+ax_locations[0].spines["bottom"].set_visible(False)
+ax_locations[1].spines["top"].set_visible(False)
+ax_locations[1].tick_params(labeltop=False)
+
+ax_locations[0].minorticks_on()
+ax_locations[0].xaxis.set_ticks_position('none')
+ax_locations[0].set_xticklabels([])
+
+# set labels
+ax_locations[1].xaxis.set_minor_locator(AutoMinorLocator())
+ax_locations[1].set_xlabel(x_label, fontsize=fontsize)
+ax_locations[1].text(-20, .2, "$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW",
+                     va="center", ha="center", rotation="vertical",
+                     fontsize=fontsize)
+
+# set legend   
+ax_locations[0].legend([ln_loc_dVIC, ln_loc_dAdp], ["dVIC", "dVIC \n + Total"], 
+                       fontsize=fontsize, loc="center right",
+                       bbox_to_anchor=(1.35, .5))
+ax_locations[1].legend([ln_loc_tot, ln_loc_206, ln_loc_212],
+                       ["Total $\u00B7 10^{-1}$", "Code 20604", "Code 21203"],
+                       fontsize=fontsize, loc='center right',
+                       bbox_to_anchor=(1.35, .5))
+ax_locations[1].text(164, -.07, "c)", va="bottom", ha="right",
+                     fontsize=fontsize)
+
+# slants
+d = .7  # proportion of vertical to horizontal extent of the slanted line
+kwargs = dict(marker=[(-1, -d), (1, d)], markersize=6,
               linestyle="none", color='k', mec='k', mew=1, clip_on=False)
-ax_location_zoom_left.plot([1, 1], [1, 0], transform=ax_location_zoom_left.transAxes, **kwargs)
-ax_location_zoom_right.plot([0, 0], [1, 0], transform=ax_location_zoom_right.transAxes, **kwargs)
-ax_location_zoom_right.text(167, -.08, "d)", va="bottom", ha="right", fontsize=fontsize)
-"""
+ax_locations[0].plot([0, 1], [0, 0], transform=ax_locations[0].transAxes, **kwargs)
+ax_locations[1].plot([0, 1], [1, 1], transform=ax_locations[1].transAxes, **kwargs)
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                            Difference Map Plot                            ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
 # plot data - geographic
 # parameters to retrieve area border gps data
@@ -325,6 +388,14 @@ ax_map.set_xlim([map_dimensions["min_x"] ,map_dimensions["max_x"]])
 ax_map.set_ylim([map_dimensions["min_y"] ,map_dimensions["max_y"]])
 ax_map.axis('off')
 ax_map.text(145.8, -38.5, "a)", va="bottom", ha="right", fontsize=fontsize)
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                               Post-Process                                ##
+##                                                                           ##
+###############################################################################
+###############################################################################
 
 plt.show()
 
