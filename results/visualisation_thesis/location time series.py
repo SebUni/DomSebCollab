@@ -40,11 +40,16 @@ maw = 12
 
 # charge recieved by source
 file_source = "model_10-8_nbr_agents_12000_26c_season_avg-avg_-_diff_charge_received_time_series.csv"
+file_mdl8 = "model_8_nbr_agents_12000_26c_season_avg_charge_received_time_series.csv"
+file_mdl10 = "model_10_nbr_agents_12000_26c_season_avg_charge_received_time_series.csv"
 # charge received by location
 file_location = "model_10-8_nbr_agents_12000_26c_season_avg-avg_-_diff_location_time_series.csv"
 
-names = ["source","location"]
-files = [file_source, file_location]
+names = ["source","location","mdl8","mdl10"]
+files = [file_source, file_location, file_mdl8, file_mdl10]
+
+lbl_y = lambda t: t[0] + (t[1] - t[0])*.9
+mult = lambda l, m: [i * m for i in l]
 
 ###############################################################################
 ###############################################################################
@@ -89,19 +94,20 @@ for it, name in enumerate(names):
         else:
             data_raw[name][first_row_cell] = []
             for data_row in data_tmp:
-                if name == "location":
+                if name in ["location","mdl8", "mdl10"]:
                     data_raw[name][first_row_cell].append(-data_row[it-1]*12*100/10**6)
                 else:
                     data_raw[name][first_row_cell].append(data_row[it-1]*12*100/10**6)
 
 # add sum for locations
-data_raw["location"]["summ"] = []
-for it in range(0,len(data_raw["location"]["x_value"])):
-    summ = 0
-    for name, row in data_raw["location"].items():
-        if name != "x_value" and name != "summ":
-            summ += row[it]
-    data_raw["location"]["summ"].append(summ / 10)
+for item in ["location","mdl8","mdl10"]:
+    data_raw[item]["summ"] = []
+    for it in range(0,len(data_raw[item]["x_value"])):
+        summ = 0
+        for name, row in data_raw[item].items():
+            if name != "x_value" and name != "summ":
+                summ += row[it]
+        data_raw[item]["summ"].append(summ / 10)
     
 location_sum = dict()
 for name, data_set in data_raw["location"].items():
@@ -153,6 +159,16 @@ demand_VIC_adp = [dVIC + 10
                          [(i * 6 + j) % len(data_maw["location"]["summ"])]
                          for j in range(6)]) / 6
                   for i, dVIC in enumerate(demand_VIC)]
+demand_VIC_plus_nw \
+    = [dVIC + 10 * sum([data_maw["mdl10"]["summ"]
+                        [(i * 6 + j) % len(data_maw["mdl10"]["summ"])]
+                        for j in range(6)]) / 6
+                  for i, dVIC in enumerate(demand_VIC)]
+demand_VIC_plus_adv \
+    = [dVIC + 10 * sum([data_maw["mdl8"]["summ"]
+                        [(i * 6 + j) % len(data_maw["mdl8"]["summ"])]
+                        for j in range(6)]) / 6
+                  for i, dVIC in enumerate(demand_VIC)]
 
 cast = Cast("Analysis")
 
@@ -171,6 +187,9 @@ linewidth_map = 0.3
 cm = 1/2.54
 fontsize = 8
 fontsize_leg = 4
+fontsize_map = 7
+
+y_label_offset = -18
 
 fig = plt.figure(figsize=(14.65*cm, 20.5*cm))
 
@@ -178,18 +197,14 @@ gsMain = gridspec.GridSpec(2, 1, figure=fig, hspace=.3*cm,
                            height_ratios=[50, 50])
 gsTop = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gsMain[0],
                                          wspace=0, width_ratios=[10, 65, 25])
-gsMidBot = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gsMain[1],
+gsBottom = gridspec.GridSpecFromSubplotSpec(3, 2, subplot_spec=gsMain[1],
                                            hspace=0*cm,wspace=0,
-                                           height_ratios=[40, 60],
+                                           height_ratios=[1, 1, 1],
                                            width_ratios=[75, 25])
-gsBotAx = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gsMidBot[2],
-                                           hspace=.2*cm,
-                                           height_ratios=[50, 50])
 
-ax_source = fig.add_subplot(gsMidBot[0, 0])
-ax_locations = [0, 1]
-ax_locations[1] = fig.add_subplot(gsBotAx[1, 0])
-ax_locations[0] = fig.add_subplot(gsBotAx[0, 0])
+ax_source = fig.add_subplot(gsBottom[0, 0])
+ax_location = fig.add_subplot(gsBottom[1, 0])
+ax_total = fig.add_subplot(gsBottom[2, 0])
 ax_map = fig.add_subplot(gsTop[0, 1])
 ax_hide = fig.add_subplot(gsTop[0, 2])
 
@@ -225,13 +240,14 @@ ax_source.set_xticklabels([])
 
 # set labels
 ax_source.set_xlabel(x_label, fontsize=fontsize)
-ax_source.text(-20, sum(ax_source.get_ylim()) / 2,
-               "$P_{adv,\u26AA} - P_{nw,\u26AA}$ in GW", va="center",
+ax_source.text(y_label_offset, sum(ax_source.get_ylim()) / 2,
+               "$P_{adv,\u26AA} - P_{nw,\u26AA}$ \n in GW", va="center",
                ha="center", rotation="vertical", fontsize=fontsize)
 # set legend
 ax_source.legend(fontsize=fontsize,loc="center right",
                  bbox_to_anchor=(1.35, .5))
-ax_source.text(164, -0.9, "b)", va="bottom", ha="right", fontsize=fontsize)
+ax_source.text(164, lbl_y(ax_source.get_ylim()), "b)", va="top", ha="right",
+               fontsize=fontsize)
 
 ###############################################################################
 ###############################################################################
@@ -242,80 +258,103 @@ ax_source.text(164, -0.9, "b)", va="bottom", ha="right", fontsize=fontsize)
 ###############################################################################
 
 dl = data_maw["location"]
-ln_loc_tot, ln_loc_206, ln_loc_212,  ln_loc_dVIC, ln_loc_dAdp = 0, 0, 0, 0, 0
-for ax in ax_locations:
-    ln_loc_tot, = ax.plot(dl["x_value"], dl["summ"],
-                          label="Total $\u00B7 10^{-1}$", linewidth=linewidth,
-                          color='k')
-    ln_loc_max, = ax.plot(dl["x_value"], dl[str(loc_min_max[1])],
-                          label=lbl_max, linewidth=linewidth, color='r',
-                          linestyle='--')
-    ln_loc_min, = ax.plot(dl["x_value"], dl[str(loc_min_max[0])],
-                          label=lbl_min, linewidth=linewidth, color='b',
-                          linestyle='--')
-    ln_loc_dVIC, = ax.plot(demand_VIC_time_step, demand_VIC,
-                           label="dVIC $\u00B7 2 \u00B7 10^{-2}$",
-                           linewidth=linewidth, color='grey')
-    ln_loc_dAdp, = ax.plot(demand_VIC_time_step, demand_VIC_adp,
-                           label="dVIC + Total", linewidth=linewidth,
-                           color='orange')
-    ax.set_xticks(range(0, 24*8, 24))
-    ax.set_xlim(0,168)
-    # ax.set_ylabel("$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW", fontsize=fontsize)
-    # ax_location.set_ylim(5,1.5*10**4)
-    ax.yaxis.set_minor_locator(AutoMinorLocator())
-    ax.tick_params(labelsize=fontsize)
-    ax.grid(True)
+ln_loc_tot, = ax_location.plot(dl["x_value"], mult(dl["summ"],10),
+                               label="Total $\u00B7 10^{-1}$",
+                               linewidth=linewidth, color='k')
+ln_loc_max, = ax_location.plot(dl["x_value"], mult(dl[str(loc_min_max[1])],10),
+                               label=lbl_max, linewidth=linewidth, color='r',
+                               linestyle='--')
+ln_loc_min, = ax_location.plot(dl["x_value"], mult(dl[str(loc_min_max[0])],10),
+                               label=lbl_min, linewidth=linewidth, color='b',
+                               linestyle='--')
+
+ax_location.set_xticks(range(0, 24*8, 24))
+ax_location.set_xlim(0,168)
+# ax.set_ylabel("$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW", fontsize=fontsize)
+# ax_location.set_ylim(5,1.5*10**4)
+ax_location.yaxis.set_minor_locator(AutoMinorLocator())
+ax_location.tick_params(labelsize=fontsize)
+ax_location.grid(True)
 
 
 offset = .05
-min_top = min(min(demand_VIC), min(demand_VIC_adp))
-max_top = max(max(demand_VIC), max(demand_VIC_adp))
-min_bot = min(min(dl["summ"]), min(dl[str(loc_min_max[1])]),
-                               min(dl[str(loc_min_max[0])]))
-max_bot = max(max(dl["summ"]), max(dl[str(loc_min_max[1])]),
-                               max(dl[str(loc_min_max[0])]))
-top_ylim = [min_top - (max_top-min_top)*offset,
-            max_top + (max_top-min_top)*offset]
-bot_ylim = [min_bot - (max_bot-min_bot)*offset,
-            max_bot + (max_bot-min_bot)*offset]
+min_loc = min(min(mult(dl["summ"],10)), min(dl[str(loc_min_max[1])]),
+                                   min(dl[str(loc_min_max[0])]))
+max_loc = max(max(mult(dl["summ"],10)), max(dl[str(loc_min_max[1])]),
+                                   max(dl[str(loc_min_max[0])]))
+loc_ylim = [min_loc - (max_loc-min_loc)*offset,
+            max_loc + (max_loc-min_loc)*offset]
 
-ax_locations[0].set_ylim(*top_ylim)  # outliers only
-ax_locations[1].set_ylim(*bot_ylim)  # most of the data
+ax_location.set_ylim(*loc_ylim)  # most of the data
 
-# hide the spines between ax and ax2
-ax_locations[0].spines["bottom"].set_visible(False)
-ax_locations[1].spines["top"].set_visible(False)
-ax_locations[1].tick_params(labeltop=False)
 
-ax_locations[0].minorticks_on()
-ax_locations[0].xaxis.set_ticks_position('none')
-ax_locations[0].set_xticklabels([])
+ax_location.minorticks_on()
+ax_location.xaxis.set_ticks_position('none')
+ax_location.set_xticklabels([])
 
 # set labels
-ax_locations[1].xaxis.set_minor_locator(AutoMinorLocator())
-ax_locations[1].set_xlabel(x_label, fontsize=fontsize)
-ax_locations[1].text(-20, .2, "$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW",
-                     va="center", ha="center", rotation="vertical",
-                     fontsize=fontsize)
+ax_location.xaxis.set_minor_locator(AutoMinorLocator())
+ax_location.text(y_label_offset, sum(ax_location.get_ylim()) / 2,
+                 "$P_{adv,\u2B26} - P_{nw,\u2B26}$ \n in $10^{-1}$ GW",
+                 va="center", ha="center", rotation="vertical",
+                 fontsize=fontsize)
+
+# set legend
+ax_location.legend(fontsize=fontsize, loc='center right',
+                   bbox_to_anchor=(1.35, .5))
+ax_location.text(164, lbl_y(loc_ylim), "c)", va="top", ha="right",
+                 fontsize=fontsize)
+
+###############################################################################
+###############################################################################
+##                                                                           ##
+##                                Total Plot                                 ##
+##                                                                           ##
+###############################################################################
+###############################################################################
+
+dl = data_maw["location"]
+ln_loc_dVIC, = ax_total.plot(demand_VIC_time_step, demand_VIC,
+                             label="$P_{VIC}$", linewidth=linewidth,
+                             color='grey')
+ln_loc_dIVC_mdl10, = ax_total.plot(demand_VIC_time_step, demand_VIC_plus_nw,
+                                   label="$P_{VIC} + P_{nw}$",
+                                   linewidth=linewidth, color='orange')
+ln_loc_dIVC_mdl8, = ax_total.plot(demand_VIC_time_step, demand_VIC_plus_adv,
+                                  label="$P_{VIC} + P_{adv}$",
+                                  linewidth=linewidth, color='magenta')
+ax_total.set_xticks(range(0, 24*8, 24))
+ax_total.set_xlim(0,168)
+ax_total.yaxis.set_minor_locator(AutoMinorLocator())
+ax_total.tick_params(labelsize=fontsize)
+ax_total.grid(True)
+
+
+offset = .05
+min_tot = min(min(demand_VIC), min(demand_VIC_adp))
+max_tot = max(max(demand_VIC), max(demand_VIC_adp))
+tot_ylim = [min_tot - (max_tot-min_tot)*offset,
+            max_tot + (max_tot-min_tot)*offset]
+
+ax_total.set_ylim(*tot_ylim)  # most of the data
+
+ax_total.minorticks_on()
+
+# set labels
+ax_total.text(y_label_offset, sum(ax_total.get_ylim()) / 2,
+              "$P_{\u2020}$ in GW \n", va="center", ha="center",
+              rotation="vertical", fontsize=fontsize)
+ax_total.xaxis.set_minor_locator(AutoMinorLocator())
+ax_total.set_xlabel(x_label, fontsize=fontsize)
 
 # set legend   
-ax_locations[0].legend([ln_loc_dVIC, ln_loc_dAdp], ["dVIC", "dVIC \n + Total"], 
-                       fontsize=fontsize, loc="center right",
-                       bbox_to_anchor=(1.35, .5))
-ax_locations[1].legend([ln_loc_tot, ln_loc_max, ln_loc_min],
-                       ["Total $\u00B7 10^{-1}$", lbl_max, lbl_min],
-                        fontsize=fontsize, loc='center right',
-                       bbox_to_anchor=(1.35, .5))
-ax_locations[1].text(164, -.07, "c)", va="bottom", ha="right",
+#ax_locations[0].legend([ln_loc_dVIC, ln_loc_dAdp], ["dVIC", "dVIC \n + Total"], 
+#                       fontsize=fontsize, loc="center right",
+#                       bbox_to_anchor=(1.35, .5))
+ax_total.legend(fontsize=fontsize, loc="center right",
+                bbox_to_anchor=(1.35, .5))
+ax_total.text(164, lbl_y(tot_ylim), "d)", va="top", ha="right",
                      fontsize=fontsize)
-
-# slants
-d = .7  # proportion of vertical to horizontal extent of the slanted line
-kwargs = dict(marker=[(-1, -d), (1, d)], markersize=6,
-              linestyle="none", color='k', mec='k', mew=1, clip_on=False)
-ax_locations[0].plot([0, 1], [0, 0], transform=ax_locations[0].transAxes, **kwargs)
-ax_locations[1].plot([0, 1], [1, 1], transform=ax_locations[1].transAxes, **kwargs)
 
 ###############################################################################
 ###############################################################################
@@ -423,7 +462,7 @@ for i, l in enumerate(loc_min_max):
                 color='black', linewidth=lbl_linewidth)
     ax_map.text(lbl_anc[0] - lbl_anc_txt_marg, lbl_anc[1] + lbl_anc_offset * i,
                 loc_min_max_names[i] + "\n Code " + l,
-                va="center", ha="right", fontsize=fontsize)
+                va="center", ha="right", fontsize=fontsize_map)
     
 
 ###############################################################################
