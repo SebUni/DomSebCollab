@@ -1,0 +1,60 @@
+Australian Bureau of Statistics
+
+"2016 Census - Selected Dwelling Characteristics"
+"SA3 by STRD Dwelling Structure"
+"Counting: Dwellings Location on Census Night"
+
+Filters:
+"Default Summation","Dwellings Location on Census Night"
+
+"STRD Dwelling Structure","Semi-detached, row or terrace house, townhouse etc. with two or more storeys","Semi-detached, row or terrace house, townhouse etc. with one storey","Separate house","Total",
+"SA3",
+"20601",5211,4703,18508,28422,
+"20602",2918,3088,11457,17457,
+"20603",3160,2689,12718,18561,
+"20604",5878,2866,2078,10814,
+"20605",5918,6950,4843,17712,
+"20606",3411,3669,5545,12625,
+"20607",6964,9675,6079,22719,
+"20701",5384,9029,37768,52177,
+"20702",4038,2864,25781,32679,
+"20703",3579,6786,26221,36585,
+"20801",4434,5336,24949,34726,
+"20802",5809,9784,31122,46711,
+"20803",5241,8632,27379,41256,
+"20804",1528,2277,8315,12115,
+"20901",2959,5266,38142,46377,
+"20902",3838,6749,24855,35437,
+"20903",405,418,21781,22598,
+"20904",3853,5663,64428,73945,
+"21001",2582,2487,17977,23048,
+"21002",18,585,10605,11210,
+"21003",4914,3895,20035,28838,
+"21004",132,549,13523,14199,
+"21005",2212,3989,44780,50981,
+"21101",2159,5367,49469,56994,
+"21102",157,323,8486,8969,
+"21103",1112,3045,38727,42880,
+"21104",1347,4251,17831,23423,
+"21105",640,2580,54363,57583,
+"21201",635,2080,31956,34673,
+"21202",1267,3252,40678,45201,
+"21203",835,3975,50151,54964,
+"21204",3355,8858,48003,60218,
+"21205",4671,5516,48309,58496,
+"21301",3319,5553,53333,62211,
+"21302",4440,5082,22522,32043,
+"21303",5616,3001,17736,26359,
+"21304",1761,4409,46594,52768,
+"21305",2848,7943,64111,74903,
+"21401",2155,7860,44068,54088,
+"21402",2205,5805,76514,84516,
+"Total",122918,186842,1211733,1521490,
+
+"Data Source: Census of Population and Housing, 2016, TableBuilder"
+
+"INFO","Cells in this table have been randomly adjusted to avoid the release of confidential data. No reliance should be placed on small cells."
+
+
+"Copyright Commonwealth of Australia, 2018, see abs.gov.au/copyright"
+"ABS data licensed under Creative Commons, see abs.gov.au/ccby"
