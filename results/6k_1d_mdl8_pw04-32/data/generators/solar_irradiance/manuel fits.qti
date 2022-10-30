@@ -1,0 +1,695 @@
+QtiPlot 0.9.8 project file
+<scripting-lang>	muParser
+<windows>	4
+<table>
+Elapsedminutes_498630	30	2	9/06/21 4:22 AM
+geometry	0	0	551	220	
+header	1[X]	2[Y]
+ColWidth	146	100	
+<com>
+</com>
+ColType	0;0/13	0;0/13
+ReadOnlyColumn	0	0
+HiddenColumn	0	0
+Comments			
+WindowLabel		2
+<data>
+0	37.54201666667	0.01878975
+1	41.09005	0
+2	44.63808333333	0
+3	48.18611666667	0
+4	51.73415	0.01878975
+5	55.28218333333	0
+6	58.83021666667	0.01878975
+7	62.37825	0
+8	65.92628333333	0
+9	69.47431666667	0
+10	73.02235	0
+11	76.57038333333	0
+12	80.11841666667	0
+13	83.66645	0
+14	87.21448333333	0
+15	90.76251666667	0.01878975
+16	94.31055	0
+17	97.85858333333	0
+18	101.4066166667	0.01878975
+19	104.95465	0
+20	108.5026833333	0.01878975
+21	112.0507166667	0.07515901
+22	115.59875	0
+23	119.1467833333	0
+24	122.6948166667	0.0375795
+25	126.24285	0
+26	129.7908833333	0.01878975
+27	133.3389166667	0.01878975
+28	136.88695	0
+29	140.4349833333	0.01878975
+</data>
+</table>
+<table>
+Elapsedminutes_500070	30	2	9/06/21 4:24 AM
+geometry	8	266	445	220	
+header	1[X]	2[Y]
+ColWidth	100	100	
+<com>
+</com>
+ColType	0;0/13	0;0/13
+ReadOnlyColumn	0	0
+HiddenColumn	0	0
+Comments			
+WindowLabel		2
+<data>
+0	37.54201666667	0.01878975
+1	41.09005	0
+2	44.63808333333	0
+3	48.18611666667	0
+4	51.73415	0.01878975
+5	55.28218333333	0
+6	58.83021666667	0.01878975
+7	62.37825	0
+8	65.92628333333	0.01878975
+9	69.47431666667	0
+10	73.02235	0
+11	76.57038333333	0
+12	80.11841666667	0
+13	83.66645	0
+14	87.21448333333	0
+15	90.76251666667	0.01878975
+16	94.31055	0
+17	97.85858333333	0
+18	101.4066166667	0
+19	104.95465	0
+20	108.5026833333	0.01878975
+21	112.0507166667	0.07515901
+22	115.59875	0
+23	119.1467833333	0
+24	122.6948166667	0.0375795
+25	126.24285	0
+26	129.7908833333	0.01878975
+27	133.3389166667	0.01878975
+28	136.88695	0
+29	140.4349833333	0.01878975
+</data>
+</table>
+<multiLayer>
+Graph1	1	1	9/06/21 4:25 AM
+geometry	773	-18	563	477	
+WindowLabel		2
+Margins	5	5	5	5
+Spacing	5	5
+LayerCanvasSize	400	300
+Alignement	0	0
+<AlignPolicy>0</AlignPolicy>
+<CommonAxes>0</CommonAxes>
+<graph>
+ggeometry	5	5	545	414
+<PageGeometry>0.00900901	0.011655	0.981982	0.965035</PageGeometry>
+PlotTitle	Title	#000000	4228
+<Antialiasing>1</Antialiasing>
+<Autoscaling>1</Autoscaling>
+<ScaleFonts>1</ScaleFonts>
+<GridOnTop>0</GridOnTop>
+<MissingDataGap>1</MissingDataGap>
+Background	#ffffff	0
+Margin	0
+Border	0	#000000
+grid	0	0	0	0	#0000ff	0	0.5	#a0a0a4	2	0.4	#0000ff	0	0.5	#a0a0a4	2	0.4	0	0	2	0	0
+EnabledAxes	1	1	1	1	
+AxesTitles	%(?X)	%(?Y)		%(?Y)	
+AxesTitleColors	#000000	#000000	#000000	#000000	
+AxesTitleAlignment	5124	5124	5124	5124
+AxesTitleDistance	2	2	2	2
+InvertedTitle	0	0	0	0
+TitleFont	Noto Sans	12	75	0	0	0
+ScaleFont0	Noto Sans	10	75	0	0	0
+ScaleFont1	Noto Sans	10	75	0	0	0
+ScaleFont2	Noto Sans	10	75	0	0	0
+ScaleFont3	Noto Sans	10	75	0	0	0
+AxisFont0	Noto Sans	10	50	0	0	0
+AxisFont1	Noto Sans	10	50	0	0	0
+AxisFont2	Noto Sans	10	50	0	0	0
+AxisFont3	Noto Sans	10	50	0	0	0
+AxesColors	#000000	#000000	#000000	#000000
+AxesNumberColors	#232627	#232627	#232627	#232627
+AxesBaseline	0	0	0	0	
+CanvasBackground	#ffffff	0
+curve	Elapsedminutes_498630_1	Elapsedminutes_498630_2	1	0	#000000	0	1	7	1	#000000	#000000	0	#000000	14	1	2	0	0	29	1
+<Function>
+<Type>0</Type>
+<Title>NonLinearFit3</Title>
+<Expression>y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))</Expression>
+<Variable>x</Variable>
+<Range>37.54201666667	140.4349833333</Range>
+<Points>100</Points>
+<Constant>A	0.2</Constant>
+<Constant>w	4</Constant>
+<Constant>xc	115</Constant>
+<Constant>y0	0.0067107668129992</Constant>
+<Style>0</Style>
+<LineStyle>1</LineStyle>
+<Pen>
+	<Color>#000000</Color>
+	<Style>0</Style>
+	<Width>1</Width>
+</Pen>
+<xAxis>2</xAxis>
+<yAxis>0</yAxis>
+<CurveType>0</CurveType>
+<Visible>1</Visible>
+</Function>
+<Function>
+<Type>0</Type>
+<Title>NonLinearFit1</Title>
+<Expression>a</Expression>
+<Variable>x</Variable>
+<Range>37.54201666667	140.4349833333</Range>
+<Points>100</Points>
+<Constant>a	0.0093948755419436</Constant>
+<Style>0</Style>
+<LineStyle>1</LineStyle>
+<Pen>
+	<Color>#000000</Color>
+	<Style>0</Style>
+	<Width>1</Width>
+</Pen>
+<xAxis>2</xAxis>
+<yAxis>0</yAxis>
+<CurveType>0</CurveType>
+<Visible>1</Visible>
+</Function>
+scale	0	-0.01	0.08	0	10	5	0	0
+scale	1	-0.01	0.08	0	10	5	0	0
+scale	2	20	160	0	8	5	0	0
+scale	3	20	160	0	8	5	0	0
+LabelsFormat	0	6	0	6	0	6	0	6
+AxisType	0	0	0	0	
+MajorTicks	1	1	1	1
+MinorTicks	1	1	1	1
+TicksLength	5	9
+DrawAxesBackbone	1	1	1	1	1
+AxesLineWidth	1
+LabelsRotation	0	0	0	0
+LabelsPrefix				
+LabelsSuffix				
+TickLabelsSpace	4	4	4	4
+ShowTicksPolicy	0	0	0	0
+EnabledTickLabels	1	1	1	1
+<Legend>
+<Frame>1</Frame>
+<Color>#000000</Color>
+<FrameWidth>1</FrameWidth>
+<LineStyle>0</LineStyle>
+<x>25.397590361446</x>
+<y>0.50635451505017</y>
+<right>79.0361445783132</right>
+<bottom>0.391638795986622</bottom>
+<attachTo>1</attachTo>
+<onTop>1</onTop>
+<visible>1</visible>
+<Text>
+\l(1)%(1)
+\l(2)%(2)
+\l(3)%(3)
+</Text>
+<Font>Noto Sans	10	50	0	0	0</Font>
+<TextColor>#000000</TextColor>
+<Background>#ffffff</Background>
+<Alpha>0</Alpha>
+<Angle>0</Angle>
+<AutoUpdate>1</AutoUpdate>
+<TeXOutput>0</TeXOutput>
+</Legend>
+</graph>
+<LinkXAxes>0</LinkXAxes>
+<ScaleLayers>1</ScaleLayers>
+</multiLayer>
+<multiLayer>
+Graph2	1	1	9/06/21 4:55 AM
+geometry	1336	0	563	477	active
+WindowLabel		2
+Margins	5	5	5	5
+Spacing	5	5
+LayerCanvasSize	400	300
+Alignement	0	0
+<AlignPolicy>0</AlignPolicy>
+<CommonAxes>0</CommonAxes>
+<graph>
+ggeometry	5	5	545	414
+<PageGeometry>0.00900901	0.011655	0.981982	0.965035</PageGeometry>
+PlotTitle	Title	#000000	4228
+<Antialiasing>1</Antialiasing>
+<Autoscaling>1</Autoscaling>
+<ScaleFonts>1</ScaleFonts>
+<GridOnTop>0</GridOnTop>
+<MissingDataGap>1</MissingDataGap>
+Background	#ffffff	0
+Margin	0
+Border	0	#000000
+grid	0	0	0	0	#0000ff	0	0.5	#a0a0a4	2	0.4	#0000ff	0	0.5	#a0a0a4	2	0.4	0	0	2	0	0
+EnabledAxes	1	1	1	1	
+AxesTitles	%(?X)	%(?Y)		%(?Y)	
+AxesTitleColors	#000000	#000000	#000000	#000000	
+AxesTitleAlignment	5124	5124	5124	5124
+AxesTitleDistance	2	2	2	2
+InvertedTitle	0	0	0	0
+TitleFont	Noto Sans	12	75	0	0	0
+ScaleFont0	Noto Sans	10	75	0	0	0
+ScaleFont1	Noto Sans	10	75	0	0	0
+ScaleFont2	Noto Sans	10	75	0	0	0
+ScaleFont3	Noto Sans	10	75	0	0	0
+AxisFont0	Noto Sans	10	50	0	0	0
+AxisFont1	Noto Sans	10	50	0	0	0
+AxisFont2	Noto Sans	10	50	0	0	0
+AxisFont3	Noto Sans	10	50	0	0	0
+AxesColors	#000000	#000000	#000000	#000000
+AxesNumberColors	#232627	#232627	#232627	#232627
+AxesBaseline	0	0	0	0	
+CanvasBackground	#ffffff	0
+curve	Elapsedminutes_500070_1	Elapsedminutes_500070_2	1	0	#000000	0	1	7	1	#000000	#000000	0	#000000	14	1	2	0	0	29	1
+<Function>
+<Type>0</Type>
+<Title>NonLinearFit4</Title>
+<Expression>y0+(A/(sqrt(2*PI)*sig))*exp(-(x-mu)^2/(2*sig^2))</Expression>
+<Variable>x</Variable>
+<Range>37.54201666667	140.4349833333</Range>
+<Points>100</Points>
+<Constant>A	0.5</Constant>
+<Constant>mu	117</Constant>
+<Constant>sig	4</Constant>
+<Constant>y0	0.0067106250001978</Constant>
+<Style>0</Style>
+<LineStyle>1</LineStyle>
+<Pen>
+	<Color>#000000</Color>
+	<Style>0</Style>
+	<Width>1</Width>
+</Pen>
+<xAxis>2</xAxis>
+<yAxis>0</yAxis>
+<CurveType>0</CurveType>
+<Visible>1</Visible>
+</Function>
+<Function>
+<Type>0</Type>
+<Title>NonLinearFit1</Title>
+<Expression>a</Expression>
+<Variable>x</Variable>
+<Range>37.54201666667	140.4349833333</Range>
+<Points>100</Points>
+<Constant>a	0.0093948755419436</Constant>
+<Style>0</Style>
+<LineStyle>1</LineStyle>
+<Pen>
+	<Color>#000000</Color>
+	<Style>0</Style>
+	<Width>1</Width>
+</Pen>
+<xAxis>2</xAxis>
+<yAxis>0</yAxis>
+<CurveType>0</CurveType>
+<Visible>1</Visible>
+</Function>
+scale	0	-0.01	0.08	0	10	5	0	0
+scale	1	-0.01	0.08	0	10	5	0	0
+scale	2	20	160	0	8	5	0	0
+scale	3	20	160	0	8	5	0	0
+LabelsFormat	0	6	0	6	0	6	0	6
+AxisType	0	0	0	0	
+MajorTicks	1	1	1	1
+MinorTicks	1	1	1	1
+TicksLength	5	9
+DrawAxesBackbone	1	1	1	1	1
+AxesLineWidth	1
+LabelsRotation	0	0	0	0
+LabelsPrefix				
+LabelsSuffix				
+TickLabelsSpace	4	4	4	4
+ShowTicksPolicy	0	0	0	0
+EnabledTickLabels	1	1	1	1
+<Legend>
+<Frame>1</Frame>
+<Color>#000000</Color>
+<FrameWidth>1</FrameWidth>
+<LineStyle>0</LineStyle>
+<x>23.508771929825</x>
+<y>0.076989966555184</y>
+<right>58.2456140350877</right>
+<bottom>0.0682608695652174</bottom>
+<attachTo>1</attachTo>
+<onTop>1</onTop>
+<visible>1</visible>
+<Text>
+\l(1)%(1)
+\l(2)%(2)
+\l(3)%(3)
+</Text>
+<Font>Noto Sans	10	50	0	0	0</Font>
+<TextColor>#000000</TextColor>
+<Background>#ffffff</Background>
+<Alpha>0</Alpha>
+<Angle>0</Angle>
+<AutoUpdate>1</AutoUpdate>
+<TeXOutput>0</TeXOutput>
+</Legend>
+</graph>
+<LinkXAxes>0</LinkXAxes>
+<ScaleLayers>1</ScaleLayers>
+</multiLayer>
+<open>1</open>
+<log>
+[9/06/21 4:29 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: (A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 2.610947951526952e-01 +/- 8.486332061408182e-02
+w = 1.430233221242360e+01 +/- 5.571712830325840e+00
+xc = 1.160214553370151e+02 +/- 5.262650056100223e+00
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.413209787328721e-04
+R^2 = 0.141622543179195
+Adjusted R^2 = 0.042578990469102
+RMSE (Root Mean Squared Error) = 0.0155345092852292
+RSS (Residual Sum of Squares) = 0.00651566642578755
+---------------------------------------------------------------------------------------
+Iterations = 49
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:30 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = -3.445184760420079e-01 +/- 1.963336194789524e+07
+w = -7.288806273369609e-01 +/- 8.659293805203199e+06
+xc = 1.105364315844079e+02 +/- 6.171359239539704e+06
+y0 = 6.710625001189862e-03 +/- 2.085158861477622e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.144518000030980e-04
+R^2 = 0.607973489820414
+Adjusted R^2 = 0.54524924819168
+RMSE (Root Mean Squared Error) = 0.0106982148044942
+RSS (Residual Sum of Squares) = 0.00297574680008055
+---------------------------------------------------------------------------------------
+Iterations = 388
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:33 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = -3.445184760420000e-01 +/- 1.568949245171358e+09
+w = nan +/- 3.764591511943796e+08
+xc = 5.729388635705048e-313 +/- 4.194487581587029e+07
+y0 = 2.095326049858719e-110 +/- 6.564468052567061e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.923369303700021e-04
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:33 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = -3.445184760420000e-01 +/- 3.096151047663437e+54
+w = nan +/- 2.064100698442290e+55
+xc = 5.729388635705048e-313 +/- 2.015723338322532e+51
+y0 = 2.095326049858719e-110 +/- 6.335273424665401e+43
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.919491336202442e-04
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:33 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = -3.445184760420000e-01 +/- 3.096151047663437e+54
+w = nan +/- 2.064100698442290e+55
+xc = 5.729388635705048e-313 +/- 2.015723338322532e+51
+y0 = 2.095326049858719e-110 +/- 6.335273424665401e+43
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.919491336202442e-04
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:34 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = -3.445184760420000e-01 +/- 3.096151047663437e+54
+w = -6.288806273370000e-01 +/- 2.064100698442290e+55
+xc = 5.729388635705048e-313 +/- 2.015723338322532e+51
+y0 = 2.095326049858719e-110 +/- 6.335273424665401e+43
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.919491336202442e-04
+R^2 = -0.348837173610912
+Adjusted R^2 = -0.564651121388657
+RMSE (Root Mean Squared Error) = 0.0198441891804751
+RSS (Residual Sum of Squares) = 0.0102385879499926
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:34 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.000000000000000e+00 +/- 5.504268529179440e+55
+w = -6.288806273370000e-01 +/- 2.752134264589721e+55
+xc = 5.729388635705048e-313 +/- 2.101467526133762e+37
+y0 = 2.095326049858719e-110 +/- 1.428329568938060e+44
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.919491336202442e-04
+R^2 = -0.348837173610912
+Adjusted R^2 = -0.564651121388657
+RMSE (Root Mean Squared Error) = 0.0198441891804751
+RSS (Residual Sum of Squares) = 0.0102385879499926
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:35 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.000000000000000e+00 +/- 1.047341137623365e+02
+w = 1.000000000000000e+02 +/- 5.887766819680814e+03
+xc = 1.100000000000000e+02 +/- 7.855185550478241e+03
+y0 = 0.000000000000000e+00 +/- 2.374000999790391e-01
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.848947194447072e-04
+R^2 = -0.00446182001107043
+Adjusted R^2 = -0.165175711212842
+RMSE (Root Mean Squared Error) = 0.017124595122421
+RSS (Residual Sum of Squares) = 0.00762454571077799
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:36 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 9.149469732885523e-02 +/- 4.117834261533677e+08
+w = 1.904998458685901e+00 +/- 4.434993631052939e+08
+xc = 1.106248760563065e+02 +/- 1.368049580151333e+09
+y0 = 6.723223454352344e-03 +/- 2.159270225183866e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.258863046731892e-04
+R^2 = 0.478934426014116
+Adjusted R^2 = 0.395563934176375
+RMSE (Root Mean Squared Error) = 0.0123338819065416
+RSS (Residual Sum of Squares) = 0.00395524071499737
+---------------------------------------------------------------------------------------
+Iterations = 3
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:37 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.244025817620440e-01 +/- 1.050479424762570e+02
+w = 1.000822502893049e+00 +/- 4.131939420438950e+02
+xc = 1.107664147554676e+02 +/- 3.998415545662522e+02
+y0 = 6.710766812999231e-03 +/- 2.059297770208780e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.144524700908227e-04
+R^2 = 0.60797051858847
+Adjusted R^2 = 0.545245801562625
+RMSE (Root Mean Squared Error) = 0.0106982553461623
+RSS (Residual Sum of Squares) = 0.00297576935374394
+---------------------------------------------------------------------------------------
+Iterations = 18
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:37 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.244025817620000e-01 +/- 8.463175909189356e+01
+w = 1.000822502893000e+00 +/- 3.490668779214138e+02
+xc = 5.729388635705048e-313 +/- 3.403491007074479e+02
+y0 = 2.095326049858719e-110 +/- 2.059297151909749e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.144524407468813e-04
+R^2 = -0.348837173610912
+Adjusted R^2 = -0.564651121388657
+RMSE (Root Mean Squared Error) = 0.0198441891804751
+RSS (Residual Sum of Squares) = 0.0102385879499926
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:39 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: y0+(A/(sqrt(2/PI)*w))*exp(-(x-xc)^2/(2*w^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.244025817620000e-01 +/- 6.941294945243288e-02
+w = 1.000822502893000e+00 +/- 1.106753005157289e+00
+xc = 5.729388635705048e-313 +/- 1.063213729019258e+00
+y0 = 2.095326049858719e-110 +/- 4.600520040597177e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 5.090266147832732e-04
+R^2 = -0.348837173610912
+Adjusted R^2 = -0.564651121388657
+RMSE (Root Mean Squared Error) = 0.0198441891804751
+RSS (Residual Sum of Squares) = 0.0102385879499926
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:48 AM	Plot: ''Graph1'']
+Non-linear Fit of dataset: Elapsedminutes_498630_2, using function: a
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+a = 9.394875541943596e-03 +/- 2.953796986977115e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.617474991078050e-04
+R^2 = 5.55111512312578e-16
+Adjusted R^2 = -0.0357142857142849
+RMSE (Root Mean Squared Error) = 0.0161786123974773
+RSS (Residual Sum of Squares) = 0.00759067747412634
+---------------------------------------------------------------------------------------
+Iterations = 2
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:57 AM	Plot: ''Graph2'']
+Non-linear Fit of dataset: Elapsedminutes_500070_2, using function: y0+(A/(sqrt(2*PI)*sig))*exp(-(x-mu)^2/(2*sig^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.000000000000000e+00 +/- 0.000000000000000e+00
+mu = 1.000000000000000e+00 +/- 0.000000000000000e+00
+sig = 5.729388635705048e-313 +/- 0.000000000000000e+00
+y0 = 1.417365953724016e+190 +/- 3.119557304311925e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.919491336202442e-04
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 4:57 AM	Plot: ''Graph2'']
+Non-linear Fit of dataset: Elapsedminutes_500070_2, using function: y0+(A/(sqrt(2*PI)*sig))*exp(-(x-mu)^2/(2*sig^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.000000000000000e+00 +/- nan
+mu = 1.000000000000000e+00 +/- 0.000000000000000e+00
+sig = 5.729388635705048e-313 +/- 0.000000000000000e+00
+y0 = 1.417365953724016e+190 +/- 0.000000000000000e+00
+--------------------------------------------------------------------------------------
+Chi^2/doF = 0.000000000000000e+00
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 0
+Status = singularity or extremely bad function behavior detected
+---------------------------------------------------------------------------------------
+[9/06/21 4:58 AM	Plot: ''Graph2'']
+Non-linear Fit of dataset: Elapsedminutes_500070_2, using function: y0+(A/(sqrt(2*PI)*sig))*exp(-(x-mu)^2/(2*sig^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.000000000000000e+00 +/- nan
+mu = 1.000000000000000e+00 +/- inf
+sig = 5.729388635705048e-313 +/- inf
+y0 = 1.417365953724016e+190 +/- nan
+--------------------------------------------------------------------------------------
+Chi^2/doF = inf
+R^2 = nan
+Adjusted R^2 = nan
+RMSE (Root Mean Squared Error) = nan
+RSS (Residual Sum of Squares) = nan
+---------------------------------------------------------------------------------------
+Iterations = 1
+Status = singularity or extremely bad function behavior detected
+---------------------------------------------------------------------------------------
+[9/06/21 4:58 AM	Plot: ''Graph2'']
+Non-linear Fit of dataset: Elapsedminutes_500070_2, using function: y0+(A/(sqrt(2*PI)*sig))*exp(-(x-mu)^2/(2*sig^2))
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+A = 1.326049087215188e+00 +/- 6.323868185126772e+08
+mu = 1.105163472991814e+02 +/- 4.310159981625725e+07
+sig = 7.001325899423201e-01 +/- 6.296093227599557e+07
+y0 = 6.710625000197819e-03 +/- 2.060789062727185e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 1.144517999942033e-04
+R^2 = 0.60797348985088
+Adjusted R^2 = 0.545249248227021
+RMSE (Root Mean Squared Error) = 0.0106982148040785
+RSS (Residual Sum of Squares) = 0.00297574679984929
+---------------------------------------------------------------------------------------
+Iterations = 704
+Status = success
+---------------------------------------------------------------------------------------
+[9/06/21 5:01 AM	Plot: ''Graph2'']
+Non-linear Fit of dataset: Elapsedminutes_500070_2, using function: a
+Weighting Method: No weighting
+Scaled Levenberg-Marquardt algorithm with tolerance = 0.0001
+From x = 3.754201666667000e+01 to x = 1.404349833333000e+02
+a = 9.394875541943596e-03 +/- 2.953796986977115e-03
+--------------------------------------------------------------------------------------
+Chi^2/doF = 2.617474991078050e-04
+R^2 = 5.55111512312578e-16
+Adjusted R^2 = -0.0357142857142849
+RMSE (Root Mean Squared Error) = 0.0161786123974773
+RSS (Residual Sum of Squares) = 0.00759067747412634
+---------------------------------------------------------------------------------------
+Iterations = 2
+Status = success
+---------------------------------------------------------------------------------------
+</log>
