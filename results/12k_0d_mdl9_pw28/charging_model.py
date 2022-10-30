@@ -262,6 +262,7 @@ class ChargingModel(Model):
         return total_charge
     
     def clear(self):
+        return
         for agent in self.schedule_houses.agents:
             self.schedule_houses.remove(agent)
         for agent in self.schedule_cars.agents:

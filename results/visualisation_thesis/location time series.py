@@ -107,6 +107,13 @@ location_sum = dict()
 for name, data_set in data_raw["location"].items():
     if name != "summ" and name != "x_value":
         location_sum[name] = sum(data_set) / 12
+
+ls = location_sum
+loc_min_max = ([k for k, v in ls.items() if v == min(ls.values())][0],
+               [k for k, v in ls.items() if v == max(ls.values())][0])
+del ls
+lbl_min = "Code " + str(loc_min_max[0])
+lbl_max = "Code " + str(loc_min_max[1])
    
 ###############################################################################
 ###############################################################################
@@ -240,10 +247,12 @@ for ax in ax_locations:
     ln_loc_tot, = ax.plot(dl["x_value"], dl["summ"],
                           label="Total $\u00B7 10^{-1}$", linewidth=linewidth,
                           color='k')
-    ln_loc_206, = ax.plot(dl["x_value"], dl["20604"], label="Code 20604",
-                          linewidth=linewidth, color='r', linestyle='--')
-    ln_loc_212, = ax.plot(dl["x_value"], dl["21203"], label="Code 21203",
-                          linewidth=linewidth, color='b', linestyle='--')
+    ln_loc_max, = ax.plot(dl["x_value"], dl[str(loc_min_max[1])],
+                          label=lbl_max, linewidth=linewidth, color='r',
+                          linestyle='--')
+    ln_loc_min, = ax.plot(dl["x_value"], dl[str(loc_min_max[0])],
+                          label=lbl_min, linewidth=linewidth, color='b',
+                          linestyle='--')
     ln_loc_dVIC, = ax.plot(demand_VIC_time_step, demand_VIC,
                            label="dVIC $\u00B7 2 \u00B7 10^{-2}$",
                            linewidth=linewidth, color='grey')
@@ -262,8 +271,10 @@ for ax in ax_locations:
 offset = .05
 min_top = min(min(demand_VIC), min(demand_VIC_adp))
 max_top = max(max(demand_VIC), max(demand_VIC_adp))
-min_bot = min(min(dl["summ"]), min(dl["20604"]), min(dl["21203"]))
-max_bot = max(max(dl["summ"]), max(dl["20604"]), max(dl["21203"]))
+min_bot = min(min(dl["summ"]), min(dl[str(loc_min_max[1])]),
+                               min(dl[str(loc_min_max[0])]))
+max_bot = max(max(dl["summ"]), max(dl[str(loc_min_max[1])]),
+                               max(dl[str(loc_min_max[0])]))
 top_ylim = [min_top - (max_top-min_top)*offset,
             max_top + (max_top-min_top)*offset]
 bot_ylim = [min_bot - (max_bot-min_bot)*offset,
@@ -292,9 +303,9 @@ ax_locations[1].text(-20, .2, "$P_{adv,\u2B26} - P_{nw,\u2B26}$ in GW",
 ax_locations[0].legend([ln_loc_dVIC, ln_loc_dAdp], ["dVIC", "dVIC \n + Total"], 
                        fontsize=fontsize, loc="center right",
                        bbox_to_anchor=(1.35, .5))
-ax_locations[1].legend([ln_loc_tot, ln_loc_206, ln_loc_212],
-                       ["Total $\u00B7 10^{-1}$", "Code 20604", "Code 21203"],
-                       fontsize=fontsize, loc='center right',
+ax_locations[1].legend([ln_loc_tot, ln_loc_max, ln_loc_min],
+                       ["Total $\u00B7 10^{-1}$", lbl_max, lbl_min],
+                        fontsize=fontsize, loc='center right',
                        bbox_to_anchor=(1.35, .5))
 ax_locations[1].text(164, -.07, "c)", va="bottom", ha="right",
                      fontsize=fontsize)
@@ -313,6 +324,13 @@ ax_locations[1].plot([0, 1], [1, 1], transform=ax_locations[1].transAxes, **kwar
 ##                                                                           ##
 ###############################################################################
 ###############################################################################
+
+# Label set up
+lbl_anc = (144.7,-38.225)
+lbl_anc_offset = .13
+lbl_anc_txt_marg = .025
+lbl_bar_length = .05
+lbl_linewidth = .8
 
 # plot data - geographic
 # parameters to retrieve area border gps data
@@ -346,6 +364,8 @@ co = ConsoleOutput()
 od = OutputData(co, parameters)
 map_dimensions = od.map_dimensions
 
+cntr_area = [0, 0]
+loc_min_max_names = [0, 0]
 # plot total charge
 with fiona.open(_file_path + _file_name, layer=_layer) as layer:
     nbr_of_drawn_sas = 0
@@ -371,23 +391,40 @@ with fiona.open(_file_path + _file_name, layer=_layer) as layer:
                 ax_map.add_patch(p)
                 ax_map.plot(x, y, color='black', linewidth=linewidth_map)    
             nbr_of_drawn_sas += 1
+            for i, l in enumerate(loc_min_max):
+                if str(elr_code) == l:
+                    c = elr['geometry']['coordinates'][0][0]
+                    cntr_area[i] = (sum([data[0] for data in c])/len(c),
+                                    sum([data[1] for data in c])/len(c))
+                    loc_min_max_names[i] = elr['properties']['SA3_NAME_2016']
         
-            abs_limit = max(-abs(min_total_charge_delivered),
-                            max_total_charge_delivered)
-            
-            norm = mpl.colors.Normalize(vmin=-abs_limit, vmax=abs_limit)
-            divider = make_axes_locatable(ax_map)
-            cax = divider.append_axes("right", size="5%", pad=0.05)
-            cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
-                                cax=cax)
-            cbar.set_label("$E_{adv,\u2B26} - E_{nw,\u2B26}$ in GWh", fontsize=fontsize)
-            cbar.ax.tick_params(labelsize=fontsize)
+abs_limit = max(-abs(min_total_charge_delivered),
+                max_total_charge_delivered)
+
+norm = mpl.colors.Normalize(vmin=-abs_limit, vmax=abs_limit)
+divider = make_axes_locatable(ax_map)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap),
+                    cax=cax)
+cbar.set_label("$E_{adv,\u2B26} - E_{nw,\u2B26}$ in GWh", fontsize=fontsize)
+cbar.ax.tick_params(labelsize=fontsize)
 
 ax_map.margins(0)
 ax_map.set_xlim([map_dimensions["min_x"] ,map_dimensions["max_x"]])
 ax_map.set_ylim([map_dimensions["min_y"] ,map_dimensions["max_y"]])
 ax_map.axis('off')
 ax_map.text(145.8, -38.5, "a)", va="bottom", ha="right", fontsize=fontsize)
+
+# draw labels
+for i, l in enumerate(loc_min_max):
+    ax_map.plot([lbl_anc[0], lbl_anc[0] + lbl_bar_length, cntr_area[i][0]],
+                [lbl_anc[1] + lbl_anc_offset * i,
+                 lbl_anc[1] + lbl_anc_offset * i, cntr_area[i][1]],
+                color='black', linewidth=lbl_linewidth)
+    ax_map.text(lbl_anc[0] - lbl_anc_txt_marg, lbl_anc[1] + lbl_anc_offset * i,
+                loc_min_max_names[i] + "\n Code " + l,
+                va="center", ha="right", fontsize=fontsize)
+    
 
 ###############################################################################
 ###############################################################################

@@ -453,16 +453,20 @@ class CarAgent(Agent):
             if self.emergency_charging == 0.0:
                 # If car agent is at home
                 if cur_activity == self.cp.HOME and self.house_agent.is_house:
-                    # Determine if the agent should charge already or sill wait             
-                    charge_at_home_now = 0
-                    max_charge_rate \
-                        = self.house_agent.max_charge_rate(self.car_model)
-                    min_charge_time = self.charge_at_home / max_charge_rate *60
-                    min_charge_time = self.clock.time_step \
+                    # Determine if the agent should charge already or sill wait 
+                    charge_at_home_now = self.charge_at_home
+                    if self.charging_strategy.charging_model \
+                        == self.charging_strategy.ADVANCED_OVERHAULED_WITH_RISK:
+                        charge_at_home_now = 0
+                        max_charge_rate \
+                            = self.house_agent.max_charge_rate(self.car_model)
+                        min_charge_time \
+                            = self.charge_at_home / max_charge_rate * 60
+                        min_charge_time = self.clock.time_step \
                                 * (min_charge_time // self.clock.time_step + 1)
-                    if self.calendar.next_departure_time - min_charge_time\
-                        <= self.clock.elapsed_time:
-                            charge_at_home_now = self.charge_at_home
+                        if self.calendar.next_departure_time - min_charge_time\
+                            <= self.clock.elapsed_time:
+                                charge_at_home_now = self.charge_at_home
                     # in case agent can charge from pv and is allowed to always
                     # charge from pv, adapt charge_at_home_now instruction
                     if self.charging_strategy.always_charge_from_pv == True:
