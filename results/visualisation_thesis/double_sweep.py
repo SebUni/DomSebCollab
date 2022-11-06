@@ -5,12 +5,6 @@ Created on Wed Aug 11 14:00:30 2021
 @author: S3739258
 """
 
-import os
-import fiona
-
-from mpl_toolkits.mplot3d.axes3d import Axes3D
-from mpl_toolkits.mplot3d import proj3d
-
 import matplotlib.pyplot as plt
 import matplotlib.patches
 import matplotlib as mpl
@@ -18,14 +12,9 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 matplotlib.rc('font', **{'sans-serif' : 'Arial',
                          'family' : 'sans-serif'})
 
-import numpy as np
-from matplotlib import cm
 import matplotlib.gridspec as gridspec
-from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+from matplotlib.ticker import AutoMinorLocator
 
-from parameters import Parameters
-from output_data import OutputData
-from console_output import ConsoleOutput
 from cast import Cast
 from csv_helper import CSVHelper
 
@@ -48,8 +37,7 @@ PATH = "results"
 MY_DPI = 96
 mpl.rcParams['figure.dpi'] = 300
 
-NBR_LABELS = ["a)", "b)", "c)", "f)", "e)", "d)", "g)"]
-nbr_label_it = 0
+fig_lbl = iter(["a)", "b)", "c)", "f)", "e)", "d)", "g)"])
 
 file_m6_2d = "model_6_nbr_agents_2400_season_avg_avg_cost.csv"
 file_m4_m6_2d = "model_4-6_nbr_agents_2400_season_avg-avg_-_diff_avg_cost.csv"
@@ -65,16 +53,16 @@ file_m6_1d = "model_6_nbr_agents_6000_season_avg_sweep_data.csv"
 def read_data(relative_path, file_name):
     cast = Cast("difference_tool")
     csv_helper = CSVHelper(relative_path, file_name, skip_header=False)
-    firstRowRead = False
-    first_row, front_col, data = [], [], []
-    for row in csv_helper.data:
-        if not firstRowRead:
-            first_row = [cell for cell in row]
-            firstRowRead = True
-        else:
-            front_col.append(row[0])
-            data.append([cast.to_float(cell, "data_cell") for cell in row[1:]])
+    first_row = csv_helper.data[0]
+    front_col, data = [], []
+    for row in csv_helper.data[1:]:
+        front_col.append(row[0])
+        data.append([cast.to_float(cell, "data_cell") for cell in row[1:]])
     return first_row, front_col, data
+
+def lbl_abs_pos(axes: mpl.axes, rel_pos: tuple):
+    lim = (axes.get_xlim(), axes.get_ylim())
+    return (l[0] + (l[1] - l[0]) * r for l, r in zip(lim, rel_pos))
 
 ###############################################################################
 ###############################################################################
@@ -124,18 +112,12 @@ files_2d = [file_m4_a, file_m4_wo, file_m4_w,
 data_2d = dict()
 first_row_2d = dict()
 front_col_2d = dict()
-for i, name_2d in enumerate(names_2d):
+for name_2d, file_2d in zip(names_2d, files_2d):
     first_row_tmp, front_col_2d[name_2d], data_tmp \
-        = read_data(PATH, files_2d[i])
+        = read_data(PATH, file_2d)
     
     first_row_2d[name_2d] = first_row_tmp[rrb:rre]
-    
-    data_2d[name_2d] = []
-    for i, data_tmp_row in enumerate(data_tmp):
-        row = []
-        for j, data_tmp_val in enumerate(data_tmp_row[rrb:rre]):
-            row.append(data_tmp_val * 10**2)
-        data_2d[name_2d].append(row)
+    data_2d[name_2d] = [[c * 10**2 for c in r[rrb:rre]] for r in data_tmp]
     
 ###############################################################################
 ###############################################################################
@@ -152,18 +134,16 @@ data_1d = dict()
 data_1d_diff = dict()
 first_row_1d = dict()
 front_col_1d = dict()
-for it, name in enumerate(names_1d):
+for name, file in zip(names_1d, files_1d):
     first_row_1d[name], front_col_tmp, data_tmp \
-        = read_data(PATH, files_1d[it])
+        = read_data(PATH, file)
     front_col_1d[name] = front_col_tmp[rrb:rre]
     data_1d[name] = dict()
-    for it, first_row_cell in enumerate(first_row_1d[name]):
-        if it == 0:
-            data_1d[name]["x_value"] = [float(x) for x in front_col_1d[name]]
-        else:
-            data_1d[name][first_row_cell] = []
-            for data_row in data_tmp[rrb:rre]:
-                data_1d[name][first_row_cell].append(data_row[it-1]*100)
+    data_1d[name]["x_value"] = [float(x) for x in front_col_1d[name]]
+    for it, first_row_cell in enumerate(first_row_1d[name][:-1]):
+        data_1d[name][first_row_cell] = []
+        for data_row in data_tmp[rrb:rre]:
+            data_1d[name][first_row_cell].append(data_row[it]*100)
 
 ###############################################################################
 ###############################################################################
@@ -214,9 +194,10 @@ gsLeft = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gsMain[0],
                                           hspace=0,
                                           height_ratios=[30,30,40])
 
-gsRight = gridspec.GridSpecFromSubplotSpec(len(focus_rows)+1, 1, subplot_spec=gsMain[1],
-                                            wspace=1.5*cm, hspace=0,
-                                            height_ratios=[250,175,175,400])
+gsRight = gridspec.GridSpecFromSubplotSpec(len(focus_rows)+1, 1,
+                                           subplot_spec=gsMain[1],
+                                           wspace=1.5*cm, hspace=0,
+                                           height_ratios=[250,175,175,400])
 
 ax_adv = fig.add_subplot(gsLeft[0, 0])
 ax_bsc_adv = fig.add_subplot(gsLeft[1, 0])
@@ -262,44 +243,30 @@ vmax_m6_2d=max([max(row) for row in data_m6_2d])
 vmax_m4_m6_2d=max([max(row) for row in data_m4_m6_2d])
 norm_m6_2d = mpl.colors.Normalize(vmin=vmin_m6_2d, vmax=vmax_m6_2d)
 norm_m4_m6_2d = mpl.colors.Normalize(vmin=vmin_m4_m6_2d, vmax=vmax_m4_m6_2d)
-ax_adv.pcolormesh(x_ticks_m6_2d, y_ticks_m6_2d, data_m6_2d, cmap=cmap,
-              shading='gouraud', vmin=vmin_m6_2d, vmax=vmax_m6_2d)
-ax_adv.set_xlabel(x_label_m6_2d, fontsize=fontsize)
-ax_adv.set_ylabel(y_label_m4_m6_2d, fontsize=fontsize)
-ax_adv.minorticks_on()
-ax_adv.tick_params(labelsize=fontsize)
-ax_adv.xaxis.set_ticks_position('none')
-ax_adv.xaxis.set_minor_locator(AutoMinorLocator())
-ax_adv.set_xticklabels([])
 
-divider = make_axes_locatable(ax_adv)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_m6_2d,cmap=cmap),
-                    cax=cax)
-cbar.minorticks_on()
-cbar.ax.tick_params(labelsize=fontsize)
-cbar.set_label(z_label_m6_2d, fontsize=fontsize)
-ax_adv.text(.30, 4, NBR_LABELS[nbr_label_it], va="bottom", ha="right",
-            fontsize=fontsize)
-nbr_label_it += 1
-
-ax_bsc_adv.pcolormesh(x_ticks_m4_m6_2d, y_ticks_m4_m6_2d, data_m4_m6_2d, cmap=cmap,
-              shading='gouraud', vmin=vmin_m4_m6_2d, vmax=vmax_m4_m6_2d)
-ax_bsc_adv.set_xlabel(x_label_m4_m6_2d, fontsize=fontsize)
-ax_bsc_adv.set_ylabel(y_label_m4_m6_2d, fontsize=fontsize)
-ax_bsc_adv.minorticks_on()
-ax_bsc_adv.tick_params(labelsize=fontsize)
-ax_bsc_adv.text(.30, 4, NBR_LABELS[nbr_label_it], va="bottom", ha="right",
-                fontsize=fontsize, color='w')
-nbr_label_it += 1
-
-divider = make_axes_locatable(ax_bsc_adv)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm_m4_m6_2d,cmap=cmap),
-                    cax=cax)
-cbar.minorticks_on()
-cbar.ax.tick_params(labelsize=fontsize)
-cbar.set_label(z_label_m4_m6_2d, fontsize=fontsize)
+for ax, xticks, yticks, data, vmin, vmax, norm, ylabel, zlabel, c \
+    in zip((ax_adv, ax_bsc_adv), (x_ticks_m6_2d, x_ticks_m4_m6_2d),
+           (y_ticks_m6_2d, y_ticks_m4_m6_2d), (data_m6_2d, data_m4_m6_2d),
+           (vmin_m6_2d, vmin_m4_m6_2d), (vmax_m6_2d, vmax_m4_m6_2d),
+           (norm_m6_2d, norm_m4_m6_2d), (y_label_m4_m6_2d, y_label_m4_m6_2d),
+           (z_label_m6_2d, z_label_m4_m6_2d), ('k', 'w')):
+    ax.pcolormesh(xticks, yticks, data, cmap=cmap, shading='gouraud',
+                  vmin=vmin, vmax=vmax)
+    ax.set_ylabel(ylabel, fontsize=fontsize)
+    ax.minorticks_on()
+    ax.tick_params(labelsize=fontsize)
+    ax.xaxis.set_ticks_position('none')
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.set_xticklabels([])
+    ax.text(*lbl_abs_pos(ax, (0.9, 0.96)), next(fig_lbl), va="top", ha="left",
+            fontsize=fontsize, color=c)
+    
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap), cax=cax)
+    cbar.minorticks_on()
+    cbar.ax.tick_params(labelsize=fontsize)
+    cbar.set_label(zlabel, fontsize=fontsize)
 
 # Rel plot
 
@@ -307,17 +274,17 @@ clr_lns = ['k','r','b']
 
 ln_c_rel = dict()
 
-for i, focus_row in enumerate(focus_rows):
+for focus_row, clr_ln in zip(focus_rows, clr_lns):
     data_adv = data_m6_2d[focus_row]
     data_bsc_sub_adv = data_m4_m6_2d[focus_row]
-    data_bsc =[data_bsc_sub_adv[i] / 10 + data_adv[i] for i in range(len(data_adv))]
-    data_abs = [data_bsc[i] - data_adv[i] for i in range(len(data_adv))]
-    data_rel =[data_adv[i] * 10  / data_bsc[i] for i in range(len(data_adv))]
+    data_bsc = [dba / 10 + da for dba, da in zip(data_bsc_sub_adv, data_adv)]
+    data_abs = [db - da for db, da in zip(data_bsc, data_adv)]
+    data_rel = [da * 10 / db for db, da in zip(data_bsc, data_adv)]
     
     # Plot lines
     
-    ln_sld, = ax_rel.plot(x_ticks_m6_2d, data_rel, color=clr_lns[i])
-    ln_c_rel["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_rows[i]]] = ln_sld
+    ln_sld, = ax_rel.plot(x_ticks_m6_2d, data_rel, color=clr_ln)
+    ln_c_rel["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_sld
 
 # Style plot
 ax_rel.set_xlabel(x_label_m6_2d, fontsize=fontsize)
@@ -328,13 +295,10 @@ ax_rel.minorticks_on()
 ax_rel.grid(True)
 ax_rel.tick_params(labelsize=fontsize)
 ax_rel.set_yticks([9,10])
-leg0 = ax_rel.legend([],[], title=NBR_LABELS[nbr_label_it], loc="upper left",
-                     frameon=False, fontsize=fontsize_leg)   
-nbr_label_it += 1
-
 ax_rel.legend(ln_c_rel.values(), ln_c_rel.keys(),
               fontsize=fontsize, loc=1)
-ax_rel.add_artist(leg0)
+ax_rel.text(*lbl_abs_pos(ax_rel, (0.05, 0.97)), next(fig_lbl), va="top",
+            ha="left", fontsize=fontsize)
 # ax_fr.text(.3, .4, "c)", va="bottom", ha="right", fontsize=fontsize)
 
 ###############################################################################
@@ -354,7 +318,7 @@ ln_c_emp_dsh = dict()
 ln_c_emp_sld_k = ""
 ln_c_emp_dsh_k = ""
 
-for i, fr in enumerate(focus_rows):
+for fr in focus_rows:
     # Plot lines
     line1, = ax_c_dwl[fr].plot(data_1d["m4"]["x_value"],
                                data_2d["m6a"][fr], label="m6 apt",
@@ -381,50 +345,34 @@ for i, fr in enumerate(focus_rows):
     ax_c_dwl[fr].grid(True)
     ax_c_dwl[fr].tick_params(labelsize=fontsize)
     
-    leg0 = ax_c_dwl[fr].legend([],[], title=NBR_LABELS[nbr_label_it],
-                               loc="best", frameon=False,
-                               fontsize=fontsize_leg)    
-    nbr_label_it += 1
-    
-    if i == len(focus_rows)-1:
+    fig_lbl_pos = (0.05, 0.94)
+    if fr == focus_rows[-1]:
         ylim = ax_c_dwl[fr].get_ylim()
         ax_c_dwl[fr].set_ylim((ylim[0], ylim[1] + (ylim[1] - ylim[0]) * .6))
-        #leg1 = ax_c_dwl[fr].legend([line3, line3d], ["adv", "bsc"],
-        #                       fontsize=fontsize, loc="center left")
-        leg2 = ax_c_dwl[fr].legend([line1, line2, line3], 
-                                   ["Apartment","House without PV","House with PV"],
-                               fontsize=fontsize, loc=2)
-        #ax_c_dwl[fr].add_artist(leg1)
-    ax_c_dwl[fr].add_artist(leg0)
-# Bottom Plot
+        ax_c_dwl[fr].legend([line1, line2, line3], 
+                            ["Apartment","House without PV","House with PV"],
+                            fontsize=fontsize, loc=2)
+        fig_lbl_pos = (0.9, 0.94)
+    ax_c_dwl[fr].text(*lbl_abs_pos(ax_c_dwl[fr], fig_lbl_pos), next(fig_lbl),
+                      va="top", ha="left", fontsize=fontsize)
 
-for i, focus_row in enumerate(focus_rows):
+# Bottom Plot
+for focus_row, clr_ln in zip(focus_rows, clr_lns):
     data_adv = data_m6_2d[focus_row]
     data_bsc_sub_adv = data_m4_m6_2d[focus_row]
-    data_bsc =[data_bsc_sub_adv[i] / 10 + data_adv[i] for i in range(len(data_adv))]
-    data_abs = [data_bsc[i] - data_adv[i] for i in range(len(data_adv))]
-    data_rel =[data_adv[i] / data_bsc[i] for i in range(len(data_adv))]
+    data_bsc = [dba / 10 + da for dba, da in zip(data_bsc_sub_adv, data_adv)]
+    data_abs = [db - da for db, da in zip(data_bsc, data_adv)]
+    data_rel = [db / da for db, da in zip(data_bsc, data_adv)]
     
     # Plot lines
-    
-    """
-    ax_fr[i].plot(x_ticks_m6_2d, data_adv, color='k')
-    ax_fr[i].plot(x_ticks_m6_2d, data_bsc, color='k', linestyle='--')
-    ax_fr[i].set_xlabel(x_label_m6_2d, fontsize=fontsize)
-    ax_fr[i].set_ylabel(z_label_m6_2d_two_lines, fontsize=fontsize)
-    ax_fr[i].minorticks_on()
-    ax_fr[i].grid(True)
-    ax_fr[i].tick_params(labelsize=fontsize)
-    ax_fr[i].text(.32, 3.2, "c)", va="bottom", ha="right", fontsize=fontsize)
-    """
-    ln_sld, = ax_c_emp.plot(x_ticks_m6_2d, data_adv, color=clr_lns[i])
-    ln_c_emp_sld["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_rows[i]]] = ln_sld
+    ln_sld, = ax_c_emp.plot(x_ticks_m6_2d, data_adv, color=clr_ln)
+    ln_c_emp_sld["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_sld
         
-    ln_dsh, = ax_c_emp.plot(x_ticks_m6_2d, data_bsc, color=clr_lns[i],
+    ln_dsh, = ax_c_emp.plot(x_ticks_m6_2d, data_bsc, color=clr_ln,
                         linestyle='dotted')
-    ln_c_emp_dsh["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_rows[i]]] = ln_dsh
+    ln_c_emp_dsh["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_dsh
     
-    if clr_lns[i] == "k":
+    if clr_ln == "k":
         ln_c_emp_sld_k = ln_sld
         ln_c_emp_dsh_k = ln_dsh
         
@@ -438,18 +386,13 @@ ax_c_emp.minorticks_on()
 ax_c_emp.grid(True)
 ax_c_emp.tick_params(labelsize=fontsize)
 
-leg0 = ax_c_emp.legend([],[], title=NBR_LABELS[nbr_label_it],
-                       loc="upper right", frameon=False,
-                       fontsize=fontsize_leg)
-nbr_label_it += 1
-
-leg1 = ax_c_emp.legend([ln_c_emp_sld_k, ln_c_emp_dsh_k], ["adv", "bsc"],
+leg0 = ax_c_emp.legend([ln_c_emp_sld_k, ln_c_emp_dsh_k], ["adv", "bsc"],
                        fontsize=fontsize, loc=2)
-leg2 = ax_c_emp.legend(ln_c_emp_sld.values(), ln_c_emp_sld.keys(),
+leg1 = ax_c_emp.legend(ln_c_emp_sld.values(), ln_c_emp_sld.keys(),
                        fontsize=fontsize, loc=4)
-ax_c_emp.add_artist(leg1)
 ax_c_emp.add_artist(leg0)
-# ax_fr.text(.3, .4, "c)", va="bottom", ha="right", fontsize=fontsize)
+ax_c_emp.text(*lbl_abs_pos(ax_c_emp, (0.9, 0.97)), next(fig_lbl), va="top",
+              ha="left", fontsize=fontsize)
 
 plt.show
 

@@ -43,15 +43,11 @@ files = [file_m4, file_m6]
 def read_data(relative_path, file_name):
     cast = Cast("difference_tool")
     csv_helper = CSVHelper(relative_path, file_name, skip_header=False)
-    firstRowRead = False
-    first_row, front_col, data = [], [], []
-    for row in csv_helper.data:
-        if not firstRowRead:
-            first_row = [cell for cell in row]
-            firstRowRead = True
-        else:
-            front_col.append(cast.to_float(row[0], "x_value"))
-            data.append([cast.to_float(cell, "data_cell") for cell in row[1:]])
+    first_row = csv_helper.data[0]
+    front_col, data = [], []
+    for row in csv_helper.data[1:]:
+        front_col.append(cast.to_float(row[0], "x_value"))
+        data.append([cast.to_float(cell, "data_cell") for cell in row[1:]])
     return first_row, front_col, data
 
 data = dict()
