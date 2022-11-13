@@ -33,10 +33,10 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 12000
+nbr_of_agents = 2400
 # run A
 season_a = "avg"
-model_a = 10
+model_a = 9
 addendum_a = ""
 
 # run B
