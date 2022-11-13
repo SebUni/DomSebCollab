@@ -39,16 +39,16 @@ mpl.rcParams['figure.dpi'] = 300
 
 fig_lbl = iter(["a)", "b)", "c)", "f)", "e)", "d)", "g)"])
 
-file_m6_2d = "model_6_nbr_agents_2400_season_avg_avg_cost.csv"
-file_m4_m6_2d = "model_4-6_nbr_agents_2400_season_avg-avg_-_diff_avg_cost.csv"
-file_m4_a = "model_4_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
-file_m4_wo = "model_4_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
-file_m4_w = "model_4_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
-file_m6_a = "model_6_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
-file_m6_wo = "model_6_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
-file_m6_w = "model_6_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
-file_m4_1d = "model_4_nbr_agents_6000_season_avg_sweep_data.csv"
-file_m6_1d = "model_6_nbr_agents_6000_season_avg_sweep_data.csv"
+file_m6_2d = "model_8_nbr_agents_2400_season_avg_avg_cost.csv"
+file_m4_m6_2d = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost.csv"
+file_m4_a = "model_9_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
+file_m4_wo = "model_9_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
+file_m4_w = "model_9_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
+file_m6_a = "model_8_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
+file_m6_wo = "model_8_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
+file_m6_w = "model_8_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
+file_m4_1d = "model_9_nbr_agents_6000_season_avg_sweep_data.csv"
+file_m6_1d = "model_8_nbr_agents_6000_season_avg_sweep_data.csv"
             
 def read_data(relative_path, file_name):
     cast = Cast("difference_tool")
@@ -74,10 +74,6 @@ def lbl_abs_pos(axes: mpl.axes, rel_pos: tuple):
 
 cast = Cast("Analysis")
 
-# remove rows from begin
-rrb = 0
-# remove rows from end
-rre = -1
 # focused rows
 focus_rows = [0,5,-1]
 
@@ -86,19 +82,19 @@ first_row_m6_2d_org,  front_col_m6_2d,  data_m6_2d_org \
 first_row_m4_m6_2d_org, front_col_m4_m6_2d, data_m4_m6_2d_org \
     = read_data(PATH, file_m4_m6_2d)
 
-first_row_m6_2d = first_row_m6_2d_org[rrb:rre]
-first_row_m4_m6_2d = first_row_m4_m6_2d_org[rrb:rre]
+first_row_m6_2d = first_row_m6_2d_org
+first_row_m4_m6_2d = first_row_m4_m6_2d_org
 
 data_m6_2d = []
 for i, data_m6_2d_org_row in enumerate(data_m6_2d_org):
     row = []
-    for j, data_m6_2d_org_val in enumerate(data_m6_2d_org_row[rrb:rre]):
+    for j, data_m6_2d_org_val in enumerate(data_m6_2d_org_row):
         row.append(data_m6_2d_org_val * 10**2)
     data_m6_2d.append(row)
 data_m4_m6_2d = []
 for i, data_m4_m6_2d_org_row in enumerate(data_m4_m6_2d_org):
     row = []
-    for j, data_m4_m6_2d_org_val in enumerate(data_m4_m6_2d_org_row[rrb:rre]):
+    for j, data_m4_m6_2d_org_val in enumerate(data_m4_m6_2d_org_row):
         a = data_m6_2d_org[i][j]
         c = data_m4_m6_2d_org_val
         row.append(data_m4_m6_2d_org_val * 10**3)
@@ -116,8 +112,8 @@ for name_2d, file_2d in zip(names_2d, files_2d):
     first_row_tmp, front_col_2d[name_2d], data_tmp \
         = read_data(PATH, file_2d)
     
-    first_row_2d[name_2d] = first_row_tmp[rrb:rre]
-    data_2d[name_2d] = [[c * 10**2 for c in r[rrb:rre]] for r in data_tmp]
+    first_row_2d[name_2d] = first_row_tmp
+    data_2d[name_2d] = [[c * 10**2 for c in r] for r in data_tmp]
     
 ###############################################################################
 ###############################################################################
@@ -137,12 +133,12 @@ front_col_1d = dict()
 for name, file in zip(names_1d, files_1d):
     first_row_1d[name], front_col_tmp, data_tmp \
         = read_data(PATH, file)
-    front_col_1d[name] = front_col_tmp[rrb:rre]
+    front_col_1d[name] = front_col_tmp
     data_1d[name] = dict()
     data_1d[name]["x_value"] = [float(x) for x in front_col_1d[name]]
     for it, first_row_cell in enumerate(first_row_1d[name][:-1]):
         data_1d[name][first_row_cell] = []
-        for data_row in data_tmp[rrb:rre]:
+        for data_row in data_tmp:
             data_1d[name][first_row_cell].append(data_row[it]*100)
 
 ###############################################################################
@@ -159,7 +155,7 @@ x_label_m4_m6_2d = "$p^w$ in \$/kWh"
 y_label_m6_2d = "$|I_j| / u_j$ in 1"
 y_label_m4_m6_2d = "$|I_j| / u_j$ in 1"
 y_label_m4_m6_1d = "$C_{\u2020,\u2217}$ in $10^{-2}$ \$/km"
-y_label_rel = "$C_{adv}/C_{bsc}$ in 10%"
+y_label_rel = "$C_{adv}/C_{bsc}$ in %"
 z_label_m6_2d = "$C_{adv}$ in $10^{-2}$ \$/km"
 z_label_m6_2d_two_lines = "$C_{\dagger}$ in $10^{-2}$ \$/km"
 z_label_m4_m6_2d = "$C_{bsc} - C_{adv}$ in $10^{-3}$ \$/km"
@@ -279,7 +275,7 @@ for focus_row, clr_ln in zip(focus_rows, clr_lns):
     data_bsc_sub_adv = data_m4_m6_2d[focus_row]
     data_bsc = [dba / 10 + da for dba, da in zip(data_bsc_sub_adv, data_adv)]
     data_abs = [db - da for db, da in zip(data_bsc, data_adv)]
-    data_rel = [da * 10 / db for db, da in zip(data_bsc, data_adv)]
+    data_rel = [da * 100 / db for db, da in zip(data_bsc, data_adv)]
     
     # Plot lines
     
@@ -290,11 +286,10 @@ for focus_row, clr_ln in zip(focus_rows, clr_lns):
 ax_rel.set_xlabel(x_label_m6_2d, fontsize=fontsize)
 ax_rel.set_ylabel(y_label_rel, fontsize=fontsize)
 ylim = ax_rel.get_ylim()
-ax_rel.set_ylim((ylim[0], ylim[1] + (ylim[1] - ylim[0]) * .2))
+ax_rel.set_ylim((ylim[0], ylim[1] + (ylim[1] - ylim[0]) * .1))
 ax_rel.minorticks_on()
 ax_rel.grid(True)
 ax_rel.tick_params(labelsize=fontsize)
-ax_rel.set_yticks([9,10])
 ax_rel.legend(ln_c_rel.values(), ln_c_rel.keys(),
               fontsize=fontsize, loc=1)
 ax_rel.text(*lbl_abs_pos(ax_rel, (0.05, 0.97)), next(fig_lbl), va="top",
