@@ -37,10 +37,16 @@ PATH = "results"
 MY_DPI = 96
 mpl.rcParams['figure.dpi'] = 300
 
-fig_lbl = iter(["a)", "b)", "c)", "f)", "e)", "d)", "g)"])
+fig_lbl = iter(["a)", "b)", "c)", "d)", "e)", "h)", "g)", "f)", "i)"])
 
 file_m6_2d = "model_8_nbr_agents_2400_season_avg_avg_cost.csv"
 file_m4_m6_2d = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost.csv"
+file_m4_m6_2d_apt \
+    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_apartment.csv"
+file_m4_m6_2d_hNPV \
+    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_house_no_pv.csv"
+file_m4_m6_2d_hPV \
+    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_house_PV.csv"
 file_m4_a = "model_9_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
 file_m4_wo = "model_9_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
 file_m4_w = "model_9_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
@@ -77,43 +83,26 @@ cast = Cast("Analysis")
 # focused rows
 focus_rows = [0,5,-1]
 
-first_row_m6_2d_org,  front_col_m6_2d,  data_m6_2d_org \
-    = read_data(PATH, file_m6_2d)
-first_row_m4_m6_2d_org, front_col_m4_m6_2d, data_m4_m6_2d_org \
-    = read_data(PATH, file_m4_m6_2d)
+file_m4_m6_2d_apt, file_m4_m6_2d_hNPV, file_m4_m6_2d_hPV
 
-first_row_m6_2d = first_row_m6_2d_org
-first_row_m4_m6_2d = first_row_m4_m6_2d_org
+names_2d = ["m6", "m4-6", "m4-6a", "m4-6wo", "m4-6w", "m4a", "m4wo", "m4w", 
+            "m6a", "m6wo", "m6w"]
+files_2d = [file_m6_2d, file_m4_m6_2d, file_m4_m6_2d_apt, file_m4_m6_2d_hNPV,
+            file_m4_m6_2d_hPV, file_m4_a, file_m4_wo, file_m4_w, file_m6_a,
+            file_m6_wo, file_m6_w]
+scales = [10**2, 10**3] + [10**3, 10**3, 10**2] + [10**2]*6
 
-data_m6_2d = []
-for i, data_m6_2d_org_row in enumerate(data_m6_2d_org):
-    row = []
-    for j, data_m6_2d_org_val in enumerate(data_m6_2d_org_row):
-        row.append(data_m6_2d_org_val * 10**2)
-    data_m6_2d.append(row)
-data_m4_m6_2d = []
-for i, data_m4_m6_2d_org_row in enumerate(data_m4_m6_2d_org):
-    row = []
-    for j, data_m4_m6_2d_org_val in enumerate(data_m4_m6_2d_org_row):
-        a = data_m6_2d_org[i][j]
-        c = data_m4_m6_2d_org_val
-        row.append(data_m4_m6_2d_org_val * 10**3)
-        #row.append(a / (c+a))
-    data_m4_m6_2d.append(row)
-    
-names_2d = ["m4a","m4wo","m4w","m6a","m6wo","m6w"]
-files_2d = [file_m4_a, file_m4_wo, file_m4_w,
-            file_m6_a, file_m6_wo, file_m6_w]
+plots_2d = ["m6", "m4-6", "m4-6a", "m4-6wo", "m4-6w"]
 
 data_2d = dict()
 first_row_2d = dict()
 front_col_2d = dict()
-for name_2d, file_2d in zip(names_2d, files_2d):
+for name_2d, file_2d, scale in zip(names_2d, files_2d, scales):
     first_row_tmp, front_col_2d[name_2d], data_tmp \
         = read_data(PATH, file_2d)
     
     first_row_2d[name_2d] = first_row_tmp
-    data_2d[name_2d] = [[c * 10**2 for c in r] for r in data_tmp]
+    data_2d[name_2d] = [[c * scale for c in r] for r in data_tmp]
     
 ###############################################################################
 ###############################################################################
@@ -150,24 +139,25 @@ for name, file in zip(names_1d, files_1d):
 ###############################################################################
 
 cmap = mpl.cm.viridis
-x_label_m6_2d = "$p^w$ in \$/kWh"
-x_label_m4_m6_2d = "$p^w$ in \$/kWh"
-y_label_m6_2d = "$|I_j| / u_j$ in 1"
-y_label_m4_m6_2d = "$|I_j| / u_j$ in 1"
-y_label_m4_m6_1d = "$C_{\u2020,\u2217}$ in $10^{-2}$ \$/km"
-y_label_rel = "$C_{adv}/C_{bsc}$ in %"
-z_label_m6_2d = "$C_{adv}$ in $10^{-2}$ \$/km"
-z_label_m6_2d_two_lines = "$C_{\dagger}$ in $10^{-2}$ \$/km"
-z_label_m4_m6_2d = "$C_{bsc} - C_{adv}$ in $10^{-3}$ \$/km"
+x_label = "$p^w$ in \$/kWh"
+y_label = {"m6": "$|I_j| / u_j$ in 1",
+           "m4+6": "$C_{\u2020,\u2217}$ in $10^{-2}$ \$/km",
+           "m4+6_avg": "$C_{\dagger}$ in $10^{-2}$ \$/km"}
+z_label = {"m6": "$C_{adv}$ in $10^{-2}$ \$/km",
+           "m4-6": "$C_{bsc} - C_{adv}$ in $10^{-3}$ \$/km",
+           "m4-6a": "$C_{bsc,apt} - C_{adv,apt}$ \n in $10^{-3}$ \$/km",
+           "m4-6wo": "$C_{bsc,h} - C_{adv,h}$ \n in $10^{-3}$ \$/km",
+           "m4-6w": "$C_{bsc,hPV} - C_{adv,hPV}$ \n in $10^{-3}$ \$/km"}
+z_ticks = {"m6": None,
+           "m4-6": None,
+           "m4-6a": [0,3,6],
+           "m4-6wo": None,
+           "m4-6w": None}
 
-x_ticks_m6_2d = [cast.to_float(i, "first_row_cell")\
-                for i in first_row_m6_2d[1:]]
-x_ticks_m4_m6_2d = [cast.to_float(i, "first_row_cell")\
-                 for i in first_row_m4_m6_2d[1:]]
-y_ticks_m6_2d = [cast.to_int(i, "front_col_cell") \
-                for i in front_col_m6_2d]
-y_ticks_m4_m6_2d = [cast.to_int(i, "front_col_cell") \
-                 for i in front_col_m4_m6_2d]
+x_ticks_2d = [cast.to_float(i, "first_row_cell")\
+                for i in first_row_2d["m6"][1:]]
+y_ticks_2d = [cast.to_int(i, "front_col_cell") \
+                for i in front_col_2d["m6"]]
 
 linewidth = 1
 cm = 1/2.54
@@ -183,21 +173,24 @@ hs = .1
 
 fig = plt.figure(figsize=(14.5*cm, 20*cm))
 
-gsMain = gridspec.GridSpec(1, 2, figure=fig, wspace=1.3*cm,
-                        width_ratios=[.5,.5,])
+gsMain = gridspec.GridSpec(1, 2, figure=fig, wspace=1.6*cm,
+                        width_ratios=[.52,.48,])
 
-gsLeft = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gsMain[0],
+gsLeft = gridspec.GridSpecFromSubplotSpec(5, 1, subplot_spec=gsMain[0],
                                           hspace=0,
-                                          height_ratios=[30,30,40])
+                                          height_ratios=[25,25,16.7,16.7,16.6])
 
 gsRight = gridspec.GridSpecFromSubplotSpec(len(focus_rows)+1, 1,
                                            subplot_spec=gsMain[1],
                                            wspace=1.5*cm, hspace=0,
                                            height_ratios=[250,175,175,400])
 
-ax_adv = fig.add_subplot(gsLeft[0, 0])
-ax_bsc_adv = fig.add_subplot(gsLeft[1, 0])
-ax_rel = fig.add_subplot(gsLeft[2, 0])
+ax_l = {"m6": fig.add_subplot(gsLeft[0, 0]),
+        "m4-6": fig.add_subplot(gsLeft[1, 0]),
+        "m4-6a": fig.add_subplot(gsLeft[2, 0]),
+        "m4-6wo": fig.add_subplot(gsLeft[3, 0]),
+        "m4-6w": fig.add_subplot(gsLeft[4, 0])}
+# ax_rel = fig.add_subplot(gsLeft[2, 0])
 
 """
 gsRight = gridspec.GridSpecFromSubplotSpec(len(focus_rows), 1,
@@ -233,46 +226,51 @@ ax_c_emp = fig.add_subplot(gsRight[1, 0], sharex=ax_c_src)
 
 # Surface plots
 
-vmin_m6_2d=min([min(row) for row in data_m6_2d])
-vmin_m4_m6_2d=min([min(row) for row in data_m4_m6_2d])
-vmax_m6_2d=max([max(row) for row in data_m6_2d])
-vmax_m4_m6_2d=max([max(row) for row in data_m4_m6_2d])
-norm_m6_2d = mpl.colors.Normalize(vmin=vmin_m6_2d, vmax=vmax_m6_2d)
-norm_m4_m6_2d = mpl.colors.Normalize(vmin=vmin_m4_m6_2d, vmax=vmax_m4_m6_2d)
+vmin = dict([(key, min([min(row) for row in data_2d[key]]))
+             for key in plots_2d])
+vmax = dict([(key, max([max(row) for row in data_2d[key]]))
+             for key in plots_2d])
+norm = dict([(key, mpl.colors.Normalize(vmin=vmin[key], vmax=vmax[key]))
+             for key in plots_2d])
 
-for ax, xticks, yticks, data, vmin, vmax, norm, ylabel, zlabel, c \
-    in zip((ax_adv, ax_bsc_adv), (x_ticks_m6_2d, x_ticks_m4_m6_2d),
-           (y_ticks_m6_2d, y_ticks_m4_m6_2d), (data_m6_2d, data_m4_m6_2d),
-           (vmin_m6_2d, vmin_m4_m6_2d), (vmax_m6_2d, vmax_m4_m6_2d),
-           (norm_m6_2d, norm_m4_m6_2d), (y_label_m4_m6_2d, y_label_m4_m6_2d),
-           (z_label_m6_2d, z_label_m4_m6_2d), ('k', 'w')):
-    ax.pcolormesh(xticks, yticks, data, cmap=cmap, shading='gouraud',
-                  vmin=vmin, vmax=vmax)
-    ax.set_ylabel(ylabel, fontsize=fontsize)
-    ax.minorticks_on()
-    ax.tick_params(labelsize=fontsize)
-    ax.xaxis.set_ticks_position('none')
-    ax.xaxis.set_minor_locator(AutoMinorLocator())
-    ax.set_xticklabels([])
-    ax.text(*lbl_abs_pos(ax, (0.9, 0.96)), next(fig_lbl), va="top", ha="left",
-            fontsize=fontsize, color=c)
+lbl_clr = {"m6": 'k',
+           "m4-6": 'w',
+           "m4-6a": 'w',
+           "m4-6wo": 'w',
+           "m4-6w": 'k'}
+
+for k in plots_2d:
+    ax_l[k].pcolormesh(x_ticks_2d, y_ticks_2d, data_2d[k], cmap=cmap,
+                       shading='gouraud', vmin=vmin[k], vmax=vmax[k])
+    ax_l[k].set_ylabel(y_label["m6"], fontsize=fontsize)
+    ax_l[k].minorticks_on()
+    ax_l[k].tick_params(labelsize=fontsize)
+    ax_l[k].xaxis.set_minor_locator(AutoMinorLocator())
+    if plots_2d[-1] != k:
+        ax_l[k].xaxis.set_ticks_position('none')
+        ax_l[k].set_xticklabels([])
+    ax_l[k].text(*lbl_abs_pos(ax_l[k], (0.9, 0.96)), next(fig_lbl), va="top",
+                 ha="left", fontsize=fontsize, color=lbl_clr[k])
     
-    divider = make_axes_locatable(ax)
+    divider = make_axes_locatable(ax_l[k])
     cax = divider.append_axes("right", size="5%", pad=0.05)
-    cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm,cmap=cmap), cax=cax)
+    cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm[k],cmap=cmap), cax=cax)
+    if z_ticks[k] is not None:
+        cbar.set_ticks(z_ticks[k])
     cbar.minorticks_on()
     cbar.ax.tick_params(labelsize=fontsize)
-    cbar.set_label(zlabel, fontsize=fontsize)
+    cbar.set_label(z_label[k], fontsize=fontsize)
 
 # Rel plot
 
+"""
 clr_lns = ['k','r','b']
 
 ln_c_rel = dict()
 
 for focus_row, clr_ln in zip(focus_rows, clr_lns):
-    data_adv = data_m6_2d[focus_row]
-    data_bsc_sub_adv = data_m4_m6_2d[focus_row]
+    data_adv = data_2d["m6"][focus_row]
+    data_bsc_sub_adv = data_2d["m4-6"][focus_row]
     data_bsc = [dba / 10 + da for dba, da in zip(data_bsc_sub_adv, data_adv)]
     data_abs = [db - da for db, da in zip(data_bsc, data_adv)]
     data_rel = [da * 100 / db for db, da in zip(data_bsc, data_adv)]
@@ -280,11 +278,10 @@ for focus_row, clr_ln in zip(focus_rows, clr_lns):
     # Plot lines
     
     ln_sld, = ax_rel.plot(x_ticks_m6_2d, data_rel, color=clr_ln)
-    ln_c_rel["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_sld
+    ln_c_rel["|$I_j$|/$u_j$ = " + front_col_2d["m6"][focus_row]] = ln_sld
 
 # Style plot
 ax_rel.set_xlabel(x_label_m6_2d, fontsize=fontsize)
-ax_rel.set_ylabel(y_label_rel, fontsize=fontsize)
 ylim = ax_rel.get_ylim()
 ax_rel.set_ylim((ylim[0], ylim[1] + (ylim[1] - ylim[0]) * .1))
 ax_rel.minorticks_on()
@@ -295,6 +292,9 @@ ax_rel.legend(ln_c_rel.values(), ln_c_rel.keys(),
 ax_rel.text(*lbl_abs_pos(ax_rel, (0.05, 0.97)), next(fig_lbl), va="top",
             ha="left", fontsize=fontsize)
 # ax_fr.text(.3, .4, "c)", va="bottom", ha="right", fontsize=fontsize)
+"""
+
+ax_l[plots_2d[-1]].set_xlabel(x_label, fontsize=fontsize)
 
 ###############################################################################
 ###############################################################################
@@ -335,7 +335,7 @@ for fr in focus_rows:
     ax_c_dwl[fr].xaxis.set_ticks_position('none')
     ax_c_dwl[fr].xaxis.set_minor_locator(AutoMinorLocator())
     ax_c_dwl[fr].set_xticklabels([])
-    ax_c_dwl[fr].set_ylabel(y_label_m4_m6_1d, fontsize=fontsize)
+    ax_c_dwl[fr].set_ylabel(y_label["m4+6"], fontsize=fontsize)
     ax_c_dwl[fr].yaxis.set_minor_locator(AutoMinorLocator())
     ax_c_dwl[fr].grid(True)
     ax_c_dwl[fr].tick_params(labelsize=fontsize)
@@ -353,19 +353,19 @@ for fr in focus_rows:
 
 # Bottom Plot
 for focus_row, clr_ln in zip(focus_rows, clr_lns):
-    data_adv = data_m6_2d[focus_row]
-    data_bsc_sub_adv = data_m4_m6_2d[focus_row]
+    data_adv = data_2d["m6"][focus_row]
+    data_bsc_sub_adv = data_2d["m4-6"][focus_row]
     data_bsc = [dba / 10 + da for dba, da in zip(data_bsc_sub_adv, data_adv)]
     data_abs = [db - da for db, da in zip(data_bsc, data_adv)]
     data_rel = [db / da for db, da in zip(data_bsc, data_adv)]
     
     # Plot lines
-    ln_sld, = ax_c_emp.plot(x_ticks_m6_2d, data_adv, color=clr_ln)
-    ln_c_emp_sld["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_sld
+    ln_sld, = ax_c_emp.plot(x_ticks_2d, data_adv, color=clr_ln)
+    ln_c_emp_sld["|$I_j$|/$u_j$ = " + front_col_2d["m6"][focus_row]] = ln_sld
         
-    ln_dsh, = ax_c_emp.plot(x_ticks_m6_2d, data_bsc, color=clr_ln,
+    ln_dsh, = ax_c_emp.plot(x_ticks_2d, data_bsc, color=clr_ln,
                         linestyle='dotted')
-    ln_c_emp_dsh["|$I_j$|/$u_j$ = " + front_col_m6_2d[focus_row]] = ln_dsh
+    ln_c_emp_dsh["|$I_j$|/$u_j$ = " + front_col_2d["m6"][focus_row]] = ln_dsh
     
     if clr_ln == "k":
         ln_c_emp_sld_k = ln_sld
@@ -375,8 +375,8 @@ for focus_row, clr_ln in zip(focus_rows, clr_lns):
     #ax_fr.plot(x_ticks_m6_2d, data_bsc_sub_adv, color=clr_lns[i])
 
 # Style plot
-ax_c_emp.set_xlabel(x_label_m6_2d, fontsize=fontsize)
-ax_c_emp.set_ylabel(z_label_m6_2d_two_lines, fontsize=fontsize)
+ax_c_emp.set_xlabel(x_label, fontsize=fontsize)
+ax_c_emp.set_ylabel(y_label["m4+6_avg"], fontsize=fontsize)
 ax_c_emp.minorticks_on()
 ax_c_emp.grid(True)
 ax_c_emp.tick_params(labelsize=fontsize)
