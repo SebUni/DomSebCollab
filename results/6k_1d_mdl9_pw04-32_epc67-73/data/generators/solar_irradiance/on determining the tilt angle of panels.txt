@@ -1,0 +1,8 @@
+Use equation from: [1] M. Z. Jacobson and V. Jadhav, “World estimates of PV optimal tilt angles and ratios of sunlight incident upon tilted and tracked PV panels relative to horizontal panels,” Solar Energy, vol. 169, pp. 55–66, Jul. 2018, doi: 10.1016/j.solener.2018.04.030.
+
+
+For Southern Hemisphere:
+tilt_angle = -0.41657+lat*(1.4216+lat*(0.024051+lat*0.00021828))
+
+City of Melbourne Latitude = -38.6330
+
