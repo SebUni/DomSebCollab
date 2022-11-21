@@ -1,0 +1,29 @@
+Australian Bureau of Statistics
+
+"2016 Census - Selected Dwelling Characteristics"
+"SA4 by STRD Dwelling Structure"
+"Counting: Dwellings Location on Census Night"
+
+Filters:
+"Default Summation","Dwellings Location on Census Night"
+
+"STRD Dwelling Structure","Semi-detached, row or terrace house, townhouse etc. with two or more storeys","Semi-detached, row or terrace house, townhouse etc. with one storey","Separate house","Total",
+"SA4",
+"206",33456,33635,61221,128319,
+"207",12999,18679,89768,121449,
+"208",17009,26032,91769,134816,
+"209",11060,18095,149207,178362,
+"210",9860,11503,106910,128277,
+"211",5411,15565,168872,189848,
+"212",10764,23678,219102,253547,
+"213",17993,25991,204296,248278,
+"214",4362,13662,120581,138606,
+"Total",122918,186842,1211733,1521490,
+
+"Data Source: Census of Population and Housing, 2016, TableBuilder"
+
+"INFO","Cells in this table have been randomly adjusted to avoid the release of confidential data. No reliance should be placed on small cells."
+
+
+"Copyright Commonwealth of Australia, 2018, see abs.gov.au/copyright"
+"ABS data licensed under Creative Commons, see abs.gov.au/ccby"

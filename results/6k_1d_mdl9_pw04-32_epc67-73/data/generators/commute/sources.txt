@@ -1,0 +1,5 @@
+Retrieved from ABS' tablebuilder
+
+Where from and where to do aussies commute:
+https://www.abs.gov.au/websitedbs/censushome.nsf/home/tablebuilder
+Login -> 2016 Census of Population and Housing -> Census TableBuilder Basic -> 2016 Census - Employment, Income and Education (double click) -> Geographical Areas (Usual residency) -> Main Statistical Area Strucutre (Main ASGS) (UR) -> Victroia -> Select SA 3 regions wanted -> click Add to: Column -> Geographical Areas (Place of Work) -> Main Statistical Area Strucutre (Main ASGS) (UR) -> Victroia -> Select SA 3 regions wanted -> click Add to: Row -> Retreive Data -> Enjoy 

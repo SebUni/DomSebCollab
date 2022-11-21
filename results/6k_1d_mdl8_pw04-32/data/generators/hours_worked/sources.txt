@@ -1,7 +1,0 @@
-How many hours did aussies work per week:
-https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia-detailed/latest-release
--> Table 9 (6291009.xls here called raw_number_of_hours_worked.xls)
-
-When were these hours worked:
-https://www.abs.gov.au/statistics/people/people-and-communities/how-australians-use-their-time/latest-release
--> Estimates tables (41530DO001_2006.xlsx here called raw_how_australians_use_their_time.xlsx)

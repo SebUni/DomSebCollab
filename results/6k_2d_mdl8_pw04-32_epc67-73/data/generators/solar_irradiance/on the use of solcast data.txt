@@ -1,5 +1,0 @@
-    To only use our data for non-commercial research or student use, and only in connection with a public research institution
-    To not share our data with any third parties without our explicit written permission
-    To not publish or submit for publication any study that could be reasonably be expected to harm our reputation
-    To send Solcast pre-prints of any presentations, theses, publications, reports or other materials at least one week prior to publication or other public or private dissemination
-    To correctly cite the use of our data in any presentations, theses, publications, reports or other materials using the following information "Solcast, 2019. Global solar irradiance data and PV system power output data. URL https://solcast.com/"
