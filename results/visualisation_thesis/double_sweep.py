@@ -39,20 +39,20 @@ mpl.rcParams['figure.dpi'] = 300
 
 fig_lbl = iter(["a)", "b)", "c)", "d)", "e)", "h)", "g)", "f)", "i)"])
 
-file_m6_2d = "model_8_nbr_agents_2400_season_avg_avg_cost.csv"
-file_m4_m6_2d = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost.csv"
+file_m6_2d = "model_8_nbr_agents_6k_season_avg_avg_cost.csv"
+file_m4_m6_2d = "model_9-8_nbr_agents_6k_season_avg-avg_-_diff_avg_cost.csv"
 file_m4_m6_2d_apt \
-    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_apartment.csv"
+    = "model_9-8_nbr_agents_6k_season_avg-avg_-_diff_avg_cost_apartment.csv"
 file_m4_m6_2d_hNPV \
-    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_house_no_pv.csv"
+    = "model_9-8_nbr_agents_6k_season_avg-avg_-_diff_avg_cost_house_no_pv.csv"
 file_m4_m6_2d_hPV \
-    = "model_9-8_nbr_agents_2400_season_avg-avg_-_diff_avg_cost_house_PV.csv"
-file_m4_a = "model_9_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
-file_m4_wo = "model_9_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
-file_m4_w = "model_9_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
-file_m6_a = "model_8_nbr_agents_2400_season_avg_avg_cost_apartment.csv"
-file_m6_wo = "model_8_nbr_agents_2400_season_avg_avg_cost_house_no_pv.csv"
-file_m6_w = "model_8_nbr_agents_2400_season_avg_avg_cost_house_pv.csv"
+    = "model_9-8_nbr_agents_6k_season_avg-avg_-_diff_avg_cost_house_PV.csv"
+file_m4_a = "model_9_nbr_agents_6k_season_avg_avg_cost_apartment.csv"
+file_m4_wo = "model_9_nbr_agents_6k_season_avg_avg_cost_house_no_pv.csv"
+file_m4_w = "model_9_nbr_agents_6k_season_avg_avg_cost_house_pv.csv"
+file_m6_a = "model_8_nbr_agents_6k_season_avg_avg_cost_apartment.csv"
+file_m6_wo = "model_8_nbr_agents_6k_season_avg_avg_cost_house_no_pv.csv"
+file_m6_w = "model_8_nbr_agents_6k_season_avg_avg_cost_house_pv.csv"
 file_m4_1d = "model_9_nbr_agents_6000_season_avg_sweep_data.csv"
 file_m6_1d = "model_8_nbr_agents_6000_season_avg_sweep_data.csv"
             
@@ -81,7 +81,7 @@ def lbl_abs_pos(axes: mpl.axes, rel_pos: tuple):
 cast = Cast("Analysis")
 
 # focused rows
-focus_rows = [0,5,-1]
+focus_rows = [0,6,-1]
 
 file_m4_m6_2d_apt, file_m4_m6_2d_hNPV, file_m4_m6_2d_hPV
 
@@ -140,7 +140,7 @@ for name, file in zip(names_1d, files_1d):
 
 cmap = mpl.cm.viridis
 x_label = "$p^w$ in \$/kWh"
-y_label = {"m6": "$|I_j| / u_j$ in 1",
+y_label = {"m6": "$|I_j| / u_j$ in 10",
            "m4+6": "$C_{\u2020,\u2217}$ in $10^{-2}$ \$/km",
            "m4+6_avg": "$C_{\dagger}$ in $10^{-2}$ \$/km"}
 z_label = {"m6": "$C_{adv}$ in $10^{-2}$ \$/km",
@@ -156,7 +156,7 @@ z_ticks = {"m6": None,
 
 x_ticks_2d = [cast.to_float(i, "first_row_cell")\
                 for i in first_row_2d["m6"][1:]]
-y_ticks_2d = [cast.to_int(i, "front_col_cell") \
+y_ticks_2d = [cast.to_int(i, "front_col_cell") / 10 \
                 for i in front_col_2d["m6"]]
 
 linewidth = 1
@@ -171,10 +171,10 @@ cl = .5
 #horizontal space
 hs = .1
 
-fig = plt.figure(figsize=(14.5*cm, 20*cm))
+fig = plt.figure(figsize=(15.5*cm, 20*cm))
 
 gsMain = gridspec.GridSpec(1, 2, figure=fig, wspace=1.6*cm,
-                        width_ratios=[.52,.48,])
+                        width_ratios=[.48,.52,])
 
 gsLeft = gridspec.GridSpecFromSubplotSpec(5, 1, subplot_spec=gsMain[0],
                                           hspace=0,
@@ -345,7 +345,8 @@ for fr in focus_rows:
         ylim = ax_c_dwl[fr].get_ylim()
         ax_c_dwl[fr].set_ylim((ylim[0], ylim[1] + (ylim[1] - ylim[0]) * .6))
         ax_c_dwl[fr].legend([line1, line2, line3], 
-                            ["Apartment","House without PV","House with PV"],
+                            ["Apartment (apt)","House without PV (h)",
+                             "House with PV (hPV)"],
                             fontsize=fontsize, loc=2)
         fig_lbl_pos = (0.9, 0.94)
     ax_c_dwl[fr].text(*lbl_abs_pos(ax_c_dwl[fr], fig_lbl_pos), next(fig_lbl),
