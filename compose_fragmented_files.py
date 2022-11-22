@@ -9,7 +9,7 @@ import pandas as pd
 import os
 
 
-mdl = 8
+mdl = 9
 agents = "6k"
 agents_n = 6000
 pws = [(4,33)]
