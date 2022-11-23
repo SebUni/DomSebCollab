@@ -1,0 +1,2040 @@
+INFO:root:[01:35:20] INITIALISING CHARGING MODEL
+INFO:root:[01:35:21] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[01:35:21] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[01:35:21] Selected work charge price: 0.04 $/kWh, employees per charger: 55
+INFO:root:[01:35:21] Start to create agents
+INFO:root:[01:35:23] Agent creation complete
+INFO:root:[01:35:23] Create agent's work schedule
+INFO:root:[01:35:39] Completed agent's work schedule
+INFO:root:[01:35:39] Agent creation complete
+INFO:root:[01:35:39] INITIALISATION COMPLETE
+INFO:root:[01:35:39] 
+INFO:root:[01:35:39] COMMENCING STEP CALCULATION
+INFO:root:[02:04:04] STEP CALCULATION COMPLETE
+INFO:root:[02:04:04] 
+INFO:root:[02:04:04] Summary
+INFO:root:[02:04:04] Memory useage | Base: 1 MB Agents: 603 MB Steps: 1318 MB Total: 6836 MB
+INFO:root:[02:04:04] Cars that would run flat: None
+INFO:root:[02:04:04] Route (min / avg / max) = 2.0 km / 17.8 km / 93.7 km
+INFO:root:[02:04:04] Average Consumption 37.1 kWh
+INFO:root:[02:04:04] Apartments: 642, Houses wo PV: 4336, Houses w PV: 1022
+INFO:root:[02:04:04] COMMENCING DATA EVALUATION
+INFO:root:[02:04:06] charge_received_work: 119563.5 kWh
+INFO:root:[02:04:06] charge_received_pv: 3207.3 kWh
+INFO:root:[02:04:06] charge_received_grid: 73126.5 kWh
+INFO:root:[02:04:06] charge_received_public: 26576.5 kWh
+INFO:root:[02:04:06] charge_held_back: 0.0 kWh
+INFO:root:[02:04:06] Company Charger Utilisation: 57.39%
+INFO:root:[02:04:06] Total Company Total Revenue: $4782.54
+INFO:root:[02:04:06] Total Company Revenue per Charger: $1421.08
+INFO:root:[02:04:06] Average Electricity Cost Apartments: $/km 0.0473
+INFO:root:[02:04:06] Average Electricity Cost House wo PV: $/km 0.0322
+INFO:root:[02:04:06] Average Electricity Cost House w PV: $/km 0.0295
+INFO:root:[02:04:06] Average Electricity Cost: $/km 0.0323
+INFO:root:[02:04:06] DATA EVALUATION COMPLETE
+INFO:root:[02:05:40] INITIALISING CHARGING MODEL
+INFO:root:[02:05:42] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[02:05:42] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[02:05:42] Selected work charge price: 0.05 $/kWh, employees per charger: 55
+INFO:root:[02:05:42] Start to create agents
+INFO:root:[02:05:43] Agent creation complete
+INFO:root:[02:05:43] Create agent's work schedule
+INFO:root:[02:05:59] Completed agent's work schedule
+INFO:root:[02:05:59] Agent creation complete
+INFO:root:[02:05:59] INITIALISATION COMPLETE
+INFO:root:[02:05:59] 
+INFO:root:[02:05:59] COMMENCING STEP CALCULATION
+INFO:root:[02:34:59] STEP CALCULATION COMPLETE
+INFO:root:[02:34:59] 
+INFO:root:[02:34:59] Summary
+INFO:root:[02:34:59] Memory useage | Base: 7 MB Agents: 705 MB Steps: 1320 MB Total: 6838 MB
+INFO:root:[02:34:59] Cars that would run flat: None
+INFO:root:[02:34:59] Route (min / avg / max) = 2.0 km / 18.0 km / 100.7 km
+INFO:root:[02:35:00] Average Consumption 37.8 kWh
+INFO:root:[02:35:00] Apartments: 702, Houses wo PV: 4288, Houses w PV: 1010
+INFO:root:[02:35:00] COMMENCING DATA EVALUATION
+INFO:root:[02:35:01] charge_received_work: 122704.2 kWh
+INFO:root:[02:35:01] charge_received_pv: 3396.0 kWh
+INFO:root:[02:35:01] charge_received_grid: 73116.9 kWh
+INFO:root:[02:35:01] charge_received_public: 27476.4 kWh
+INFO:root:[02:35:01] charge_held_back: 0.0 kWh
+INFO:root:[02:35:01] Company Charger Utilisation: 56.84%
+INFO:root:[02:35:01] Total Company Total Revenue: $6135.21
+INFO:root:[02:35:01] Total Company Revenue per Charger: $1761.15
+INFO:root:[02:35:01] Average Electricity Cost Apartments: $/km 0.0489
+INFO:root:[02:35:01] Average Electricity Cost House wo PV: $/km 0.0332
+INFO:root:[02:35:01] Average Electricity Cost House w PV: $/km 0.0305
+INFO:root:[02:35:01] Average Electricity Cost: $/km 0.0334
+INFO:root:[02:35:01] DATA EVALUATION COMPLETE
+INFO:root:[02:36:38] INITIALISING CHARGING MODEL
+INFO:root:[02:36:40] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[02:36:40] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[02:36:40] Selected work charge price: 0.06 $/kWh, employees per charger: 55
+INFO:root:[02:36:40] Start to create agents
+INFO:root:[02:36:42] Agent creation complete
+INFO:root:[02:36:42] Create agent's work schedule
+INFO:root:[02:36:57] Completed agent's work schedule
+INFO:root:[02:36:57] Agent creation complete
+INFO:root:[02:36:57] INITIALISATION COMPLETE
+INFO:root:[02:36:57] 
+INFO:root:[02:36:57] COMMENCING STEP CALCULATION
+INFO:root:[03:05:20] STEP CALCULATION COMPLETE
+INFO:root:[03:05:20] 
+INFO:root:[03:05:20] Summary
+INFO:root:[03:05:20] Memory useage | Base: 7 MB Agents: 703 MB Steps: 1315 MB Total: 6833 MB
+INFO:root:[03:05:20] Cars that would run flat: None
+INFO:root:[03:05:20] Route (min / avg / max) = 2.0 km / 17.6 km / 91.8 km
+INFO:root:[03:05:20] Average Consumption 36.7 kWh
+INFO:root:[03:05:20] Apartments: 691, Houses wo PV: 4258, Houses w PV: 1051
+INFO:root:[03:05:20] COMMENCING DATA EVALUATION
+INFO:root:[03:05:22] charge_received_work: 120708.1 kWh
+INFO:root:[03:05:22] charge_received_pv: 3245.2 kWh
+INFO:root:[03:05:22] charge_received_grid: 70485.1 kWh
+INFO:root:[03:05:22] charge_received_public: 26058.6 kWh
+INFO:root:[03:05:22] charge_held_back: 0.0 kWh
+INFO:root:[03:05:22] Company Charger Utilisation: 57.31%
+INFO:root:[03:05:22] Total Company Total Revenue: $7242.49
+INFO:root:[03:05:22] Total Company Revenue per Charger: $2137.05
+INFO:root:[03:05:22] Average Electricity Cost Apartments: $/km 0.0504
+INFO:root:[03:05:22] Average Electricity Cost House wo PV: $/km 0.0337
+INFO:root:[03:05:22] Average Electricity Cost House w PV: $/km 0.0311
+INFO:root:[03:05:22] Average Electricity Cost: $/km 0.0339
+INFO:root:[03:05:22] DATA EVALUATION COMPLETE
+INFO:root:[03:06:57] INITIALISING CHARGING MODEL
+INFO:root:[03:06:59] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[03:06:59] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[03:06:59] Selected work charge price: 0.07 $/kWh, employees per charger: 55
+INFO:root:[03:06:59] Start to create agents
+INFO:root:[03:07:00] Agent creation complete
+INFO:root:[03:07:00] Create agent's work schedule
+INFO:root:[03:07:16] Completed agent's work schedule
+INFO:root:[03:07:16] Agent creation complete
+INFO:root:[03:07:16] INITIALISATION COMPLETE
+INFO:root:[03:07:16] 
+INFO:root:[03:07:16] COMMENCING STEP CALCULATION
+INFO:root:[03:36:27] STEP CALCULATION COMPLETE
+INFO:root:[03:36:27] 
+INFO:root:[03:36:27] Summary
+INFO:root:[03:36:27] Memory useage | Base: 7 MB Agents: 703 MB Steps: 1321 MB Total: 6834 MB
+INFO:root:[03:36:27] Cars that would run flat: None
+INFO:root:[03:36:27] Route (min / avg / max) = 2.0 km / 17.6 km / 102.9 km
+INFO:root:[03:36:28] Average Consumption 36.8 kWh
+INFO:root:[03:36:28] Apartments: 723, Houses wo PV: 4247, Houses w PV: 1030
+INFO:root:[03:36:28] COMMENCING DATA EVALUATION
+INFO:root:[03:36:29] charge_received_work: 120998.2 kWh
+INFO:root:[03:36:29] charge_received_pv: 3237.1 kWh
+INFO:root:[03:36:29] charge_received_grid: 70739.9 kWh
+INFO:root:[03:36:29] charge_received_public: 25663.7 kWh
+INFO:root:[03:36:29] charge_held_back: 0.0 kWh
+INFO:root:[03:36:29] Company Charger Utilisation: 57.08%
+INFO:root:[03:36:29] Total Company Total Revenue: $8469.87
+INFO:root:[03:36:29] Total Company Revenue per Charger: $2456.71
+INFO:root:[03:36:29] Average Electricity Cost Apartments: $/km 0.0524
+INFO:root:[03:36:29] Average Electricity Cost House wo PV: $/km 0.0345
+INFO:root:[03:36:29] Average Electricity Cost House w PV: $/km 0.0318
+INFO:root:[03:36:29] Average Electricity Cost: $/km 0.0347
+INFO:root:[03:36:29] DATA EVALUATION COMPLETE
+INFO:root:[03:38:05] INITIALISING CHARGING MODEL
+INFO:root:[03:38:06] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[03:38:06] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[03:38:06] Selected work charge price: 0.08 $/kWh, employees per charger: 55
+INFO:root:[03:38:06] Start to create agents
+INFO:root:[03:38:08] Agent creation complete
+INFO:root:[03:38:08] Create agent's work schedule
+INFO:root:[03:38:24] Completed agent's work schedule
+INFO:root:[03:38:24] Agent creation complete
+INFO:root:[03:38:24] INITIALISATION COMPLETE
+INFO:root:[03:38:24] 
+INFO:root:[03:38:24] COMMENCING STEP CALCULATION
+INFO:root:[04:06:43] STEP CALCULATION COMPLETE
+INFO:root:[04:06:43] 
+INFO:root:[04:06:43] Summary
+INFO:root:[04:06:43] Memory useage | Base: 7 MB Agents: 699 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[04:06:43] Cars that would run flat: None
+INFO:root:[04:06:43] Route (min / avg / max) = 2.0 km / 17.6 km / 91.8 km
+INFO:root:[04:06:43] Average Consumption 36.8 kWh
+INFO:root:[04:06:43] Apartments: 655, Houses wo PV: 4305, Houses w PV: 1040
+INFO:root:[04:06:43] COMMENCING DATA EVALUATION
+INFO:root:[04:06:45] charge_received_work: 120954.3 kWh
+INFO:root:[04:06:45] charge_received_pv: 3346.3 kWh
+INFO:root:[04:06:45] charge_received_grid: 71155.8 kWh
+INFO:root:[04:06:45] charge_received_public: 25556.6 kWh
+INFO:root:[04:06:45] charge_held_back: 0.0 kWh
+INFO:root:[04:06:45] Company Charger Utilisation: 56.69%
+INFO:root:[04:06:45] Total Company Total Revenue: $9676.35
+INFO:root:[04:06:45] Total Company Revenue per Charger: $2825.74
+INFO:root:[04:06:45] Average Electricity Cost Apartments: $/km 0.0516
+INFO:root:[04:06:45] Average Electricity Cost House wo PV: $/km 0.0359
+INFO:root:[04:06:45] Average Electricity Cost House w PV: $/km 0.0333
+INFO:root:[04:06:45] Average Electricity Cost: $/km 0.0360
+INFO:root:[04:06:45] DATA EVALUATION COMPLETE
+INFO:root:[04:08:20] INITIALISING CHARGING MODEL
+INFO:root:[04:08:21] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[04:08:21] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[04:08:21] Selected work charge price: 0.09 $/kWh, employees per charger: 55
+INFO:root:[04:08:21] Start to create agents
+INFO:root:[04:08:23] Agent creation complete
+INFO:root:[04:08:23] Create agent's work schedule
+INFO:root:[04:08:39] Completed agent's work schedule
+INFO:root:[04:08:39] Agent creation complete
+INFO:root:[04:08:39] INITIALISATION COMPLETE
+INFO:root:[04:08:39] 
+INFO:root:[04:08:39] COMMENCING STEP CALCULATION
+INFO:root:[04:37:06] STEP CALCULATION COMPLETE
+INFO:root:[04:37:06] 
+INFO:root:[04:37:06] Summary
+INFO:root:[04:37:06] Memory useage | Base: 7 MB Agents: 699 MB Steps: 1318 MB Total: 6836 MB
+INFO:root:[04:37:06] Cars that would run flat: None
+INFO:root:[04:37:06] Route (min / avg / max) = 2.0 km / 17.8 km / 90.2 km
+INFO:root:[04:37:07] Average Consumption 37.2 kWh
+INFO:root:[04:37:07] Apartments: 671, Houses wo PV: 4260, Houses w PV: 1069
+INFO:root:[04:37:07] COMMENCING DATA EVALUATION
+INFO:root:[04:37:08] charge_received_work: 120961.5 kWh
+INFO:root:[04:37:08] charge_received_pv: 3430.6 kWh
+INFO:root:[04:37:08] charge_received_grid: 71932.7 kWh
+INFO:root:[04:37:08] charge_received_public: 26941.4 kWh
+INFO:root:[04:37:08] charge_held_back: 0.0 kWh
+INFO:root:[04:37:08] Company Charger Utilisation: 56.91%
+INFO:root:[04:37:08] Total Company Total Revenue: $10886.54
+INFO:root:[04:37:08] Total Company Revenue per Charger: $3134.03
+INFO:root:[04:37:08] Average Electricity Cost Apartments: $/km 0.0549
+INFO:root:[04:37:08] Average Electricity Cost House wo PV: $/km 0.0371
+INFO:root:[04:37:08] Average Electricity Cost House w PV: $/km 0.0346
+INFO:root:[04:37:08] Average Electricity Cost: $/km 0.0372
+INFO:root:[04:37:08] DATA EVALUATION COMPLETE
+INFO:root:[04:38:43] INITIALISING CHARGING MODEL
+INFO:root:[04:38:45] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[04:38:45] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[04:38:45] Selected work charge price: 0.10 $/kWh, employees per charger: 55
+INFO:root:[04:38:45] Start to create agents
+INFO:root:[04:38:47] Agent creation complete
+INFO:root:[04:38:47] Create agent's work schedule
+INFO:root:[04:39:03] Completed agent's work schedule
+INFO:root:[04:39:03] Agent creation complete
+INFO:root:[04:39:03] INITIALISATION COMPLETE
+INFO:root:[04:39:03] 
+INFO:root:[04:39:03] COMMENCING STEP CALCULATION
+INFO:root:[05:07:17] STEP CALCULATION COMPLETE
+INFO:root:[05:07:17] 
+INFO:root:[05:07:17] Summary
+INFO:root:[05:07:17] Memory useage | Base: 3 MB Agents: 699 MB Steps: 1319 MB Total: 6837 MB
+INFO:root:[05:07:17] Cars that would run flat: None
+INFO:root:[05:07:17] Route (min / avg / max) = 2.0 km / 17.8 km / 102.9 km
+INFO:root:[05:07:18] Average Consumption 37.2 kWh
+INFO:root:[05:07:18] Apartments: 668, Houses wo PV: 4225, Houses w PV: 1107
+INFO:root:[05:07:18] COMMENCING DATA EVALUATION
+INFO:root:[05:07:19] charge_received_work: 119985.2 kWh
+INFO:root:[05:07:19] charge_received_pv: 3670.2 kWh
+INFO:root:[05:07:19] charge_received_grid: 72806.7 kWh
+INFO:root:[05:07:19] charge_received_public: 26647.0 kWh
+INFO:root:[05:07:19] charge_held_back: 0.0 kWh
+INFO:root:[05:07:19] Company Charger Utilisation: 58.14%
+INFO:root:[05:07:19] Total Company Total Revenue: $11998.52
+INFO:root:[05:07:19] Total Company Revenue per Charger: $3628.17
+INFO:root:[05:07:19] Average Electricity Cost Apartments: $/km 0.0549
+INFO:root:[05:07:19] Average Electricity Cost House wo PV: $/km 0.0383
+INFO:root:[05:07:19] Average Electricity Cost House w PV: $/km 0.0358
+INFO:root:[05:07:19] Average Electricity Cost: $/km 0.0384
+INFO:root:[05:07:19] DATA EVALUATION COMPLETE
+INFO:root:[05:08:54] INITIALISING CHARGING MODEL
+INFO:root:[05:08:56] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[05:08:56] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[05:08:56] Selected work charge price: 0.11 $/kWh, employees per charger: 55
+INFO:root:[05:08:56] Start to create agents
+INFO:root:[05:08:58] Agent creation complete
+INFO:root:[05:08:58] Create agent's work schedule
+INFO:root:[05:09:13] Completed agent's work schedule
+INFO:root:[05:09:13] Agent creation complete
+INFO:root:[05:09:13] INITIALISATION COMPLETE
+INFO:root:[05:09:13] 
+INFO:root:[05:09:13] COMMENCING STEP CALCULATION
+INFO:root:[05:37:55] STEP CALCULATION COMPLETE
+INFO:root:[05:37:55] 
+INFO:root:[05:37:55] Summary
+INFO:root:[05:37:55] Memory useage | Base: 2 MB Agents: 697 MB Steps: 1315 MB Total: 6833 MB
+INFO:root:[05:37:55] Cars that would run flat: None
+INFO:root:[05:37:55] Route (min / avg / max) = 2.0 km / 17.6 km / 93.7 km
+INFO:root:[05:37:55] Average Consumption 36.6 kWh
+INFO:root:[05:37:55] Apartments: 659, Houses wo PV: 4300, Houses w PV: 1041
+INFO:root:[05:37:55] COMMENCING DATA EVALUATION
+INFO:root:[05:37:57] charge_received_work: 121076.3 kWh
+INFO:root:[05:37:57] charge_received_pv: 3091.3 kWh
+INFO:root:[05:37:57] charge_received_grid: 70099.1 kWh
+INFO:root:[05:37:57] charge_received_public: 25606.6 kWh
+INFO:root:[05:37:57] charge_held_back: 0.0 kWh
+INFO:root:[05:37:57] Company Charger Utilisation: 55.85%
+INFO:root:[05:37:57] Total Company Total Revenue: $13318.39
+INFO:root:[05:37:57] Total Company Revenue per Charger: $3810.84
+INFO:root:[05:37:57] Average Electricity Cost Apartments: $/km 0.0549
+INFO:root:[05:37:57] Average Electricity Cost House wo PV: $/km 0.0387
+INFO:root:[05:37:57] Average Electricity Cost House w PV: $/km 0.0365
+INFO:root:[05:37:57] Average Electricity Cost: $/km 0.0388
+INFO:root:[05:37:57] DATA EVALUATION COMPLETE
+INFO:root:[05:39:30] INITIALISING CHARGING MODEL
+INFO:root:[05:39:32] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[05:39:32] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[05:39:32] Selected work charge price: 0.12 $/kWh, employees per charger: 55
+INFO:root:[05:39:32] Start to create agents
+INFO:root:[05:39:33] Agent creation complete
+INFO:root:[05:39:33] Create agent's work schedule
+INFO:root:[05:39:49] Completed agent's work schedule
+INFO:root:[05:39:49] Agent creation complete
+INFO:root:[05:39:49] INITIALISATION COMPLETE
+INFO:root:[05:39:49] 
+INFO:root:[05:39:49] COMMENCING STEP CALCULATION
+INFO:root:[06:07:52] STEP CALCULATION COMPLETE
+INFO:root:[06:07:52] 
+INFO:root:[06:07:52] Summary
+INFO:root:[06:07:52] Memory useage | Base: 2 MB Agents: 693 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[06:07:52] Cars that would run flat: None
+INFO:root:[06:07:53] Route (min / avg / max) = 2.0 km / 17.9 km / 102.9 km
+INFO:root:[06:07:53] Average Consumption 37.1 kWh
+INFO:root:[06:07:53] Apartments: 703, Houses wo PV: 4239, Houses w PV: 1058
+INFO:root:[06:07:53] COMMENCING DATA EVALUATION
+INFO:root:[06:07:54] charge_received_work: 121482.1 kWh
+INFO:root:[06:07:54] charge_received_pv: 3466.6 kWh
+INFO:root:[06:07:54] charge_received_grid: 71712.2 kWh
+INFO:root:[06:07:54] charge_received_public: 25989.4 kWh
+INFO:root:[06:07:54] charge_held_back: 0.0 kWh
+INFO:root:[06:07:54] Company Charger Utilisation: 55.77%
+INFO:root:[06:07:54] Total Company Total Revenue: $14577.85
+INFO:root:[06:07:54] Total Company Revenue per Charger: $4150.76
+INFO:root:[06:07:54] Average Electricity Cost Apartments: $/km 0.0548
+INFO:root:[06:07:54] Average Electricity Cost House wo PV: $/km 0.0398
+INFO:root:[06:07:54] Average Electricity Cost House w PV: $/km 0.0379
+INFO:root:[06:07:54] Average Electricity Cost: $/km 0.0399
+INFO:root:[06:07:54] DATA EVALUATION COMPLETE
+INFO:root:[06:09:29] INITIALISING CHARGING MODEL
+INFO:root:[06:09:30] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[06:09:30] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[06:09:30] Selected work charge price: 0.13 $/kWh, employees per charger: 55
+INFO:root:[06:09:30] Start to create agents
+INFO:root:[06:09:32] Agent creation complete
+INFO:root:[06:09:32] Create agent's work schedule
+INFO:root:[06:09:47] Completed agent's work schedule
+INFO:root:[06:09:47] Agent creation complete
+INFO:root:[06:09:47] INITIALISATION COMPLETE
+INFO:root:[06:09:47] 
+INFO:root:[06:09:47] COMMENCING STEP CALCULATION
+INFO:root:[06:37:39] STEP CALCULATION COMPLETE
+INFO:root:[06:37:39] 
+INFO:root:[06:37:39] Summary
+INFO:root:[06:37:39] Memory useage | Base: 2 MB Agents: 691 MB Steps: 1317 MB Total: 6834 MB
+INFO:root:[06:37:39] Cars that would run flat: None
+INFO:root:[06:37:39] Route (min / avg / max) = 2.0 km / 17.6 km / 83.3 km
+INFO:root:[06:37:40] Average Consumption 36.5 kWh
+INFO:root:[06:37:40] Apartments: 643, Houses wo PV: 4320, Houses w PV: 1037
+INFO:root:[06:37:40] COMMENCING DATA EVALUATION
+INFO:root:[06:37:41] charge_received_work: 119272.7 kWh
+INFO:root:[06:37:41] charge_received_pv: 3360.1 kWh
+INFO:root:[06:37:41] charge_received_grid: 71803.4 kWh
+INFO:root:[06:37:41] charge_received_public: 24905.9 kWh
+INFO:root:[06:37:41] charge_held_back: 0.0 kWh
+INFO:root:[06:37:41] Company Charger Utilisation: 57.82%
+INFO:root:[06:37:41] Total Company Total Revenue: $15505.45
+INFO:root:[06:37:41] Total Company Revenue per Charger: $4660.73
+INFO:root:[06:37:41] Average Electricity Cost Apartments: $/km 0.0579
+INFO:root:[06:37:41] Average Electricity Cost House wo PV: $/km 0.0408
+INFO:root:[06:37:41] Average Electricity Cost House w PV: $/km 0.0386
+INFO:root:[06:37:41] Average Electricity Cost: $/km 0.0410
+INFO:root:[06:37:41] DATA EVALUATION COMPLETE
+INFO:root:[06:39:15] INITIALISING CHARGING MODEL
+INFO:root:[06:39:17] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[06:39:17] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[06:39:17] Selected work charge price: 0.14 $/kWh, employees per charger: 55
+INFO:root:[06:39:17] Start to create agents
+INFO:root:[06:39:19] Agent creation complete
+INFO:root:[06:39:19] Create agent's work schedule
+INFO:root:[06:39:34] Completed agent's work schedule
+INFO:root:[06:39:34] Agent creation complete
+INFO:root:[06:39:34] INITIALISATION COMPLETE
+INFO:root:[06:39:34] 
+INFO:root:[06:39:34] COMMENCING STEP CALCULATION
+INFO:root:[07:08:49] STEP CALCULATION COMPLETE
+INFO:root:[07:08:49] 
+INFO:root:[07:08:49] Summary
+INFO:root:[07:08:49] Memory useage | Base: 3 MB Agents: 689 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[07:08:49] Cars that would run flat: None
+INFO:root:[07:08:50] Route (min / avg / max) = 2.0 km / 17.7 km / 91.8 km
+INFO:root:[07:08:50] Average Consumption 36.8 kWh
+INFO:root:[07:08:50] Apartments: 689, Houses wo PV: 4242, Houses w PV: 1069
+INFO:root:[07:08:50] COMMENCING DATA EVALUATION
+INFO:root:[07:08:51] charge_received_work: 119140.2 kWh
+INFO:root:[07:08:51] charge_received_pv: 3715.3 kWh
+INFO:root:[07:08:51] charge_received_grid: 71708.3 kWh
+INFO:root:[07:08:51] charge_received_public: 26506.0 kWh
+INFO:root:[07:08:51] charge_held_back: 0.0 kWh
+INFO:root:[07:08:51] Company Charger Utilisation: 57.28%
+INFO:root:[07:08:51] Total Company Total Revenue: $16679.63
+INFO:root:[07:08:51] Total Company Revenue per Charger: $4942.48
+INFO:root:[07:08:51] Average Electricity Cost Apartments: $/km 0.0585
+INFO:root:[07:08:51] Average Electricity Cost House wo PV: $/km 0.0420
+INFO:root:[07:08:51] Average Electricity Cost House w PV: $/km 0.0398
+INFO:root:[07:08:51] Average Electricity Cost: $/km 0.0422
+INFO:root:[07:08:51] DATA EVALUATION COMPLETE
+INFO:root:[07:10:26] INITIALISING CHARGING MODEL
+INFO:root:[07:10:27] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[07:10:27] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[07:10:27] Selected work charge price: 0.15 $/kWh, employees per charger: 55
+INFO:root:[07:10:27] Start to create agents
+INFO:root:[07:10:29] Agent creation complete
+INFO:root:[07:10:29] Create agent's work schedule
+INFO:root:[07:10:45] Completed agent's work schedule
+INFO:root:[07:10:45] Agent creation complete
+INFO:root:[07:10:45] INITIALISATION COMPLETE
+INFO:root:[07:10:45] 
+INFO:root:[07:10:45] COMMENCING STEP CALCULATION
+INFO:root:[07:39:22] STEP CALCULATION COMPLETE
+INFO:root:[07:39:22] 
+INFO:root:[07:39:22] Summary
+INFO:root:[07:39:22] Memory useage | Base: 2 MB Agents: 689 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[07:39:22] Cars that would run flat: None
+INFO:root:[07:39:22] Route (min / avg / max) = 2.0 km / 17.8 km / 92.3 km
+INFO:root:[07:39:23] Average Consumption 37.0 kWh
+INFO:root:[07:39:23] Apartments: 671, Houses wo PV: 4281, Houses w PV: 1048
+INFO:root:[07:39:23] COMMENCING DATA EVALUATION
+INFO:root:[07:39:24] charge_received_work: 120687.9 kWh
+INFO:root:[07:39:24] charge_received_pv: 3604.8 kWh
+INFO:root:[07:39:24] charge_received_grid: 71203.0 kWh
+INFO:root:[07:39:24] charge_received_public: 26598.3 kWh
+INFO:root:[07:39:24] charge_held_back: 0.0 kWh
+INFO:root:[07:39:24] Company Charger Utilisation: 56.82%
+INFO:root:[07:39:24] Total Company Total Revenue: $18103.19
+INFO:root:[07:39:24] Total Company Revenue per Charger: $5288.28
+INFO:root:[07:39:24] Average Electricity Cost Apartments: $/km 0.0600
+INFO:root:[07:39:24] Average Electricity Cost House wo PV: $/km 0.0431
+INFO:root:[07:39:24] Average Electricity Cost House w PV: $/km 0.0403
+INFO:root:[07:39:24] Average Electricity Cost: $/km 0.0432
+INFO:root:[07:39:24] DATA EVALUATION COMPLETE
+INFO:root:[07:40:58] INITIALISING CHARGING MODEL
+INFO:root:[07:41:00] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[07:41:00] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[07:41:00] Selected work charge price: 0.16 $/kWh, employees per charger: 55
+INFO:root:[07:41:00] Start to create agents
+INFO:root:[07:41:02] Agent creation complete
+INFO:root:[07:41:02] Create agent's work schedule
+INFO:root:[07:41:17] Completed agent's work schedule
+INFO:root:[07:41:17] Agent creation complete
+INFO:root:[07:41:17] INITIALISATION COMPLETE
+INFO:root:[07:41:17] 
+INFO:root:[07:41:17] COMMENCING STEP CALCULATION
+INFO:root:[08:10:37] STEP CALCULATION COMPLETE
+INFO:root:[08:10:37] 
+INFO:root:[08:10:37] Summary
+INFO:root:[08:10:37] Memory useage | Base: 3 MB Agents: 687 MB Steps: 1319 MB Total: 6836 MB
+INFO:root:[08:10:37] Cars that would run flat: None
+INFO:root:[08:10:37] Route (min / avg / max) = 2.0 km / 17.8 km / 93.7 km
+INFO:root:[08:10:38] Average Consumption 37.4 kWh
+INFO:root:[08:10:38] Apartments: 627, Houses wo PV: 4338, Houses w PV: 1035
+INFO:root:[08:10:38] COMMENCING DATA EVALUATION
+INFO:root:[08:10:39] charge_received_work: 122850.9 kWh
+INFO:root:[08:10:39] charge_received_pv: 3150.9 kWh
+INFO:root:[08:10:39] charge_received_grid: 71746.6 kWh
+INFO:root:[08:10:39] charge_received_public: 26607.2 kWh
+INFO:root:[08:10:39] charge_held_back: 0.0 kWh
+INFO:root:[08:10:39] Company Charger Utilisation: 57.31%
+INFO:root:[08:10:39] Total Company Total Revenue: $19656.15
+INFO:root:[08:10:39] Total Company Revenue per Charger: $5703.93
+INFO:root:[08:10:39] Average Electricity Cost Apartments: $/km 0.0617
+INFO:root:[08:10:39] Average Electricity Cost House wo PV: $/km 0.0443
+INFO:root:[08:10:39] Average Electricity Cost House w PV: $/km 0.0407
+INFO:root:[08:10:39] Average Electricity Cost: $/km 0.0444
+INFO:root:[08:10:39] DATA EVALUATION COMPLETE
+INFO:root:[08:12:13] INITIALISING CHARGING MODEL
+INFO:root:[08:12:15] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[08:12:15] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[08:12:15] Selected work charge price: 0.17 $/kWh, employees per charger: 55
+INFO:root:[08:12:15] Start to create agents
+INFO:root:[08:12:17] Agent creation complete
+INFO:root:[08:12:17] Create agent's work schedule
+INFO:root:[08:12:32] Completed agent's work schedule
+INFO:root:[08:12:32] Agent creation complete
+INFO:root:[08:12:32] INITIALISATION COMPLETE
+INFO:root:[08:12:32] 
+INFO:root:[08:12:32] COMMENCING STEP CALCULATION
+INFO:root:[08:40:46] STEP CALCULATION COMPLETE
+INFO:root:[08:40:46] 
+INFO:root:[08:40:46] Summary
+INFO:root:[08:40:46] Memory useage | Base: 3 MB Agents: 685 MB Steps: 1317 MB Total: 6831 MB
+INFO:root:[08:40:46] Cars that would run flat: None
+INFO:root:[08:40:46] Route (min / avg / max) = 2.0 km / 17.3 km / 91.8 km
+INFO:root:[08:40:46] Average Consumption 36.1 kWh
+INFO:root:[08:40:46] Apartments: 676, Houses wo PV: 4292, Houses w PV: 1032
+INFO:root:[08:40:46] COMMENCING DATA EVALUATION
+INFO:root:[08:40:48] charge_received_work: 120090.1 kWh
+INFO:root:[08:40:48] charge_received_pv: 3229.1 kWh
+INFO:root:[08:40:48] charge_received_grid: 68355.3 kWh
+INFO:root:[08:40:48] charge_received_public: 25076.1 kWh
+INFO:root:[08:40:48] charge_held_back: 0.0 kWh
+INFO:root:[08:40:48] Company Charger Utilisation: 57.83%
+INFO:root:[08:40:48] Total Company Total Revenue: $20415.32
+INFO:root:[08:40:48] Total Company Revenue per Charger: $6065.02
+INFO:root:[08:40:48] Average Electricity Cost Apartments: $/km 0.0590
+INFO:root:[08:40:48] Average Electricity Cost House wo PV: $/km 0.0453
+INFO:root:[08:40:48] Average Electricity Cost House w PV: $/km 0.0418
+INFO:root:[08:40:48] Average Electricity Cost: $/km 0.0453
+INFO:root:[08:40:48] DATA EVALUATION COMPLETE
+INFO:root:[08:42:22] INITIALISING CHARGING MODEL
+INFO:root:[08:42:24] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[08:42:24] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[08:42:24] Selected work charge price: 0.18 $/kWh, employees per charger: 55
+INFO:root:[08:42:24] Start to create agents
+INFO:root:[08:42:25] Agent creation complete
+INFO:root:[08:42:25] Create agent's work schedule
+INFO:root:[08:42:41] Completed agent's work schedule
+INFO:root:[08:42:41] Agent creation complete
+INFO:root:[08:42:41] INITIALISATION COMPLETE
+INFO:root:[08:42:41] 
+INFO:root:[08:42:41] COMMENCING STEP CALCULATION
+INFO:root:[09:10:28] STEP CALCULATION COMPLETE
+INFO:root:[09:10:28] 
+INFO:root:[09:10:28] Summary
+INFO:root:[09:10:28] Memory useage | Base: 2 MB Agents: 683 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[09:10:28] Cars that would run flat: None
+INFO:root:[09:10:28] Route (min / avg / max) = 2.0 km / 17.8 km / 92.3 km
+INFO:root:[09:10:28] Average Consumption 36.7 kWh
+INFO:root:[09:10:28] Apartments: 661, Houses wo PV: 4257, Houses w PV: 1082
+INFO:root:[09:10:28] COMMENCING DATA EVALUATION
+INFO:root:[09:10:30] charge_received_work: 119848.1 kWh
+INFO:root:[09:10:30] charge_received_pv: 3726.2 kWh
+INFO:root:[09:10:30] charge_received_grid: 70529.8 kWh
+INFO:root:[09:10:30] charge_received_public: 26113.0 kWh
+INFO:root:[09:10:30] charge_held_back: 0.0 kWh
+INFO:root:[09:10:30] Company Charger Utilisation: 57.51%
+INFO:root:[09:10:30] Total Company Total Revenue: $21572.65
+INFO:root:[09:10:30] Total Company Revenue per Charger: $6392.17
+INFO:root:[09:10:30] Average Electricity Cost Apartments: $/km 0.0631
+INFO:root:[09:10:30] Average Electricity Cost House wo PV: $/km 0.0461
+INFO:root:[09:10:30] Average Electricity Cost House w PV: $/km 0.0431
+INFO:root:[09:10:30] Average Electricity Cost: $/km 0.0462
+INFO:root:[09:10:30] DATA EVALUATION COMPLETE
+INFO:root:[09:12:05] INITIALISING CHARGING MODEL
+INFO:root:[09:12:06] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[09:12:06] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[09:12:06] Selected work charge price: 0.19 $/kWh, employees per charger: 55
+INFO:root:[09:12:06] Start to create agents
+INFO:root:[09:12:08] Agent creation complete
+INFO:root:[09:12:08] Create agent's work schedule
+INFO:root:[09:12:23] Completed agent's work schedule
+INFO:root:[09:12:23] Agent creation complete
+INFO:root:[09:12:23] INITIALISATION COMPLETE
+INFO:root:[09:12:23] 
+INFO:root:[09:12:23] COMMENCING STEP CALCULATION
+INFO:root:[09:41:11] STEP CALCULATION COMPLETE
+INFO:root:[09:41:11] 
+INFO:root:[09:41:11] Summary
+INFO:root:[09:41:11] Memory useage | Base: 2 MB Agents: 681 MB Steps: 1319 MB Total: 6836 MB
+INFO:root:[09:41:11] Cars that would run flat: None
+INFO:root:[09:41:12] Route (min / avg / max) = 2.0 km / 17.6 km / 102.9 km
+INFO:root:[09:41:12] Average Consumption 37.1 kWh
+INFO:root:[09:41:12] Apartments: 669, Houses wo PV: 4244, Houses w PV: 1087
+INFO:root:[09:41:12] COMMENCING DATA EVALUATION
+INFO:root:[09:41:14] charge_received_work: 120883.0 kWh
+INFO:root:[09:41:14] charge_received_pv: 3306.5 kWh
+INFO:root:[09:41:14] charge_received_grid: 73060.6 kWh
+INFO:root:[09:41:14] charge_received_public: 25383.9 kWh
+INFO:root:[09:41:14] charge_held_back: 0.0 kWh
+INFO:root:[09:41:14] Company Charger Utilisation: 57.61%
+INFO:root:[09:41:14] Total Company Total Revenue: $22967.76
+INFO:root:[09:41:14] Total Company Revenue per Charger: $6716.11
+INFO:root:[09:41:14] Average Electricity Cost Apartments: $/km 0.0642
+INFO:root:[09:41:14] Average Electricity Cost House wo PV: $/km 0.0473
+INFO:root:[09:41:14] Average Electricity Cost House w PV: $/km 0.0442
+INFO:root:[09:41:14] Average Electricity Cost: $/km 0.0474
+INFO:root:[09:41:14] DATA EVALUATION COMPLETE
+INFO:root:[09:42:48] INITIALISING CHARGING MODEL
+INFO:root:[09:42:49] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[09:42:49] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[09:42:49] Selected work charge price: 0.20 $/kWh, employees per charger: 55
+INFO:root:[09:42:49] Start to create agents
+INFO:root:[09:42:51] Agent creation complete
+INFO:root:[09:42:51] Create agent's work schedule
+INFO:root:[09:43:07] Completed agent's work schedule
+INFO:root:[09:43:07] Agent creation complete
+INFO:root:[09:43:07] INITIALISATION COMPLETE
+INFO:root:[09:43:07] 
+INFO:root:[09:43:07] COMMENCING STEP CALCULATION
+INFO:root:[10:12:04] STEP CALCULATION COMPLETE
+INFO:root:[10:12:04] 
+INFO:root:[10:12:04] Summary
+INFO:root:[10:12:04] Memory useage | Base: 2 MB Agents: 679 MB Steps: 1317 MB Total: 6834 MB
+INFO:root:[10:12:04] Cars that would run flat: None
+INFO:root:[10:12:05] Route (min / avg / max) = 2.0 km / 17.6 km / 87.4 km
+INFO:root:[10:12:05] Average Consumption 36.8 kWh
+INFO:root:[10:12:05] Apartments: 669, Houses wo PV: 4234, Houses w PV: 1097
+INFO:root:[10:12:05] COMMENCING DATA EVALUATION
+INFO:root:[10:12:07] charge_received_work: 120352.1 kWh
+INFO:root:[10:12:07] charge_received_pv: 3654.9 kWh
+INFO:root:[10:12:07] charge_received_grid: 70496.5 kWh
+INFO:root:[10:12:07] charge_received_public: 26179.0 kWh
+INFO:root:[10:12:07] charge_held_back: 0.0 kWh
+INFO:root:[10:12:07] Company Charger Utilisation: 56.28%
+INFO:root:[10:12:07] Total Company Total Revenue: $24070.43
+INFO:root:[10:12:07] Total Company Revenue per Charger: $7060.21
+INFO:root:[10:12:07] Average Electricity Cost Apartments: $/km 0.0641
+INFO:root:[10:12:07] Average Electricity Cost House wo PV: $/km 0.0483
+INFO:root:[10:12:07] Average Electricity Cost House w PV: $/km 0.0460
+INFO:root:[10:12:07] Average Electricity Cost: $/km 0.0484
+INFO:root:[10:12:07] DATA EVALUATION COMPLETE
+INFO:root:[10:13:40] INITIALISING CHARGING MODEL
+INFO:root:[10:13:42] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[10:13:42] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[10:13:42] Selected work charge price: 0.21 $/kWh, employees per charger: 55
+INFO:root:[10:13:42] Start to create agents
+INFO:root:[10:13:44] Agent creation complete
+INFO:root:[10:13:44] Create agent's work schedule
+INFO:root:[10:13:59] Completed agent's work schedule
+INFO:root:[10:13:59] Agent creation complete
+INFO:root:[10:13:59] INITIALISATION COMPLETE
+INFO:root:[10:13:59] 
+INFO:root:[10:13:59] COMMENCING STEP CALCULATION
+INFO:root:[10:41:53] STEP CALCULATION COMPLETE
+INFO:root:[10:41:53] 
+INFO:root:[10:41:53] Summary
+INFO:root:[10:41:53] Memory useage | Base: 3 MB Agents: 675 MB Steps: 1319 MB Total: 6836 MB
+INFO:root:[10:41:53] Cars that would run flat: None
+INFO:root:[10:41:54] Route (min / avg / max) = 2.0 km / 17.8 km / 90.2 km
+INFO:root:[10:41:54] Average Consumption 37.2 kWh
+INFO:root:[10:41:54] Apartments: 662, Houses wo PV: 4277, Houses w PV: 1061
+INFO:root:[10:41:54] COMMENCING DATA EVALUATION
+INFO:root:[10:41:55] charge_received_work: 121153.4 kWh
+INFO:root:[10:41:55] charge_received_pv: 3515.4 kWh
+INFO:root:[10:41:55] charge_received_grid: 72083.9 kWh
+INFO:root:[10:41:55] charge_received_public: 26467.2 kWh
+INFO:root:[10:41:55] charge_held_back: 0.0 kWh
+INFO:root:[10:41:55] Company Charger Utilisation: 56.66%
+INFO:root:[10:41:55] Total Company Total Revenue: $25442.21
+INFO:root:[10:41:55] Total Company Revenue per Charger: $7379.78
+INFO:root:[10:41:55] Average Electricity Cost Apartments: $/km 0.0665
+INFO:root:[10:41:55] Average Electricity Cost House wo PV: $/km 0.0493
+INFO:root:[10:41:55] Average Electricity Cost House w PV: $/km 0.0463
+INFO:root:[10:41:55] Average Electricity Cost: $/km 0.0494
+INFO:root:[10:41:55] DATA EVALUATION COMPLETE
+INFO:root:[10:43:30] INITIALISING CHARGING MODEL
+INFO:root:[10:43:31] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[10:43:31] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[10:43:31] Selected work charge price: 0.22 $/kWh, employees per charger: 55
+INFO:root:[10:43:31] Start to create agents
+INFO:root:[10:43:33] Agent creation complete
+INFO:root:[10:43:33] Create agent's work schedule
+INFO:root:[10:43:49] Completed agent's work schedule
+INFO:root:[10:43:49] Agent creation complete
+INFO:root:[10:43:49] INITIALISATION COMPLETE
+INFO:root:[10:43:49] 
+INFO:root:[10:43:49] COMMENCING STEP CALCULATION
+INFO:root:[11:11:48] STEP CALCULATION COMPLETE
+INFO:root:[11:11:48] 
+INFO:root:[11:11:48] Summary
+INFO:root:[11:11:48] Memory useage | Base: 2 MB Agents: 673 MB Steps: 1315 MB Total: 6833 MB
+INFO:root:[11:11:48] Cars that would run flat: None
+INFO:root:[11:11:48] Route (min / avg / max) = 2.0 km / 17.6 km / 119.1 km
+INFO:root:[11:11:48] Average Consumption 36.5 kWh
+INFO:root:[11:11:48] Apartments: 670, Houses wo PV: 4261, Houses w PV: 1069
+INFO:root:[11:11:48] COMMENCING DATA EVALUATION
+INFO:root:[11:11:50] charge_received_work: 119807.6 kWh
+INFO:root:[11:11:50] charge_received_pv: 3107.7 kWh
+INFO:root:[11:11:50] charge_received_grid: 70650.4 kWh
+INFO:root:[11:11:50] charge_received_public: 25193.1 kWh
+INFO:root:[11:11:50] charge_held_back: 0.0 kWh
+INFO:root:[11:11:50] Company Charger Utilisation: 55.96%
+INFO:root:[11:11:50] Total Company Total Revenue: $26357.67
+INFO:root:[11:11:50] Total Company Revenue per Charger: $7622.49
+INFO:root:[11:11:50] Average Electricity Cost Apartments: $/km 0.0657
+INFO:root:[11:11:50] Average Electricity Cost House wo PV: $/km 0.0505
+INFO:root:[11:11:50] Average Electricity Cost House w PV: $/km 0.0471
+INFO:root:[11:11:50] Average Electricity Cost: $/km 0.0506
+INFO:root:[11:11:50] DATA EVALUATION COMPLETE
+INFO:root:[11:13:26] INITIALISING CHARGING MODEL
+INFO:root:[11:13:28] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[11:13:28] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[11:13:28] Selected work charge price: 0.23 $/kWh, employees per charger: 55
+INFO:root:[11:13:28] Start to create agents
+INFO:root:[11:13:30] Agent creation complete
+INFO:root:[11:13:30] Create agent's work schedule
+INFO:root:[11:13:45] Completed agent's work schedule
+INFO:root:[11:13:45] Agent creation complete
+INFO:root:[11:13:45] INITIALISATION COMPLETE
+INFO:root:[11:13:45] 
+INFO:root:[11:13:45] COMMENCING STEP CALCULATION
+INFO:root:[11:42:01] STEP CALCULATION COMPLETE
+INFO:root:[11:42:01] 
+INFO:root:[11:42:01] Summary
+INFO:root:[11:42:01] Memory useage | Base: 2 MB Agents: 673 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[11:42:01] Cars that would run flat: None
+INFO:root:[11:42:01] Route (min / avg / max) = 2.0 km / 17.7 km / 93.7 km
+INFO:root:[11:42:02] Average Consumption 36.9 kWh
+INFO:root:[11:42:02] Apartments: 684, Houses wo PV: 4298, Houses w PV: 1018
+INFO:root:[11:42:02] COMMENCING DATA EVALUATION
+INFO:root:[11:42:03] charge_received_work: 120484.5 kWh
+INFO:root:[11:42:03] charge_received_pv: 3120.9 kWh
+INFO:root:[11:42:03] charge_received_grid: 71781.4 kWh
+INFO:root:[11:42:03] charge_received_public: 26182.4 kWh
+INFO:root:[11:42:03] charge_held_back: 0.0 kWh
+INFO:root:[11:42:03] Company Charger Utilisation: 57.16%
+INFO:root:[11:42:03] Total Company Total Revenue: $27711.43
+INFO:root:[11:42:03] Total Company Revenue per Charger: $8066.30
+INFO:root:[11:42:03] Average Electricity Cost Apartments: $/km 0.0665
+INFO:root:[11:42:03] Average Electricity Cost House wo PV: $/km 0.0514
+INFO:root:[11:42:03] Average Electricity Cost House w PV: $/km 0.0488
+INFO:root:[11:42:03] Average Electricity Cost: $/km 0.0516
+INFO:root:[11:42:03] DATA EVALUATION COMPLETE
+INFO:root:[11:43:39] INITIALISING CHARGING MODEL
+INFO:root:[11:43:41] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[11:43:41] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[11:43:41] Selected work charge price: 0.24 $/kWh, employees per charger: 55
+INFO:root:[11:43:41] Start to create agents
+INFO:root:[11:43:43] Agent creation complete
+INFO:root:[11:43:43] Create agent's work schedule
+INFO:root:[11:43:59] Completed agent's work schedule
+INFO:root:[11:43:59] Agent creation complete
+INFO:root:[11:43:59] INITIALISATION COMPLETE
+INFO:root:[11:43:59] 
+INFO:root:[11:43:59] COMMENCING STEP CALCULATION
+INFO:root:[12:12:35] STEP CALCULATION COMPLETE
+INFO:root:[12:12:35] 
+INFO:root:[12:12:35] Summary
+INFO:root:[12:12:35] Memory useage | Base: 2 MB Agents: 671 MB Steps: 1320 MB Total: 6837 MB
+INFO:root:[12:12:35] Cars that would run flat: None
+INFO:root:[12:12:36] Route (min / avg / max) = 2.0 km / 17.9 km / 93.7 km
+INFO:root:[12:12:36] Average Consumption 37.4 kWh
+INFO:root:[12:12:36] Apartments: 650, Houses wo PV: 4266, Houses w PV: 1084
+INFO:root:[12:12:36] COMMENCING DATA EVALUATION
+INFO:root:[12:12:37] charge_received_work: 122997.5 kWh
+INFO:root:[12:12:37] charge_received_pv: 3361.4 kWh
+INFO:root:[12:12:37] charge_received_grid: 72897.5 kWh
+INFO:root:[12:12:37] charge_received_public: 25455.3 kWh
+INFO:root:[12:12:37] charge_held_back: 0.0 kWh
+INFO:root:[12:12:37] Company Charger Utilisation: 57.93%
+INFO:root:[12:12:37] Total Company Total Revenue: $29519.39
+INFO:root:[12:12:37] Total Company Revenue per Charger: $8611.24
+INFO:root:[12:12:37] Average Electricity Cost Apartments: $/km 0.0685
+INFO:root:[12:12:37] Average Electricity Cost House wo PV: $/km 0.0523
+INFO:root:[12:12:37] Average Electricity Cost House w PV: $/km 0.0494
+INFO:root:[12:12:37] Average Electricity Cost: $/km 0.0524
+INFO:root:[12:12:37] DATA EVALUATION COMPLETE
+INFO:root:[12:14:11] INITIALISING CHARGING MODEL
+INFO:root:[12:14:13] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[12:14:13] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[12:14:13] Selected work charge price: 0.25 $/kWh, employees per charger: 55
+INFO:root:[12:14:13] Start to create agents
+INFO:root:[12:14:14] Agent creation complete
+INFO:root:[12:14:14] Create agent's work schedule
+INFO:root:[12:14:30] Completed agent's work schedule
+INFO:root:[12:14:30] Agent creation complete
+INFO:root:[12:14:30] INITIALISATION COMPLETE
+INFO:root:[12:14:30] 
+INFO:root:[12:14:30] COMMENCING STEP CALCULATION
+INFO:root:[12:43:45] STEP CALCULATION COMPLETE
+INFO:root:[12:43:45] 
+INFO:root:[12:43:45] Summary
+INFO:root:[12:43:45] Memory useage | Base: 3 MB Agents: 669 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[12:43:45] Cars that would run flat: None
+INFO:root:[12:43:45] Route (min / avg / max) = 2.0 km / 17.7 km / 102.7 km
+INFO:root:[12:43:45] Average Consumption 36.9 kWh
+INFO:root:[12:43:45] Apartments: 642, Houses wo PV: 4277, Houses w PV: 1081
+INFO:root:[12:43:45] COMMENCING DATA EVALUATION
+INFO:root:[12:43:47] charge_received_work: 121698.7 kWh
+INFO:root:[12:43:47] charge_received_pv: 3119.6 kWh
+INFO:root:[12:43:47] charge_received_grid: 71225.6 kWh
+INFO:root:[12:43:47] charge_received_public: 25196.9 kWh
+INFO:root:[12:43:47] charge_held_back: 0.0 kWh
+INFO:root:[12:43:47] Company Charger Utilisation: 56.77%
+INFO:root:[12:43:47] Total Company Total Revenue: $30424.68
+INFO:root:[12:43:47] Total Company Revenue per Charger: $8879.00
+INFO:root:[12:43:47] Average Electricity Cost Apartments: $/km 0.0701
+INFO:root:[12:43:47] Average Electricity Cost House wo PV: $/km 0.0536
+INFO:root:[12:43:47] Average Electricity Cost House w PV: $/km 0.0506
+INFO:root:[12:43:47] Average Electricity Cost: $/km 0.0536
+INFO:root:[12:43:47] DATA EVALUATION COMPLETE
+INFO:root:[12:45:21] INITIALISING CHARGING MODEL
+INFO:root:[12:45:23] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[12:45:23] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[12:45:23] Selected work charge price: 0.26 $/kWh, employees per charger: 55
+INFO:root:[12:45:23] Start to create agents
+INFO:root:[12:45:24] Agent creation complete
+INFO:root:[12:45:24] Create agent's work schedule
+INFO:root:[12:45:40] Completed agent's work schedule
+INFO:root:[12:45:40] Agent creation complete
+INFO:root:[12:45:40] INITIALISATION COMPLETE
+INFO:root:[12:45:40] 
+INFO:root:[12:45:40] COMMENCING STEP CALCULATION
+INFO:root:[13:13:12] STEP CALCULATION COMPLETE
+INFO:root:[13:13:12] 
+INFO:root:[13:13:12] Summary
+INFO:root:[13:13:12] Memory useage | Base: 3 MB Agents: 665 MB Steps: 1315 MB Total: 6834 MB
+INFO:root:[13:13:12] Cars that would run flat: None
+INFO:root:[13:13:12] Route (min / avg / max) = 2.0 km / 17.7 km / 102.9 km
+INFO:root:[13:13:13] Average Consumption 36.8 kWh
+INFO:root:[13:13:13] Apartments: 670, Houses wo PV: 4336, Houses w PV: 994
+INFO:root:[13:13:13] COMMENCING DATA EVALUATION
+INFO:root:[13:13:14] charge_received_work: 121569.2 kWh
+INFO:root:[13:13:14] charge_received_pv: 3131.6 kWh
+INFO:root:[13:13:14] charge_received_grid: 70258.5 kWh
+INFO:root:[13:13:14] charge_received_public: 25684.4 kWh
+INFO:root:[13:13:14] charge_held_back: 0.0 kWh
+INFO:root:[13:13:14] Company Charger Utilisation: 57.84%
+INFO:root:[13:13:14] Total Company Total Revenue: $31607.99
+INFO:root:[13:13:14] Total Company Revenue per Charger: $9254.03
+INFO:root:[13:13:14] Average Electricity Cost Apartments: $/km 0.0713
+INFO:root:[13:13:14] Average Electricity Cost House wo PV: $/km 0.0548
+INFO:root:[13:13:14] Average Electricity Cost House w PV: $/km 0.0519
+INFO:root:[13:13:14] Average Electricity Cost: $/km 0.0549
+INFO:root:[13:13:14] DATA EVALUATION COMPLETE
+INFO:root:[13:14:48] INITIALISING CHARGING MODEL
+INFO:root:[13:14:50] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[13:14:50] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[13:14:50] Selected work charge price: 0.27 $/kWh, employees per charger: 55
+INFO:root:[13:14:50] Start to create agents
+INFO:root:[13:14:51] Agent creation complete
+INFO:root:[13:14:51] Create agent's work schedule
+INFO:root:[13:15:07] Completed agent's work schedule
+INFO:root:[13:15:07] Agent creation complete
+INFO:root:[13:15:07] INITIALISATION COMPLETE
+INFO:root:[13:15:07] 
+INFO:root:[13:15:07] COMMENCING STEP CALCULATION
+INFO:root:[13:43:05] STEP CALCULATION COMPLETE
+INFO:root:[13:43:05] 
+INFO:root:[13:43:05] Summary
+INFO:root:[13:43:05] Memory useage | Base: 3 MB Agents: 663 MB Steps: 1351 MB Total: 6869 MB
+INFO:root:[13:43:05] Cars that would run flat: None
+INFO:root:[13:43:05] Route (min / avg / max) = 2.0 km / 17.8 km / 102.9 km
+INFO:root:[13:43:05] Average Consumption 37.3 kWh
+INFO:root:[13:43:05] Apartments: 692, Houses wo PV: 4272, Houses w PV: 1036
+INFO:root:[13:43:05] COMMENCING DATA EVALUATION
+INFO:root:[13:43:07] charge_received_work: 92558.5 kWh
+INFO:root:[13:43:07] charge_received_pv: 4826.0 kWh
+INFO:root:[13:43:07] charge_received_grid: 111161.7 kWh
+INFO:root:[13:43:07] charge_received_public: 15005.4 kWh
+INFO:root:[13:43:07] charge_held_back: 0.0 kWh
+INFO:root:[13:43:07] Company Charger Utilisation: 43.29%
+INFO:root:[13:43:07] Total Company Total Revenue: $24990.81
+INFO:root:[13:43:07] Total Company Revenue per Charger: $7073.50
+INFO:root:[13:43:07] Average Electricity Cost Apartments: $/km 0.0621
+INFO:root:[13:43:07] Average Electricity Cost House wo PV: $/km 0.0540
+INFO:root:[13:43:07] Average Electricity Cost House w PV: $/km 0.0493
+INFO:root:[13:43:07] Average Electricity Cost: $/km 0.0538
+INFO:root:[13:43:07] DATA EVALUATION COMPLETE
+INFO:root:[13:44:43] INITIALISING CHARGING MODEL
+INFO:root:[13:44:44] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[13:44:44] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[13:44:44] Selected work charge price: 0.28 $/kWh, employees per charger: 55
+INFO:root:[13:44:44] Start to create agents
+INFO:root:[13:44:46] Agent creation complete
+INFO:root:[13:44:46] Create agent's work schedule
+INFO:root:[13:45:02] Completed agent's work schedule
+INFO:root:[13:45:02] Agent creation complete
+INFO:root:[13:45:02] INITIALISATION COMPLETE
+INFO:root:[13:45:02] 
+INFO:root:[13:45:02] COMMENCING STEP CALCULATION
+INFO:root:[14:13:35] STEP CALCULATION COMPLETE
+INFO:root:[14:13:35] 
+INFO:root:[14:13:35] Summary
+INFO:root:[14:13:35] Memory useage | Base: 2 MB Agents: 663 MB Steps: 1414 MB Total: 6932 MB
+INFO:root:[14:13:35] Cars that would run flat: None
+INFO:root:[14:13:35] Route (min / avg / max) = 2.0 km / 17.9 km / 102.9 km
+INFO:root:[14:13:35] Average Consumption 37.2 kWh
+INFO:root:[14:13:36] Apartments: 684, Houses wo PV: 4302, Houses w PV: 1014
+INFO:root:[14:13:36] COMMENCING DATA EVALUATION
+INFO:root:[14:13:37] charge_received_work: 19236.6 kWh
+INFO:root:[14:13:37] charge_received_pv: 6847.2 kWh
+INFO:root:[14:13:37] charge_received_grid: 197280.6 kWh
+INFO:root:[14:13:37] charge_received_public: 30.4 kWh
+INFO:root:[14:13:37] charge_held_back: 0.0 kWh
+INFO:root:[14:13:37] Company Charger Utilisation: 11.94%
+INFO:root:[14:13:37] Total Company Total Revenue: $5386.26
+INFO:root:[14:13:37] Total Company Revenue per Charger: $1446.41
+INFO:root:[14:13:37] Average Electricity Cost Apartments: $/km 0.0532
+INFO:root:[14:13:37] Average Electricity Cost House wo PV: $/km 0.0514
+INFO:root:[14:13:37] Average Electricity Cost House w PV: $/km 0.0446
+INFO:root:[14:13:37] Average Electricity Cost: $/km 0.0511
+INFO:root:[14:13:37] DATA EVALUATION COMPLETE
+INFO:root:[14:15:12] INITIALISING CHARGING MODEL
+INFO:root:[14:15:13] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[14:15:13] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[14:15:13] Selected work charge price: 0.29 $/kWh, employees per charger: 55
+INFO:root:[14:15:13] Start to create agents
+INFO:root:[14:15:15] Agent creation complete
+INFO:root:[14:15:15] Create agent's work schedule
+INFO:root:[14:15:31] Completed agent's work schedule
+INFO:root:[14:15:31] Agent creation complete
+INFO:root:[14:15:31] INITIALISATION COMPLETE
+INFO:root:[14:15:31] 
+INFO:root:[14:15:31] COMMENCING STEP CALCULATION
+INFO:root:[14:42:53] STEP CALCULATION COMPLETE
+INFO:root:[14:42:53] 
+INFO:root:[14:42:53] Summary
+INFO:root:[14:42:53] Memory useage | Base: 3 MB Agents: 659 MB Steps: 1411 MB Total: 6929 MB
+INFO:root:[14:42:53] Cars that would run flat: None
+INFO:root:[14:42:53] Route (min / avg / max) = 2.0 km / 17.6 km / 90.2 km
+INFO:root:[14:42:53] Average Consumption 36.8 kWh
+INFO:root:[14:42:53] Apartments: 719, Houses wo PV: 4284, Houses w PV: 997
+INFO:root:[14:42:53] COMMENCING DATA EVALUATION
+INFO:root:[14:42:55] charge_received_work: 19131.4 kWh
+INFO:root:[14:42:55] charge_received_pv: 6440.6 kWh
+INFO:root:[14:42:55] charge_received_grid: 195018.0 kWh
+INFO:root:[14:42:55] charge_received_public: 36.2 kWh
+INFO:root:[14:42:55] charge_held_back: 0.0 kWh
+INFO:root:[14:42:55] Company Charger Utilisation: 11.52%
+INFO:root:[14:42:55] Total Company Total Revenue: $5548.12
+INFO:root:[14:42:55] Total Company Revenue per Charger: $1445.87
+INFO:root:[14:42:55] Average Electricity Cost Apartments: $/km 0.0554
+INFO:root:[14:42:55] Average Electricity Cost House wo PV: $/km 0.0514
+INFO:root:[14:42:55] Average Electricity Cost House w PV: $/km 0.0455
+INFO:root:[14:42:55] Average Electricity Cost: $/km 0.0512
+INFO:root:[14:42:55] DATA EVALUATION COMPLETE
+INFO:root:[14:44:29] INITIALISING CHARGING MODEL
+INFO:root:[14:44:30] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[14:44:30] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[14:44:30] Selected work charge price: 0.30 $/kWh, employees per charger: 55
+INFO:root:[14:44:30] Start to create agents
+INFO:root:[14:44:32] Agent creation complete
+INFO:root:[14:44:32] Create agent's work schedule
+INFO:root:[14:44:48] Completed agent's work schedule
+INFO:root:[14:44:48] Agent creation complete
+INFO:root:[14:44:48] INITIALISATION COMPLETE
+INFO:root:[14:44:48] 
+INFO:root:[14:44:48] COMMENCING STEP CALCULATION
+INFO:root:[15:12:37] STEP CALCULATION COMPLETE
+INFO:root:[15:12:37] 
+INFO:root:[15:12:37] Summary
+INFO:root:[15:12:37] Memory useage | Base: 3 MB Agents: 659 MB Steps: 1413 MB Total: 6931 MB
+INFO:root:[15:12:37] Cars that would run flat: None
+INFO:root:[15:12:38] Route (min / avg / max) = 2.0 km / 17.7 km / 93.7 km
+INFO:root:[15:12:38] Average Consumption 36.8 kWh
+INFO:root:[15:12:38] Apartments: 656, Houses wo PV: 4250, Houses w PV: 1094
+INFO:root:[15:12:38] COMMENCING DATA EVALUATION
+INFO:root:[15:12:40] charge_received_work: 17589.6 kWh
+INFO:root:[15:12:40] charge_received_pv: 6786.7 kWh
+INFO:root:[15:12:40] charge_received_grid: 196490.6 kWh
+INFO:root:[15:12:40] charge_received_public: 12.1 kWh
+INFO:root:[15:12:40] charge_held_back: 0.0 kWh
+INFO:root:[15:12:40] Company Charger Utilisation: 11.37%
+INFO:root:[15:12:40] Total Company Total Revenue: $5276.89
+INFO:root:[15:12:40] Total Company Revenue per Charger: $1512.80
+INFO:root:[15:12:40] Average Electricity Cost Apartments: $/km 0.0570
+INFO:root:[15:12:40] Average Electricity Cost House wo PV: $/km 0.0516
+INFO:root:[15:12:40] Average Electricity Cost House w PV: $/km 0.0455
+INFO:root:[15:12:40] Average Electricity Cost: $/km 0.0513
+INFO:root:[15:12:40] DATA EVALUATION COMPLETE
+INFO:root:[15:14:14] INITIALISING CHARGING MODEL
+INFO:root:[15:14:16] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[15:14:16] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[15:14:16] Selected work charge price: 0.31 $/kWh, employees per charger: 55
+INFO:root:[15:14:16] Start to create agents
+INFO:root:[15:14:17] Agent creation complete
+INFO:root:[15:14:17] Create agent's work schedule
+INFO:root:[15:14:33] Completed agent's work schedule
+INFO:root:[15:14:33] Agent creation complete
+INFO:root:[15:14:33] INITIALISATION COMPLETE
+INFO:root:[15:14:33] 
+INFO:root:[15:14:33] COMMENCING STEP CALCULATION
+INFO:root:[15:42:52] STEP CALCULATION COMPLETE
+INFO:root:[15:42:52] 
+INFO:root:[15:42:52] Summary
+INFO:root:[15:42:52] Memory useage | Base: 3 MB Agents: 655 MB Steps: 1411 MB Total: 6929 MB
+INFO:root:[15:42:52] Cars that would run flat: None
+INFO:root:[15:42:52] Route (min / avg / max) = 2.0 km / 17.5 km / 102.7 km
+INFO:root:[15:42:52] Average Consumption 36.7 kWh
+INFO:root:[15:42:52] Apartments: 684, Houses wo PV: 4279, Houses w PV: 1037
+INFO:root:[15:42:52] COMMENCING DATA EVALUATION
+INFO:root:[15:42:54] charge_received_work: 19398.9 kWh
+INFO:root:[15:42:54] charge_received_pv: 6850.1 kWh
+INFO:root:[15:42:54] charge_received_grid: 194058.2 kWh
+INFO:root:[15:42:54] charge_received_public: 103.4 kWh
+INFO:root:[15:42:54] charge_held_back: 0.0 kWh
+INFO:root:[15:42:54] Company Charger Utilisation: 12.57%
+INFO:root:[15:42:54] Total Company Total Revenue: $6013.66
+INFO:root:[15:42:54] Total Company Revenue per Charger: $1723.91
+INFO:root:[15:42:54] Average Electricity Cost Apartments: $/km 0.0595
+INFO:root:[15:42:54] Average Electricity Cost House wo PV: $/km 0.0514
+INFO:root:[15:42:54] Average Electricity Cost House w PV: $/km 0.0453
+INFO:root:[15:42:54] Average Electricity Cost: $/km 0.0512
+INFO:root:[15:42:54] DATA EVALUATION COMPLETE
+INFO:root:[15:44:27] INITIALISING CHARGING MODEL
+INFO:root:[15:44:28] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[15:44:28] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[15:44:28] Selected work charge price: 0.32 $/kWh, employees per charger: 55
+INFO:root:[15:44:28] Start to create agents
+INFO:root:[15:44:30] Agent creation complete
+INFO:root:[15:44:30] Create agent's work schedule
+INFO:root:[15:44:46] Completed agent's work schedule
+INFO:root:[15:44:46] Agent creation complete
+INFO:root:[15:44:46] INITIALISATION COMPLETE
+INFO:root:[15:44:46] 
+INFO:root:[15:44:46] COMMENCING STEP CALCULATION
+INFO:root:[16:13:23] STEP CALCULATION COMPLETE
+INFO:root:[16:13:23] 
+INFO:root:[16:13:23] Summary
+INFO:root:[16:13:23] Memory useage | Base: 2 MB Agents: 655 MB Steps: 1407 MB Total: 6925 MB
+INFO:root:[16:13:23] Cars that would run flat: None
+INFO:root:[16:13:24] Route (min / avg / max) = 2.0 km / 17.5 km / 91.8 km
+INFO:root:[16:13:24] Average Consumption 36.3 kWh
+INFO:root:[16:13:24] Apartments: 698, Houses wo PV: 4313, Houses w PV: 989
+INFO:root:[16:13:24] COMMENCING DATA EVALUATION
+INFO:root:[16:13:26] charge_received_work: 18706.6 kWh
+INFO:root:[16:13:26] charge_received_pv: 6188.9 kWh
+INFO:root:[16:13:26] charge_received_grid: 192614.6 kWh
+INFO:root:[16:13:26] charge_received_public: 126.5 kWh
+INFO:root:[16:13:26] charge_held_back: 0.0 kWh
+INFO:root:[16:13:26] Company Charger Utilisation: 12.06%
+INFO:root:[16:13:26] Total Company Total Revenue: $5986.12
+INFO:root:[16:13:26] Total Company Revenue per Charger: $1676.54
+INFO:root:[16:13:26] Average Electricity Cost Apartments: $/km 0.0614
+INFO:root:[16:13:26] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[16:13:26] Average Electricity Cost House w PV: $/km 0.0454
+INFO:root:[16:13:26] Average Electricity Cost: $/km 0.0512
+INFO:root:[16:13:26] DATA EVALUATION COMPLETE
+INFO:root:[16:15:00] INITIALISING CHARGING MODEL
+INFO:root:[16:15:02] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[16:15:02] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[16:15:02] Selected work charge price: 0.33 $/kWh, employees per charger: 55
+INFO:root:[16:15:02] Start to create agents
+INFO:root:[16:15:04] Agent creation complete
+INFO:root:[16:15:04] Create agent's work schedule
+INFO:root:[16:15:19] Completed agent's work schedule
+INFO:root:[16:15:19] Agent creation complete
+INFO:root:[16:15:19] INITIALISATION COMPLETE
+INFO:root:[16:15:19] 
+INFO:root:[16:15:19] COMMENCING STEP CALCULATION
+INFO:root:[16:43:50] STEP CALCULATION COMPLETE
+INFO:root:[16:43:50] 
+INFO:root:[16:43:50] Summary
+INFO:root:[16:43:50] Memory useage | Base: 2 MB Agents: 651 MB Steps: 1414 MB Total: 6932 MB
+INFO:root:[16:43:50] Cars that would run flat: None
+INFO:root:[16:43:50] Route (min / avg / max) = 2.0 km / 17.7 km / 102.7 km
+INFO:root:[16:43:50] Average Consumption 37.0 kWh
+INFO:root:[16:43:50] Apartments: 662, Houses wo PV: 4299, Houses w PV: 1039
+INFO:root:[16:43:50] COMMENCING DATA EVALUATION
+INFO:root:[16:43:52] charge_received_work: 18112.5 kWh
+INFO:root:[16:43:52] charge_received_pv: 7451.5 kWh
+INFO:root:[16:43:52] charge_received_grid: 196262.8 kWh
+INFO:root:[16:43:52] charge_received_public: 89.0 kWh
+INFO:root:[16:43:52] charge_held_back: 0.0 kWh
+INFO:root:[16:43:52] Company Charger Utilisation: 11.34%
+INFO:root:[16:43:52] Total Company Total Revenue: $5977.11
+INFO:root:[16:43:52] Total Company Revenue per Charger: $1626.76
+INFO:root:[16:43:52] Average Electricity Cost Apartments: $/km 0.0621
+INFO:root:[16:43:52] Average Electricity Cost House wo PV: $/km 0.0515
+INFO:root:[16:43:52] Average Electricity Cost House w PV: $/km 0.0452
+INFO:root:[16:43:52] Average Electricity Cost: $/km 0.0513
+INFO:root:[16:43:52] DATA EVALUATION COMPLETE
+INFO:root:[16:45:28] INITIALISING CHARGING MODEL
+INFO:root:[16:45:29] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[16:45:29] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[16:45:29] Selected work charge price: 0.04 $/kWh, employees per charger: 61
+INFO:root:[16:45:29] Start to create agents
+INFO:root:[16:45:31] Agent creation complete
+INFO:root:[16:45:31] Create agent's work schedule
+INFO:root:[16:45:47] Completed agent's work schedule
+INFO:root:[16:45:47] Agent creation complete
+INFO:root:[16:45:47] INITIALISATION COMPLETE
+INFO:root:[16:45:47] 
+INFO:root:[16:45:47] COMMENCING STEP CALCULATION
+INFO:root:[17:14:07] STEP CALCULATION COMPLETE
+INFO:root:[17:14:07] 
+INFO:root:[17:14:07] Summary
+INFO:root:[17:14:07] Memory useage | Base: 2 MB Agents: 649 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[17:14:07] Cars that would run flat: None
+INFO:root:[17:14:07] Route (min / avg / max) = 2.0 km / 17.8 km / 102.9 km
+INFO:root:[17:14:07] Average Consumption 37.2 kWh
+INFO:root:[17:14:07] Apartments: 685, Houses wo PV: 4265, Houses w PV: 1050
+INFO:root:[17:14:07] COMMENCING DATA EVALUATION
+INFO:root:[17:14:09] charge_received_work: 115605.2 kWh
+INFO:root:[17:14:09] charge_received_pv: 3368.2 kWh
+INFO:root:[17:14:09] charge_received_grid: 76713.5 kWh
+INFO:root:[17:14:09] charge_received_public: 27503.8 kWh
+INFO:root:[17:14:09] charge_held_back: 0.0 kWh
+INFO:root:[17:14:09] Company Charger Utilisation: 58.35%
+INFO:root:[17:14:09] Total Company Total Revenue: $4624.21
+INFO:root:[17:14:09] Total Company Revenue per Charger: $1455.69
+INFO:root:[17:14:09] Average Electricity Cost Apartments: $/km 0.0490
+INFO:root:[17:14:09] Average Electricity Cost House wo PV: $/km 0.0332
+INFO:root:[17:14:09] Average Electricity Cost House w PV: $/km 0.0304
+INFO:root:[17:14:09] Average Electricity Cost: $/km 0.0333
+INFO:root:[17:14:09] DATA EVALUATION COMPLETE
+INFO:root:[17:15:43] INITIALISING CHARGING MODEL
+INFO:root:[17:15:44] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[17:15:44] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[17:15:44] Selected work charge price: 0.05 $/kWh, employees per charger: 61
+INFO:root:[17:15:44] Start to create agents
+INFO:root:[17:15:46] Agent creation complete
+INFO:root:[17:15:46] Create agent's work schedule
+INFO:root:[17:16:01] Completed agent's work schedule
+INFO:root:[17:16:01] Agent creation complete
+INFO:root:[17:16:01] INITIALISATION COMPLETE
+INFO:root:[17:16:01] 
+INFO:root:[17:16:01] COMMENCING STEP CALCULATION
+INFO:root:[17:44:27] STEP CALCULATION COMPLETE
+INFO:root:[17:44:27] 
+INFO:root:[17:44:27] Summary
+INFO:root:[17:44:27] Memory useage | Base: 2 MB Agents: 647 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[17:44:27] Cars that would run flat: None
+INFO:root:[17:44:27] Route (min / avg / max) = 2.0 km / 17.9 km / 89.6 km
+INFO:root:[17:44:27] Average Consumption 37.3 kWh
+INFO:root:[17:44:27] Apartments: 666, Houses wo PV: 4282, Houses w PV: 1052
+INFO:root:[17:44:27] COMMENCING DATA EVALUATION
+INFO:root:[17:44:29] charge_received_work: 115437.3 kWh
+INFO:root:[17:44:29] charge_received_pv: 3540.5 kWh
+INFO:root:[17:44:29] charge_received_grid: 76924.4 kWh
+INFO:root:[17:44:29] charge_received_public: 27953.4 kWh
+INFO:root:[17:44:29] charge_held_back: 0.0 kWh
+INFO:root:[17:44:29] Company Charger Utilisation: 59.33%
+INFO:root:[17:44:29] Total Company Total Revenue: $5771.87
+INFO:root:[17:44:29] Total Company Revenue per Charger: $1841.41
+INFO:root:[17:44:29] Average Electricity Cost Apartments: $/km 0.0479
+INFO:root:[17:44:29] Average Electricity Cost House wo PV: $/km 0.0343
+INFO:root:[17:44:29] Average Electricity Cost House w PV: $/km 0.0323
+INFO:root:[17:44:29] Average Electricity Cost: $/km 0.0344
+INFO:root:[17:44:29] DATA EVALUATION COMPLETE
+INFO:root:[17:46:04] INITIALISING CHARGING MODEL
+INFO:root:[17:46:06] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[17:46:06] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[17:46:06] Selected work charge price: 0.06 $/kWh, employees per charger: 61
+INFO:root:[17:46:06] Start to create agents
+INFO:root:[17:46:08] Agent creation complete
+INFO:root:[17:46:08] Create agent's work schedule
+INFO:root:[17:46:23] Completed agent's work schedule
+INFO:root:[17:46:23] Agent creation complete
+INFO:root:[17:46:23] INITIALISATION COMPLETE
+INFO:root:[17:46:23] 
+INFO:root:[17:46:23] COMMENCING STEP CALCULATION
+INFO:root:[18:15:12] STEP CALCULATION COMPLETE
+INFO:root:[18:15:12] 
+INFO:root:[18:15:12] Summary
+INFO:root:[18:15:12] Memory useage | Base: 3 MB Agents: 647 MB Steps: 1323 MB Total: 6838 MB
+INFO:root:[18:15:12] Cars that would run flat: None
+INFO:root:[18:15:12] Route (min / avg / max) = 2.0 km / 17.4 km / 90.2 km
+INFO:root:[18:15:12] Average Consumption 36.4 kWh
+INFO:root:[18:15:12] Apartments: 658, Houses wo PV: 4303, Houses w PV: 1039
+INFO:root:[18:15:12] COMMENCING DATA EVALUATION
+INFO:root:[18:15:14] charge_received_work: 113466.2 kWh
+INFO:root:[18:15:14] charge_received_pv: 3308.9 kWh
+INFO:root:[18:15:14] charge_received_grid: 75053.8 kWh
+INFO:root:[18:15:14] charge_received_public: 26678.1 kWh
+INFO:root:[18:15:14] charge_held_back: 0.0 kWh
+INFO:root:[18:15:14] Company Charger Utilisation: 57.37%
+INFO:root:[18:15:14] Total Company Total Revenue: $6807.97
+INFO:root:[18:15:14] Total Company Revenue per Charger: $2126.05
+INFO:root:[18:15:14] Average Electricity Cost Apartments: $/km 0.0530
+INFO:root:[18:15:14] Average Electricity Cost House wo PV: $/km 0.0351
+INFO:root:[18:15:14] Average Electricity Cost House w PV: $/km 0.0320
+INFO:root:[18:15:14] Average Electricity Cost: $/km 0.0351
+INFO:root:[18:15:14] DATA EVALUATION COMPLETE
+INFO:root:[18:16:48] INITIALISING CHARGING MODEL
+INFO:root:[18:16:49] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[18:16:49] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[18:16:49] Selected work charge price: 0.07 $/kWh, employees per charger: 61
+INFO:root:[18:16:49] Start to create agents
+INFO:root:[18:16:51] Agent creation complete
+INFO:root:[18:16:51] Create agent's work schedule
+INFO:root:[18:17:06] Completed agent's work schedule
+INFO:root:[18:17:06] Agent creation complete
+INFO:root:[18:17:06] INITIALISATION COMPLETE
+INFO:root:[18:17:06] 
+INFO:root:[18:17:06] COMMENCING STEP CALCULATION
+INFO:root:[18:45:18] STEP CALCULATION COMPLETE
+INFO:root:[18:45:18] 
+INFO:root:[18:45:18] Summary
+INFO:root:[18:45:18] Memory useage | Base: 3 MB Agents: 641 MB Steps: 1314 MB Total: 6833 MB
+INFO:root:[18:45:18] Cars that would run flat: None
+INFO:root:[18:45:18] Route (min / avg / max) = 2.0 km / 17.4 km / 93.7 km
+INFO:root:[18:45:18] Average Consumption 36.1 kWh
+INFO:root:[18:45:18] Apartments: 701, Houses wo PV: 4336, Houses w PV: 963
+INFO:root:[18:45:18] COMMENCING DATA EVALUATION
+INFO:root:[18:45:20] charge_received_work: 114652.6 kWh
+INFO:root:[18:45:20] charge_received_pv: 3256.2 kWh
+INFO:root:[18:45:20] charge_received_grid: 71495.5 kWh
+INFO:root:[18:45:20] charge_received_public: 27102.0 kWh
+INFO:root:[18:45:20] charge_held_back: 0.0 kWh
+INFO:root:[18:45:20] Company Charger Utilisation: 58.27%
+INFO:root:[18:45:20] Total Company Total Revenue: $8025.68
+INFO:root:[18:45:20] Total Company Revenue per Charger: $2539.33
+INFO:root:[18:45:20] Average Electricity Cost Apartments: $/km 0.0514
+INFO:root:[18:45:20] Average Electricity Cost House wo PV: $/km 0.0354
+INFO:root:[18:45:20] Average Electricity Cost House w PV: $/km 0.0335
+INFO:root:[18:45:20] Average Electricity Cost: $/km 0.0356
+INFO:root:[18:45:20] DATA EVALUATION COMPLETE
+INFO:root:[18:46:54] INITIALISING CHARGING MODEL
+INFO:root:[18:46:55] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[18:46:55] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[18:46:55] Selected work charge price: 0.08 $/kWh, employees per charger: 61
+INFO:root:[18:46:55] Start to create agents
+INFO:root:[18:46:57] Agent creation complete
+INFO:root:[18:46:57] Create agent's work schedule
+INFO:root:[18:47:13] Completed agent's work schedule
+INFO:root:[18:47:13] Agent creation complete
+INFO:root:[18:47:13] INITIALISATION COMPLETE
+INFO:root:[18:47:13] 
+INFO:root:[18:47:13] COMMENCING STEP CALCULATION
+INFO:root:[19:15:53] STEP CALCULATION COMPLETE
+INFO:root:[19:15:53] 
+INFO:root:[19:15:53] Summary
+INFO:root:[19:15:53] Memory useage | Base: 5 MB Agents: 639 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[19:15:53] Cars that would run flat: None
+INFO:root:[19:15:53] Route (min / avg / max) = 2.0 km / 17.7 km / 90.2 km
+INFO:root:[19:15:53] Average Consumption 37.0 kWh
+INFO:root:[19:15:53] Apartments: 670, Houses wo PV: 4279, Houses w PV: 1051
+INFO:root:[19:15:53] COMMENCING DATA EVALUATION
+INFO:root:[19:15:55] charge_received_work: 114274.6 kWh
+INFO:root:[19:15:55] charge_received_pv: 3558.2 kWh
+INFO:root:[19:15:55] charge_received_grid: 75997.7 kWh
+INFO:root:[19:15:55] charge_received_public: 28025.7 kWh
+INFO:root:[19:15:55] charge_held_back: 0.0 kWh
+INFO:root:[19:15:55] Company Charger Utilisation: 58.88%
+INFO:root:[19:15:55] Total Company Total Revenue: $9141.97
+INFO:root:[19:15:55] Total Company Revenue per Charger: $2891.86
+INFO:root:[19:15:55] Average Electricity Cost Apartments: $/km 0.0549
+INFO:root:[19:15:55] Average Electricity Cost House wo PV: $/km 0.0374
+INFO:root:[19:15:55] Average Electricity Cost House w PV: $/km 0.0340
+INFO:root:[19:15:55] Average Electricity Cost: $/km 0.0375
+INFO:root:[19:15:55] DATA EVALUATION COMPLETE
+INFO:root:[19:17:30] INITIALISING CHARGING MODEL
+INFO:root:[19:17:32] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[19:17:32] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[19:17:32] Selected work charge price: 0.09 $/kWh, employees per charger: 61
+INFO:root:[19:17:32] Start to create agents
+INFO:root:[19:17:33] Agent creation complete
+INFO:root:[19:17:33] Create agent's work schedule
+INFO:root:[19:17:49] Completed agent's work schedule
+INFO:root:[19:17:49] Agent creation complete
+INFO:root:[19:17:49] INITIALISATION COMPLETE
+INFO:root:[19:17:49] 
+INFO:root:[19:17:49] COMMENCING STEP CALCULATION
+INFO:root:[19:46:02] STEP CALCULATION COMPLETE
+INFO:root:[19:46:02] 
+INFO:root:[19:46:02] Summary
+INFO:root:[19:46:02] Memory useage | Base: 3 MB Agents: 637 MB Steps: 1317 MB Total: 6836 MB
+INFO:root:[19:46:02] Cars that would run flat: None
+INFO:root:[19:46:03] Route (min / avg / max) = 2.0 km / 17.6 km / 87.4 km
+INFO:root:[19:46:03] Average Consumption 36.4 kWh
+INFO:root:[19:46:03] Apartments: 685, Houses wo PV: 4276, Houses w PV: 1039
+INFO:root:[19:46:03] COMMENCING DATA EVALUATION
+INFO:root:[19:46:04] charge_received_work: 115441.1 kWh
+INFO:root:[19:46:04] charge_received_pv: 3597.8 kWh
+INFO:root:[19:46:04] charge_received_grid: 73287.3 kWh
+INFO:root:[19:46:04] charge_received_public: 26402.1 kWh
+INFO:root:[19:46:04] charge_held_back: 0.0 kWh
+INFO:root:[19:46:04] Company Charger Utilisation: 58.57%
+INFO:root:[19:46:04] Total Company Total Revenue: $10389.70
+INFO:root:[19:46:04] Total Company Revenue per Charger: $3289.39
+INFO:root:[19:46:04] Average Electricity Cost Apartments: $/km 0.0547
+INFO:root:[19:46:04] Average Electricity Cost House wo PV: $/km 0.0375
+INFO:root:[19:46:04] Average Electricity Cost House w PV: $/km 0.0341
+INFO:root:[19:46:04] Average Electricity Cost: $/km 0.0376
+INFO:root:[19:46:04] DATA EVALUATION COMPLETE
+INFO:root:[19:47:39] INITIALISING CHARGING MODEL
+INFO:root:[19:47:41] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[19:47:41] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[19:47:41] Selected work charge price: 0.10 $/kWh, employees per charger: 61
+INFO:root:[19:47:41] Start to create agents
+INFO:root:[19:47:42] Agent creation complete
+INFO:root:[19:47:42] Create agent's work schedule
+INFO:root:[19:47:58] Completed agent's work schedule
+INFO:root:[19:47:58] Agent creation complete
+INFO:root:[19:47:58] INITIALISATION COMPLETE
+INFO:root:[19:47:58] 
+INFO:root:[19:47:58] COMMENCING STEP CALCULATION
+INFO:root:[20:15:51] STEP CALCULATION COMPLETE
+INFO:root:[20:15:51] 
+INFO:root:[20:15:51] Summary
+INFO:root:[20:15:51] Memory useage | Base: 3 MB Agents: 637 MB Steps: 1319 MB Total: 6838 MB
+INFO:root:[20:15:51] Cars that would run flat: None
+INFO:root:[20:15:51] Route (min / avg / max) = 2.0 km / 17.6 km / 100.7 km
+INFO:root:[20:15:51] Average Consumption 36.9 kWh
+INFO:root:[20:15:51] Apartments: 709, Houses wo PV: 4259, Houses w PV: 1032
+INFO:root:[20:15:51] COMMENCING DATA EVALUATION
+INFO:root:[20:15:53] charge_received_work: 115602.3 kWh
+INFO:root:[20:15:53] charge_received_pv: 3082.8 kWh
+INFO:root:[20:15:53] charge_received_grid: 74718.8 kWh
+INFO:root:[20:15:53] charge_received_public: 27913.5 kWh
+INFO:root:[20:15:53] charge_held_back: 0.0 kWh
+INFO:root:[20:15:53] Company Charger Utilisation: 58.95%
+INFO:root:[20:15:53] Total Company Total Revenue: $11560.23
+INFO:root:[20:15:53] Total Company Revenue per Charger: $3672.51
+INFO:root:[20:15:53] Average Electricity Cost Apartments: $/km 0.0563
+INFO:root:[20:15:53] Average Electricity Cost House wo PV: $/km 0.0390
+INFO:root:[20:15:53] Average Electricity Cost House w PV: $/km 0.0370
+INFO:root:[20:15:53] Average Electricity Cost: $/km 0.0392
+INFO:root:[20:15:53] DATA EVALUATION COMPLETE
+INFO:root:[20:17:28] INITIALISING CHARGING MODEL
+INFO:root:[20:17:30] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[20:17:30] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[20:17:30] Selected work charge price: 0.11 $/kWh, employees per charger: 61
+INFO:root:[20:17:30] Start to create agents
+INFO:root:[20:17:31] Agent creation complete
+INFO:root:[20:17:31] Create agent's work schedule
+INFO:root:[20:17:47] Completed agent's work schedule
+INFO:root:[20:17:47] Agent creation complete
+INFO:root:[20:17:47] INITIALISATION COMPLETE
+INFO:root:[20:17:47] 
+INFO:root:[20:17:47] COMMENCING STEP CALCULATION
+INFO:root:[20:46:21] STEP CALCULATION COMPLETE
+INFO:root:[20:46:21] 
+INFO:root:[20:46:21] Summary
+INFO:root:[20:46:21] Memory useage | Base: 2 MB Agents: 633 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[20:46:21] Cars that would run flat: None
+INFO:root:[20:46:21] Route (min / avg / max) = 2.0 km / 17.8 km / 91.8 km
+INFO:root:[20:46:21] Average Consumption 37.1 kWh
+INFO:root:[20:46:21] Apartments: 637, Houses wo PV: 4291, Houses w PV: 1072
+INFO:root:[20:46:21] COMMENCING DATA EVALUATION
+INFO:root:[20:46:23] charge_received_work: 115145.1 kWh
+INFO:root:[20:46:23] charge_received_pv: 3685.6 kWh
+INFO:root:[20:46:23] charge_received_grid: 76111.2 kWh
+INFO:root:[20:46:23] charge_received_public: 27937.0 kWh
+INFO:root:[20:46:23] charge_held_back: 0.0 kWh
+INFO:root:[20:46:23] Company Charger Utilisation: 58.52%
+INFO:root:[20:46:23] Total Company Total Revenue: $12665.96
+INFO:root:[20:46:23] Total Company Revenue per Charger: $3968.26
+INFO:root:[20:46:23] Average Electricity Cost Apartments: $/km 0.0585
+INFO:root:[20:46:23] Average Electricity Cost House wo PV: $/km 0.0400
+INFO:root:[20:46:23] Average Electricity Cost House w PV: $/km 0.0379
+INFO:root:[20:46:23] Average Electricity Cost: $/km 0.0402
+INFO:root:[20:46:23] DATA EVALUATION COMPLETE
+INFO:root:[20:47:58] INITIALISING CHARGING MODEL
+INFO:root:[20:48:00] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[20:48:00] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[20:48:00] Selected work charge price: 0.12 $/kWh, employees per charger: 61
+INFO:root:[20:48:00] Start to create agents
+INFO:root:[20:48:01] Agent creation complete
+INFO:root:[20:48:01] Create agent's work schedule
+INFO:root:[20:48:17] Completed agent's work schedule
+INFO:root:[20:48:17] Agent creation complete
+INFO:root:[20:48:17] INITIALISATION COMPLETE
+INFO:root:[20:48:17] 
+INFO:root:[20:48:17] COMMENCING STEP CALCULATION
+INFO:root:[21:16:55] STEP CALCULATION COMPLETE
+INFO:root:[21:16:55] 
+INFO:root:[21:16:55] Summary
+INFO:root:[21:16:55] Memory useage | Base: 2 MB Agents: 633 MB Steps: 1321 MB Total: 6836 MB
+INFO:root:[21:16:55] Cars that would run flat: None
+INFO:root:[21:16:56] Route (min / avg / max) = 2.0 km / 17.5 km / 89.6 km
+INFO:root:[21:16:56] Average Consumption 36.3 kWh
+INFO:root:[21:16:56] Apartments: 650, Houses wo PV: 4334, Houses w PV: 1016
+INFO:root:[21:16:56] COMMENCING DATA EVALUATION
+INFO:root:[21:16:57] charge_received_work: 113778.7 kWh
+INFO:root:[21:16:57] charge_received_pv: 3484.0 kWh
+INFO:root:[21:16:57] charge_received_grid: 73281.0 kWh
+INFO:root:[21:16:57] charge_received_public: 27443.5 kWh
+INFO:root:[21:16:57] charge_held_back: 0.0 kWh
+INFO:root:[21:16:57] Company Charger Utilisation: 58.16%
+INFO:root:[21:16:57] Total Company Total Revenue: $13653.45
+INFO:root:[21:16:57] Total Company Revenue per Charger: $4335.55
+INFO:root:[21:16:57] Average Electricity Cost Apartments: $/km 0.0593
+INFO:root:[21:16:57] Average Electricity Cost House wo PV: $/km 0.0408
+INFO:root:[21:16:57] Average Electricity Cost House w PV: $/km 0.0383
+INFO:root:[21:16:57] Average Electricity Cost: $/km 0.0410
+INFO:root:[21:16:57] DATA EVALUATION COMPLETE
+INFO:root:[21:18:34] INITIALISING CHARGING MODEL
+INFO:root:[21:18:35] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[21:18:35] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[21:18:35] Selected work charge price: 0.13 $/kWh, employees per charger: 61
+INFO:root:[21:18:35] Start to create agents
+INFO:root:[21:18:37] Agent creation complete
+INFO:root:[21:18:37] Create agent's work schedule
+INFO:root:[21:18:53] Completed agent's work schedule
+INFO:root:[21:18:53] Agent creation complete
+INFO:root:[21:18:53] INITIALISATION COMPLETE
+INFO:root:[21:18:53] 
+INFO:root:[21:18:53] COMMENCING STEP CALCULATION
+INFO:root:[21:47:00] STEP CALCULATION COMPLETE
+INFO:root:[21:47:00] 
+INFO:root:[21:47:00] Summary
+INFO:root:[21:47:00] Memory useage | Base: 2 MB Agents: 631 MB Steps: 1316 MB Total: 6835 MB
+INFO:root:[21:47:00] Cars that would run flat: None
+INFO:root:[21:47:00] Route (min / avg / max) = 2.0 km / 17.5 km / 119.1 km
+INFO:root:[21:47:01] Average Consumption 36.5 kWh
+INFO:root:[21:47:01] Apartments: 674, Houses wo PV: 4267, Houses w PV: 1059
+INFO:root:[21:47:01] COMMENCING DATA EVALUATION
+INFO:root:[21:47:02] charge_received_work: 116340.3 kWh
+INFO:root:[21:47:02] charge_received_pv: 3586.8 kWh
+INFO:root:[21:47:02] charge_received_grid: 71980.9 kWh
+INFO:root:[21:47:02] charge_received_public: 27016.5 kWh
+INFO:root:[21:47:02] charge_held_back: 0.0 kWh
+INFO:root:[21:47:02] Company Charger Utilisation: 57.41%
+INFO:root:[21:47:02] Total Company Total Revenue: $15124.23
+INFO:root:[21:47:02] Total Company Revenue per Charger: $4639.21
+INFO:root:[21:47:02] Average Electricity Cost Apartments: $/km 0.0592
+INFO:root:[21:47:02] Average Electricity Cost House wo PV: $/km 0.0413
+INFO:root:[21:47:02] Average Electricity Cost House w PV: $/km 0.0396
+INFO:root:[21:47:02] Average Electricity Cost: $/km 0.0415
+INFO:root:[21:47:02] DATA EVALUATION COMPLETE
+INFO:root:[21:48:38] INITIALISING CHARGING MODEL
+INFO:root:[21:48:40] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[21:48:40] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[21:48:40] Selected work charge price: 0.14 $/kWh, employees per charger: 61
+INFO:root:[21:48:40] Start to create agents
+INFO:root:[21:48:41] Agent creation complete
+INFO:root:[21:48:41] Create agent's work schedule
+INFO:root:[21:48:57] Completed agent's work schedule
+INFO:root:[21:48:57] Agent creation complete
+INFO:root:[21:48:57] INITIALISATION COMPLETE
+INFO:root:[21:48:57] 
+INFO:root:[21:48:57] COMMENCING STEP CALCULATION
+INFO:root:[22:17:56] STEP CALCULATION COMPLETE
+INFO:root:[22:17:56] 
+INFO:root:[22:17:56] Summary
+INFO:root:[22:17:56] Memory useage | Base: 3 MB Agents: 627 MB Steps: 1317 MB Total: 6835 MB
+INFO:root:[22:17:56] Cars that would run flat: None
+INFO:root:[22:17:56] Route (min / avg / max) = 2.0 km / 17.3 km / 91.8 km
+INFO:root:[22:17:56] Average Consumption 36.2 kWh
+INFO:root:[22:17:56] Apartments: 632, Houses wo PV: 4299, Houses w PV: 1069
+INFO:root:[22:17:56] COMMENCING DATA EVALUATION
+INFO:root:[22:17:58] charge_received_work: 113878.4 kWh
+INFO:root:[22:17:58] charge_received_pv: 3419.9 kWh
+INFO:root:[22:17:58] charge_received_grid: 73761.2 kWh
+INFO:root:[22:17:58] charge_received_public: 26103.5 kWh
+INFO:root:[22:17:58] charge_held_back: 0.0 kWh
+INFO:root:[22:17:58] Company Charger Utilisation: 56.23%
+INFO:root:[22:17:58] Total Company Total Revenue: $15942.97
+INFO:root:[22:17:58] Total Company Revenue per Charger: $4859.34
+INFO:root:[22:17:58] Average Electricity Cost Apartments: $/km 0.0581
+INFO:root:[22:17:58] Average Electricity Cost House wo PV: $/km 0.0432
+INFO:root:[22:17:58] Average Electricity Cost House w PV: $/km 0.0396
+INFO:root:[22:17:58] Average Electricity Cost: $/km 0.0432
+INFO:root:[22:17:58] DATA EVALUATION COMPLETE
+INFO:root:[22:19:32] INITIALISING CHARGING MODEL
+INFO:root:[22:19:33] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[22:19:33] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[22:19:33] Selected work charge price: 0.15 $/kWh, employees per charger: 61
+INFO:root:[22:19:33] Start to create agents
+INFO:root:[22:19:35] Agent creation complete
+INFO:root:[22:19:35] Create agent's work schedule
+INFO:root:[22:19:51] Completed agent's work schedule
+INFO:root:[22:19:51] Agent creation complete
+INFO:root:[22:19:51] INITIALISATION COMPLETE
+INFO:root:[22:19:51] 
+INFO:root:[22:19:51] COMMENCING STEP CALCULATION
+INFO:root:[22:48:16] STEP CALCULATION COMPLETE
+INFO:root:[22:48:16] 
+INFO:root:[22:48:16] Summary
+INFO:root:[22:48:16] Memory useage | Base: 2 MB Agents: 629 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[22:48:16] Cars that would run flat: None
+INFO:root:[22:48:17] Route (min / avg / max) = 2.0 km / 17.6 km / 102.9 km
+INFO:root:[22:48:17] Average Consumption 37.0 kWh
+INFO:root:[22:48:17] Apartments: 627, Houses wo PV: 4279, Houses w PV: 1094
+INFO:root:[22:48:17] COMMENCING DATA EVALUATION
+INFO:root:[22:48:19] charge_received_work: 115833.5 kWh
+INFO:root:[22:48:19] charge_received_pv: 3532.5 kWh
+INFO:root:[22:48:19] charge_received_grid: 75887.3 kWh
+INFO:root:[22:48:19] charge_received_public: 26897.9 kWh
+INFO:root:[22:48:19] charge_held_back: 0.0 kWh
+INFO:root:[22:48:19] Company Charger Utilisation: 59.73%
+INFO:root:[22:48:19] Total Company Total Revenue: $17375.03
+INFO:root:[22:48:19] Total Company Revenue per Charger: $5536.88
+INFO:root:[22:48:19] Average Electricity Cost Apartments: $/km 0.0622
+INFO:root:[22:48:19] Average Electricity Cost House wo PV: $/km 0.0441
+INFO:root:[22:48:19] Average Electricity Cost House w PV: $/km 0.0412
+INFO:root:[22:48:19] Average Electricity Cost: $/km 0.0442
+INFO:root:[22:48:19] DATA EVALUATION COMPLETE
+INFO:root:[22:49:53] INITIALISING CHARGING MODEL
+INFO:root:[22:49:55] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[22:49:55] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[22:49:55] Selected work charge price: 0.16 $/kWh, employees per charger: 61
+INFO:root:[22:49:55] Start to create agents
+INFO:root:[22:49:57] Agent creation complete
+INFO:root:[22:49:57] Create agent's work schedule
+INFO:root:[22:50:13] Completed agent's work schedule
+INFO:root:[22:50:13] Agent creation complete
+INFO:root:[22:50:13] INITIALISATION COMPLETE
+INFO:root:[22:50:13] 
+INFO:root:[22:50:13] COMMENCING STEP CALCULATION
+INFO:root:[23:18:31] STEP CALCULATION COMPLETE
+INFO:root:[23:18:31] 
+INFO:root:[23:18:31] Summary
+INFO:root:[23:18:31] Memory useage | Base: 2 MB Agents: 627 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[23:18:31] Cars that would run flat: None
+INFO:root:[23:18:32] Route (min / avg / max) = 2.0 km / 17.7 km / 84.6 km
+INFO:root:[23:18:32] Average Consumption 36.7 kWh
+INFO:root:[23:18:32] Apartments: 689, Houses wo PV: 4227, Houses w PV: 1084
+INFO:root:[23:18:32] COMMENCING DATA EVALUATION
+INFO:root:[23:18:33] charge_received_work: 114217.2 kWh
+INFO:root:[23:18:33] charge_received_pv: 3596.7 kWh
+INFO:root:[23:18:33] charge_received_grid: 75679.5 kWh
+INFO:root:[23:18:33] charge_received_public: 27018.1 kWh
+INFO:root:[23:18:33] charge_held_back: 0.0 kWh
+INFO:root:[23:18:33] Company Charger Utilisation: 58.19%
+INFO:root:[23:18:33] Total Company Total Revenue: $18274.76
+INFO:root:[23:18:33] Total Company Revenue per Charger: $5747.45
+INFO:root:[23:18:33] Average Electricity Cost Apartments: $/km 0.0614
+INFO:root:[23:18:33] Average Electricity Cost House wo PV: $/km 0.0446
+INFO:root:[23:18:33] Average Electricity Cost House w PV: $/km 0.0428
+INFO:root:[23:18:33] Average Electricity Cost: $/km 0.0448
+INFO:root:[23:18:33] DATA EVALUATION COMPLETE
+INFO:root:[23:20:08] INITIALISING CHARGING MODEL
+INFO:root:[23:20:09] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[23:20:09] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[23:20:09] Selected work charge price: 0.17 $/kWh, employees per charger: 61
+INFO:root:[23:20:09] Start to create agents
+INFO:root:[23:20:11] Agent creation complete
+INFO:root:[23:20:11] Create agent's work schedule
+INFO:root:[23:20:27] Completed agent's work schedule
+INFO:root:[23:20:27] Agent creation complete
+INFO:root:[23:20:27] INITIALISATION COMPLETE
+INFO:root:[23:20:27] 
+INFO:root:[23:20:27] COMMENCING STEP CALCULATION
+INFO:root:[23:48:43] STEP CALCULATION COMPLETE
+INFO:root:[23:48:43] 
+INFO:root:[23:48:43] Summary
+INFO:root:[23:48:43] Memory useage | Base: 3 MB Agents: 623 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[23:48:43] Cars that would run flat: None
+INFO:root:[23:48:43] Route (min / avg / max) = 2.0 km / 17.7 km / 93.7 km
+INFO:root:[23:48:44] Average Consumption 37.1 kWh
+INFO:root:[23:48:44] Apartments: 670, Houses wo PV: 4265, Houses w PV: 1065
+INFO:root:[23:48:44] COMMENCING DATA EVALUATION
+INFO:root:[23:48:45] charge_received_work: 113094.7 kWh
+INFO:root:[23:48:45] charge_received_pv: 3698.4 kWh
+INFO:root:[23:48:45] charge_received_grid: 77200.3 kWh
+INFO:root:[23:48:45] charge_received_public: 28741.8 kWh
+INFO:root:[23:48:45] charge_held_back: 0.0 kWh
+INFO:root:[23:48:45] Company Charger Utilisation: 58.50%
+INFO:root:[23:48:45] Total Company Total Revenue: $19226.09
+INFO:root:[23:48:45] Total Company Revenue per Charger: $6204.46
+INFO:root:[23:48:45] Average Electricity Cost Apartments: $/km 0.0647
+INFO:root:[23:48:45] Average Electricity Cost House wo PV: $/km 0.0463
+INFO:root:[23:48:45] Average Electricity Cost House w PV: $/km 0.0437
+INFO:root:[23:48:45] Average Electricity Cost: $/km 0.0465
+INFO:root:[23:48:45] DATA EVALUATION COMPLETE
+INFO:root:[23:50:19] INITIALISING CHARGING MODEL
+INFO:root:[23:50:20] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[23:50:20] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[23:50:20] Selected work charge price: 0.18 $/kWh, employees per charger: 61
+INFO:root:[23:50:20] Start to create agents
+INFO:root:[23:50:22] Agent creation complete
+INFO:root:[23:50:22] Create agent's work schedule
+INFO:root:[23:50:38] Completed agent's work schedule
+INFO:root:[23:50:38] Agent creation complete
+INFO:root:[23:50:38] INITIALISATION COMPLETE
+INFO:root:[23:50:38] 
+INFO:root:[23:50:38] COMMENCING STEP CALCULATION
+INFO:root:[00:18:22] STEP CALCULATION COMPLETE
+INFO:root:[00:18:22] 
+INFO:root:[00:18:22] Summary
+INFO:root:[00:18:22] Memory useage | Base: 5 MB Agents: 621 MB Steps: 1319 MB Total: 6838 MB
+INFO:root:[00:18:22] Cars that would run flat: None
+INFO:root:[00:18:23] Route (min / avg / max) = 2.0 km / 17.7 km / 91.8 km
+INFO:root:[00:18:23] Average Consumption 36.9 kWh
+INFO:root:[00:18:23] Apartments: 680, Houses wo PV: 4261, Houses w PV: 1059
+INFO:root:[00:18:23] COMMENCING DATA EVALUATION
+INFO:root:[00:18:25] charge_received_work: 116318.7 kWh
+INFO:root:[00:18:25] charge_received_pv: 3407.5 kWh
+INFO:root:[00:18:25] charge_received_grid: 73806.6 kWh
+INFO:root:[00:18:25] charge_received_public: 27894.6 kWh
+INFO:root:[00:18:25] charge_held_back: 0.0 kWh
+INFO:root:[00:18:25] Company Charger Utilisation: 57.83%
+INFO:root:[00:18:25] Total Company Total Revenue: $20937.37
+INFO:root:[00:18:25] Total Company Revenue per Charger: $6409.64
+INFO:root:[00:18:25] Average Electricity Cost Apartments: $/km 0.0637
+INFO:root:[00:18:25] Average Electricity Cost House wo PV: $/km 0.0471
+INFO:root:[00:18:25] Average Electricity Cost House w PV: $/km 0.0433
+INFO:root:[00:18:25] Average Electricity Cost: $/km 0.0472
+INFO:root:[00:18:25] DATA EVALUATION COMPLETE
+INFO:root:[00:19:59] INITIALISING CHARGING MODEL
+INFO:root:[00:20:00] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[00:20:00] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[00:20:00] Selected work charge price: 0.19 $/kWh, employees per charger: 61
+INFO:root:[00:20:00] Start to create agents
+INFO:root:[00:20:02] Agent creation complete
+INFO:root:[00:20:02] Create agent's work schedule
+INFO:root:[00:20:17] Completed agent's work schedule
+INFO:root:[00:20:17] Agent creation complete
+INFO:root:[00:20:17] INITIALISATION COMPLETE
+INFO:root:[00:20:17] 
+INFO:root:[00:20:17] COMMENCING STEP CALCULATION
+INFO:root:[00:48:11] STEP CALCULATION COMPLETE
+INFO:root:[00:48:11] 
+INFO:root:[00:48:11] Summary
+INFO:root:[00:48:11] Memory useage | Base: 4 MB Agents: 619 MB Steps: 1323 MB Total: 6842 MB
+INFO:root:[00:48:11] Cars that would run flat: None
+INFO:root:[00:48:11] Route (min / avg / max) = 2.0 km / 17.7 km / 93.7 km
+INFO:root:[00:48:12] Average Consumption 37.2 kWh
+INFO:root:[00:48:12] Apartments: 676, Houses wo PV: 4260, Houses w PV: 1064
+INFO:root:[00:48:12] COMMENCING DATA EVALUATION
+INFO:root:[00:48:13] charge_received_work: 114483.2 kWh
+INFO:root:[00:48:13] charge_received_pv: 3399.6 kWh
+INFO:root:[00:48:13] charge_received_grid: 77307.1 kWh
+INFO:root:[00:48:13] charge_received_public: 28302.6 kWh
+INFO:root:[00:48:13] charge_held_back: 0.0 kWh
+INFO:root:[00:48:13] Company Charger Utilisation: 59.25%
+INFO:root:[00:48:13] Total Company Total Revenue: $21751.82
+INFO:root:[00:48:13] Total Company Revenue per Charger: $6963.16
+INFO:root:[00:48:13] Average Electricity Cost Apartments: $/km 0.0655
+INFO:root:[00:48:13] Average Electricity Cost House wo PV: $/km 0.0483
+INFO:root:[00:48:13] Average Electricity Cost House w PV: $/km 0.0449
+INFO:root:[00:48:13] Average Electricity Cost: $/km 0.0484
+INFO:root:[00:48:13] DATA EVALUATION COMPLETE
+INFO:root:[00:49:48] INITIALISING CHARGING MODEL
+INFO:root:[00:49:49] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[00:49:49] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[00:49:49] Selected work charge price: 0.20 $/kWh, employees per charger: 61
+INFO:root:[00:49:49] Start to create agents
+INFO:root:[00:49:51] Agent creation complete
+INFO:root:[00:49:51] Create agent's work schedule
+INFO:root:[00:50:07] Completed agent's work schedule
+INFO:root:[00:50:07] Agent creation complete
+INFO:root:[00:50:07] INITIALISATION COMPLETE
+INFO:root:[00:50:07] 
+INFO:root:[00:50:07] COMMENCING STEP CALCULATION
+INFO:root:[01:17:51] STEP CALCULATION COMPLETE
+INFO:root:[01:17:51] 
+INFO:root:[01:17:51] Summary
+INFO:root:[01:17:51] Memory useage | Base: 5 MB Agents: 615 MB Steps: 1315 MB Total: 6834 MB
+INFO:root:[01:17:51] Cars that would run flat: None
+INFO:root:[01:17:51] Route (min / avg / max) = 2.0 km / 17.5 km / 102.9 km
+INFO:root:[01:17:51] Average Consumption 36.3 kWh
+INFO:root:[01:17:51] Apartments: 685, Houses wo PV: 4314, Houses w PV: 1001
+INFO:root:[01:17:51] COMMENCING DATA EVALUATION
+INFO:root:[01:17:53] charge_received_work: 115519.6 kWh
+INFO:root:[01:17:53] charge_received_pv: 3092.4 kWh
+INFO:root:[01:17:53] charge_received_grid: 72122.0 kWh
+INFO:root:[01:17:53] charge_received_public: 26961.8 kWh
+INFO:root:[01:17:53] charge_held_back: 0.0 kWh
+INFO:root:[01:17:53] Company Charger Utilisation: 58.14%
+INFO:root:[01:17:53] Total Company Total Revenue: $23103.91
+INFO:root:[01:17:53] Total Company Revenue per Charger: $7236.15
+INFO:root:[01:17:53] Average Electricity Cost Apartments: $/km 0.0657
+INFO:root:[01:17:53] Average Electricity Cost House wo PV: $/km 0.0488
+INFO:root:[01:17:53] Average Electricity Cost House w PV: $/km 0.0456
+INFO:root:[01:17:53] Average Electricity Cost: $/km 0.0489
+INFO:root:[01:17:53] DATA EVALUATION COMPLETE
+INFO:root:[01:19:26] INITIALISING CHARGING MODEL
+INFO:root:[01:19:28] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[01:19:28] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[01:19:28] Selected work charge price: 0.21 $/kWh, employees per charger: 61
+INFO:root:[01:19:28] Start to create agents
+INFO:root:[01:19:29] Agent creation complete
+INFO:root:[01:19:29] Create agent's work schedule
+INFO:root:[01:19:45] Completed agent's work schedule
+INFO:root:[01:19:45] Agent creation complete
+INFO:root:[01:19:45] INITIALISATION COMPLETE
+INFO:root:[01:19:45] 
+INFO:root:[01:19:45] COMMENCING STEP CALCULATION
+INFO:root:[01:48:15] STEP CALCULATION COMPLETE
+INFO:root:[01:48:15] 
+INFO:root:[01:48:15] Summary
+INFO:root:[01:48:15] Memory useage | Base: 4 MB Agents: 615 MB Steps: 1317 MB Total: 6836 MB
+INFO:root:[01:48:15] Cars that would run flat: None
+INFO:root:[01:48:15] Route (min / avg / max) = 2.0 km / 17.6 km / 90.2 km
+INFO:root:[01:48:16] Average Consumption 36.6 kWh
+INFO:root:[01:48:16] Apartments: 677, Houses wo PV: 4251, Houses w PV: 1072
+INFO:root:[01:48:16] COMMENCING DATA EVALUATION
+INFO:root:[01:48:17] charge_received_work: 116358.5 kWh
+INFO:root:[01:48:17] charge_received_pv: 3331.6 kWh
+INFO:root:[01:48:17] charge_received_grid: 72716.9 kWh
+INFO:root:[01:48:17] charge_received_public: 27430.1 kWh
+INFO:root:[01:48:17] charge_held_back: 0.0 kWh
+INFO:root:[01:48:17] Company Charger Utilisation: 58.65%
+INFO:root:[01:48:17] Total Company Total Revenue: $24435.29
+INFO:root:[01:48:17] Total Company Revenue per Charger: $7598.09
+INFO:root:[01:48:17] Average Electricity Cost Apartments: $/km 0.0663
+INFO:root:[01:48:17] Average Electricity Cost House wo PV: $/km 0.0498
+INFO:root:[01:48:17] Average Electricity Cost House w PV: $/km 0.0475
+INFO:root:[01:48:17] Average Electricity Cost: $/km 0.0499
+INFO:root:[01:48:17] DATA EVALUATION COMPLETE
+INFO:root:[01:49:51] INITIALISING CHARGING MODEL
+INFO:root:[01:49:53] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[01:49:53] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[01:49:53] Selected work charge price: 0.22 $/kWh, employees per charger: 61
+INFO:root:[01:49:53] Start to create agents
+INFO:root:[01:49:54] Agent creation complete
+INFO:root:[01:49:54] Create agent's work schedule
+INFO:root:[01:50:10] Completed agent's work schedule
+INFO:root:[01:50:10] Agent creation complete
+INFO:root:[01:50:10] INITIALISATION COMPLETE
+INFO:root:[01:50:10] 
+INFO:root:[01:50:10] COMMENCING STEP CALCULATION
+INFO:root:[02:18:58] STEP CALCULATION COMPLETE
+INFO:root:[02:18:58] 
+INFO:root:[02:18:58] Summary
+INFO:root:[02:18:58] Memory useage | Base: 4 MB Agents: 613 MB Steps: 1319 MB Total: 6838 MB
+INFO:root:[02:18:58] Cars that would run flat: None
+INFO:root:[02:18:58] Route (min / avg / max) = 2.0 km / 17.5 km / 91.8 km
+INFO:root:[02:18:58] Average Consumption 36.7 kWh
+INFO:root:[02:18:58] Apartments: 645, Houses wo PV: 4290, Houses w PV: 1065
+INFO:root:[02:18:58] COMMENCING DATA EVALUATION
+INFO:root:[02:19:00] charge_received_work: 115645.5 kWh
+INFO:root:[02:19:00] charge_received_pv: 3685.7 kWh
+INFO:root:[02:19:00] charge_received_grid: 74401.0 kWh
+INFO:root:[02:19:00] charge_received_public: 26245.0 kWh
+INFO:root:[02:19:00] charge_held_back: 0.0 kWh
+INFO:root:[02:19:00] Company Charger Utilisation: 58.13%
+INFO:root:[02:19:00] Total Company Total Revenue: $25442.02
+INFO:root:[02:19:00] Total Company Revenue per Charger: $7920.49
+INFO:root:[02:19:00] Average Electricity Cost Apartments: $/km 0.0678
+INFO:root:[02:19:00] Average Electricity Cost House wo PV: $/km 0.0506
+INFO:root:[02:19:00] Average Electricity Cost House w PV: $/km 0.0485
+INFO:root:[02:19:00] Average Electricity Cost: $/km 0.0507
+INFO:root:[02:19:00] DATA EVALUATION COMPLETE
+INFO:root:[02:20:36] INITIALISING CHARGING MODEL
+INFO:root:[02:20:37] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[02:20:37] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[02:20:37] Selected work charge price: 0.23 $/kWh, employees per charger: 61
+INFO:root:[02:20:37] Start to create agents
+INFO:root:[02:20:39] Agent creation complete
+INFO:root:[02:20:39] Create agent's work schedule
+INFO:root:[02:20:55] Completed agent's work schedule
+INFO:root:[02:20:55] Agent creation complete
+INFO:root:[02:20:55] INITIALISATION COMPLETE
+INFO:root:[02:20:55] 
+INFO:root:[02:20:55] COMMENCING STEP CALCULATION
+INFO:root:[02:49:01] STEP CALCULATION COMPLETE
+INFO:root:[02:49:01] 
+INFO:root:[02:49:01] Summary
+INFO:root:[02:49:01] Memory useage | Base: 4 MB Agents: 611 MB Steps: 1317 MB Total: 6836 MB
+INFO:root:[02:49:01] Cars that would run flat: None
+INFO:root:[02:49:01] Route (min / avg / max) = 2.0 km / 17.6 km / 92.3 km
+INFO:root:[02:49:02] Average Consumption 36.6 kWh
+INFO:root:[02:49:02] Apartments: 689, Houses wo PV: 4250, Houses w PV: 1061
+INFO:root:[02:49:02] COMMENCING DATA EVALUATION
+INFO:root:[02:49:03] charge_received_work: 116365.2 kWh
+INFO:root:[02:49:03] charge_received_pv: 3402.8 kWh
+INFO:root:[02:49:03] charge_received_grid: 73350.6 kWh
+INFO:root:[02:49:03] charge_received_public: 26541.3 kWh
+INFO:root:[02:49:03] charge_held_back: 0.0 kWh
+INFO:root:[02:49:03] Company Charger Utilisation: 57.23%
+INFO:root:[02:49:03] Total Company Total Revenue: $26763.98
+INFO:root:[02:49:03] Total Company Revenue per Charger: $8256.64
+INFO:root:[02:49:03] Average Electricity Cost Apartments: $/km 0.0695
+INFO:root:[02:49:03] Average Electricity Cost House wo PV: $/km 0.0516
+INFO:root:[02:49:03] Average Electricity Cost House w PV: $/km 0.0488
+INFO:root:[02:49:03] Average Electricity Cost: $/km 0.0518
+INFO:root:[02:49:03] DATA EVALUATION COMPLETE
+INFO:root:[02:50:37] INITIALISING CHARGING MODEL
+INFO:root:[02:50:38] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[02:50:38] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[02:50:38] Selected work charge price: 0.24 $/kWh, employees per charger: 61
+INFO:root:[02:50:38] Start to create agents
+INFO:root:[02:50:40] Agent creation complete
+INFO:root:[02:50:40] Create agent's work schedule
+INFO:root:[02:50:56] Completed agent's work schedule
+INFO:root:[02:50:56] Agent creation complete
+INFO:root:[02:50:56] INITIALISATION COMPLETE
+INFO:root:[02:50:56] 
+INFO:root:[02:50:56] COMMENCING STEP CALCULATION
+INFO:root:[03:19:53] STEP CALCULATION COMPLETE
+INFO:root:[03:19:53] 
+INFO:root:[03:19:53] Summary
+INFO:root:[03:19:53] Memory useage | Base: 4 MB Agents: 607 MB Steps: 1321 MB Total: 6840 MB
+INFO:root:[03:19:53] Cars that would run flat: None
+INFO:root:[03:19:54] Route (min / avg / max) = 2.0 km / 17.8 km / 102.9 km
+INFO:root:[03:19:54] Average Consumption 37.4 kWh
+INFO:root:[03:19:54] Apartments: 682, Houses wo PV: 4223, Houses w PV: 1095
+INFO:root:[03:19:54] COMMENCING DATA EVALUATION
+INFO:root:[03:19:55] charge_received_work: 116408.2 kWh
+INFO:root:[03:19:55] charge_received_pv: 3566.3 kWh
+INFO:root:[03:19:55] charge_received_grid: 76509.3 kWh
+INFO:root:[03:19:55] charge_received_public: 27851.7 kWh
+INFO:root:[03:19:55] charge_held_back: 0.0 kWh
+INFO:root:[03:19:55] Company Charger Utilisation: 58.62%
+INFO:root:[03:19:55] Total Company Total Revenue: $27937.98
+INFO:root:[03:19:55] Total Company Revenue per Charger: $8732.84
+INFO:root:[03:19:55] Average Electricity Cost Apartments: $/km 0.0708
+INFO:root:[03:19:55] Average Electricity Cost House wo PV: $/km 0.0531
+INFO:root:[03:19:55] Average Electricity Cost House w PV: $/km 0.0505
+INFO:root:[03:19:55] Average Electricity Cost: $/km 0.0533
+INFO:root:[03:19:55] DATA EVALUATION COMPLETE
+INFO:root:[03:21:30] INITIALISING CHARGING MODEL
+INFO:root:[03:21:32] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[03:21:32] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[03:21:32] Selected work charge price: 0.25 $/kWh, employees per charger: 61
+INFO:root:[03:21:32] Start to create agents
+INFO:root:[03:21:33] Agent creation complete
+INFO:root:[03:21:33] Create agent's work schedule
+INFO:root:[03:21:49] Completed agent's work schedule
+INFO:root:[03:21:49] Agent creation complete
+INFO:root:[03:21:49] INITIALISATION COMPLETE
+INFO:root:[03:21:49] 
+INFO:root:[03:21:49] COMMENCING STEP CALCULATION
+INFO:root:[03:51:00] STEP CALCULATION COMPLETE
+INFO:root:[03:51:00] 
+INFO:root:[03:51:00] Summary
+INFO:root:[03:51:00] Memory useage | Base: 5 MB Agents: 607 MB Steps: 1318 MB Total: 6838 MB
+INFO:root:[03:51:00] Cars that would run flat: None
+INFO:root:[03:51:00] Route (min / avg / max) = 2.0 km / 17.5 km / 84.6 km
+INFO:root:[03:51:00] Average Consumption 36.5 kWh
+INFO:root:[03:51:00] Apartments: 673, Houses wo PV: 4265, Houses w PV: 1062
+INFO:root:[03:51:00] COMMENCING DATA EVALUATION
+INFO:root:[03:51:02] charge_received_work: 114321.2 kWh
+INFO:root:[03:51:02] charge_received_pv: 3778.5 kWh
+INFO:root:[03:51:02] charge_received_grid: 73950.4 kWh
+INFO:root:[03:51:02] charge_received_public: 26811.3 kWh
+INFO:root:[03:51:02] charge_held_back: 0.0 kWh
+INFO:root:[03:51:02] Company Charger Utilisation: 58.31%
+INFO:root:[03:51:02] Total Company Total Revenue: $28580.29
+INFO:root:[03:51:02] Total Company Revenue per Charger: $8992.38
+INFO:root:[03:51:02] Average Electricity Cost Apartments: $/km 0.0707
+INFO:root:[03:51:02] Average Electricity Cost House wo PV: $/km 0.0536
+INFO:root:[03:51:02] Average Electricity Cost House w PV: $/km 0.0504
+INFO:root:[03:51:02] Average Electricity Cost: $/km 0.0537
+INFO:root:[03:51:02] DATA EVALUATION COMPLETE
+INFO:root:[03:52:35] INITIALISING CHARGING MODEL
+INFO:root:[03:52:37] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[03:52:37] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[03:52:37] Selected work charge price: 0.26 $/kWh, employees per charger: 61
+INFO:root:[03:52:37] Start to create agents
+INFO:root:[03:52:39] Agent creation complete
+INFO:root:[03:52:39] Create agent's work schedule
+INFO:root:[03:52:54] Completed agent's work schedule
+INFO:root:[03:52:54] Agent creation complete
+INFO:root:[03:52:54] INITIALISATION COMPLETE
+INFO:root:[03:52:54] 
+INFO:root:[03:52:54] COMMENCING STEP CALCULATION
+INFO:root:[04:22:00] STEP CALCULATION COMPLETE
+INFO:root:[04:22:00] 
+INFO:root:[04:22:00] Summary
+INFO:root:[04:22:00] Memory useage | Base: 4 MB Agents: 603 MB Steps: 1319 MB Total: 6838 MB
+INFO:root:[04:22:00] Cars that would run flat: None
+INFO:root:[04:22:01] Route (min / avg / max) = 2.0 km / 17.7 km / 92.3 km
+INFO:root:[04:22:01] Average Consumption 36.9 kWh
+INFO:root:[04:22:01] Apartments: 708, Houses wo PV: 4247, Houses w PV: 1045
+INFO:root:[04:22:01] COMMENCING DATA EVALUATION
+INFO:root:[04:22:02] charge_received_work: 116043.2 kWh
+INFO:root:[04:22:02] charge_received_pv: 3522.2 kWh
+INFO:root:[04:22:02] charge_received_grid: 74185.1 kWh
+INFO:root:[04:22:02] charge_received_public: 27892.3 kWh
+INFO:root:[04:22:02] charge_held_back: 0.0 kWh
+INFO:root:[04:22:02] Company Charger Utilisation: 59.21%
+INFO:root:[04:22:02] Total Company Total Revenue: $30171.23
+INFO:root:[04:22:02] Total Company Revenue per Charger: $9579.24
+INFO:root:[04:22:02] Average Electricity Cost Apartments: $/km 0.0721
+INFO:root:[04:22:02] Average Electricity Cost House wo PV: $/km 0.0548
+INFO:root:[04:22:02] Average Electricity Cost House w PV: $/km 0.0513
+INFO:root:[04:22:02] Average Electricity Cost: $/km 0.0549
+INFO:root:[04:22:02] DATA EVALUATION COMPLETE
+INFO:root:[04:23:36] INITIALISING CHARGING MODEL
+INFO:root:[04:23:38] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[04:23:38] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[04:23:38] Selected work charge price: 0.27 $/kWh, employees per charger: 61
+INFO:root:[04:23:38] Start to create agents
+INFO:root:[04:23:40] Agent creation complete
+INFO:root:[04:23:40] Create agent's work schedule
+INFO:root:[04:23:56] Completed agent's work schedule
+INFO:root:[04:23:56] Agent creation complete
+INFO:root:[04:23:56] INITIALISATION COMPLETE
+INFO:root:[04:23:56] 
+INFO:root:[04:23:56] COMMENCING STEP CALCULATION
+INFO:root:[04:52:38] STEP CALCULATION COMPLETE
+INFO:root:[04:52:38] 
+INFO:root:[04:52:38] Summary
+INFO:root:[04:52:38] Memory useage | Base: 4 MB Agents: 603 MB Steps: 1349 MB Total: 6868 MB
+INFO:root:[04:52:38] Cars that would run flat: None
+INFO:root:[04:52:39] Route (min / avg / max) = 2.0 km / 17.6 km / 119.1 km
+INFO:root:[04:52:39] Average Consumption 36.6 kWh
+INFO:root:[04:52:39] Apartments: 698, Houses wo PV: 4333, Houses w PV: 969
+INFO:root:[04:52:39] COMMENCING DATA EVALUATION
+INFO:root:[04:52:41] charge_received_work: 87226.5 kWh
+INFO:root:[04:52:41] charge_received_pv: 4762.2 kWh
+INFO:root:[04:52:41] charge_received_grid: 111548.9 kWh
+INFO:root:[04:52:41] charge_received_public: 16387.0 kWh
+INFO:root:[04:52:41] charge_held_back: 0.0 kWh
+INFO:root:[04:52:41] Company Charger Utilisation: 44.22%
+INFO:root:[04:52:41] Total Company Total Revenue: $23551.15
+INFO:root:[04:52:41] Total Company Revenue per Charger: $7266.42
+INFO:root:[04:52:41] Average Electricity Cost Apartments: $/km 0.0649
+INFO:root:[04:52:41] Average Electricity Cost House wo PV: $/km 0.0540
+INFO:root:[04:52:41] Average Electricity Cost House w PV: $/km 0.0500
+INFO:root:[04:52:41] Average Electricity Cost: $/km 0.0540
+INFO:root:[04:52:41] DATA EVALUATION COMPLETE
+INFO:root:[04:54:16] INITIALISING CHARGING MODEL
+INFO:root:[04:54:18] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[04:54:18] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[04:54:18] Selected work charge price: 0.28 $/kWh, employees per charger: 61
+INFO:root:[04:54:18] Start to create agents
+INFO:root:[04:54:19] Agent creation complete
+INFO:root:[04:54:19] Create agent's work schedule
+INFO:root:[04:54:35] Completed agent's work schedule
+INFO:root:[04:54:35] Agent creation complete
+INFO:root:[04:54:35] INITIALISATION COMPLETE
+INFO:root:[04:54:35] 
+INFO:root:[04:54:35] COMMENCING STEP CALCULATION
+INFO:root:[05:22:25] STEP CALCULATION COMPLETE
+INFO:root:[05:22:25] 
+INFO:root:[05:22:25] Summary
+INFO:root:[05:22:25] Memory useage | Base: 2 MB Agents: 603 MB Steps: 1413 MB Total: 6932 MB
+INFO:root:[05:22:25] Cars that would run flat: None
+INFO:root:[05:22:26] Route (min / avg / max) = 2.0 km / 17.8 km / 89.6 km
+INFO:root:[05:22:26] Average Consumption 37.0 kWh
+INFO:root:[05:22:26] Apartments: 631, Houses wo PV: 4221, Houses w PV: 1148
+INFO:root:[05:22:26] COMMENCING DATA EVALUATION
+INFO:root:[05:22:28] charge_received_work: 17703.3 kWh
+INFO:root:[05:22:28] charge_received_pv: 7487.7 kWh
+INFO:root:[05:22:28] charge_received_grid: 196931.7 kWh
+INFO:root:[05:22:28] charge_received_public: 43.2 kWh
+INFO:root:[05:22:28] charge_held_back: 0.0 kWh
+INFO:root:[05:22:28] Company Charger Utilisation: 12.39%
+INFO:root:[05:22:28] Total Company Total Revenue: $4956.91
+INFO:root:[05:22:28] Total Company Revenue per Charger: $1479.69
+INFO:root:[05:22:28] Average Electricity Cost Apartments: $/km 0.0532
+INFO:root:[05:22:28] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[05:22:28] Average Electricity Cost House w PV: $/km 0.0455
+INFO:root:[05:22:28] Average Electricity Cost: $/km 0.0509
+INFO:root:[05:22:28] DATA EVALUATION COMPLETE
+INFO:root:[05:24:01] INITIALISING CHARGING MODEL
+INFO:root:[05:24:02] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[05:24:02] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[05:24:02] Selected work charge price: 0.29 $/kWh, employees per charger: 61
+INFO:root:[05:24:02] Start to create agents
+INFO:root:[05:24:04] Agent creation complete
+INFO:root:[05:24:04] Create agent's work schedule
+INFO:root:[05:24:20] Completed agent's work schedule
+INFO:root:[05:24:20] Agent creation complete
+INFO:root:[05:24:20] INITIALISATION COMPLETE
+INFO:root:[05:24:20] 
+INFO:root:[05:24:20] COMMENCING STEP CALCULATION
+INFO:root:[05:52:49] STEP CALCULATION COMPLETE
+INFO:root:[05:52:49] 
+INFO:root:[05:52:49] Summary
+INFO:root:[05:52:50] Memory useage | Base: 5 MB Agents: 599 MB Steps: 1414 MB Total: 6932 MB
+INFO:root:[05:52:50] Cars that would run flat: None
+INFO:root:[05:52:50] Route (min / avg / max) = 2.0 km / 17.9 km / 92.3 km
+INFO:root:[05:52:51] Average Consumption 37.4 kWh
+INFO:root:[05:52:51] Apartments: 731, Houses wo PV: 4232, Houses w PV: 1037
+INFO:root:[05:52:51] COMMENCING DATA EVALUATION
+INFO:root:[05:52:52] charge_received_work: 20025.6 kWh
+INFO:root:[05:52:52] charge_received_pv: 6783.4 kWh
+INFO:root:[05:52:52] charge_received_grid: 197165.2 kWh
+INFO:root:[05:52:52] charge_received_public: 238.8 kWh
+INFO:root:[05:52:52] charge_held_back: 0.0 kWh
+INFO:root:[05:52:52] Company Charger Utilisation: 13.27%
+INFO:root:[05:52:52] Total Company Total Revenue: $5807.42
+INFO:root:[05:52:52] Total Company Revenue per Charger: $1699.17
+INFO:root:[05:52:52] Average Electricity Cost Apartments: $/km 0.0561
+INFO:root:[05:52:52] Average Electricity Cost House wo PV: $/km 0.0516
+INFO:root:[05:52:52] Average Electricity Cost House w PV: $/km 0.0452
+INFO:root:[05:52:52] Average Electricity Cost: $/km 0.0513
+INFO:root:[05:52:52] DATA EVALUATION COMPLETE
+INFO:root:[05:54:27] INITIALISING CHARGING MODEL
+INFO:root:[05:54:28] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[05:54:28] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[05:54:28] Selected work charge price: 0.30 $/kWh, employees per charger: 61
+INFO:root:[05:54:28] Start to create agents
+INFO:root:[05:54:30] Agent creation complete
+INFO:root:[05:54:30] Create agent's work schedule
+INFO:root:[05:54:46] Completed agent's work schedule
+INFO:root:[05:54:46] Agent creation complete
+INFO:root:[05:54:46] INITIALISATION COMPLETE
+INFO:root:[05:54:46] 
+INFO:root:[05:54:46] COMMENCING STEP CALCULATION
+INFO:root:[06:23:28] STEP CALCULATION COMPLETE
+INFO:root:[06:23:28] 
+INFO:root:[06:23:28] Summary
+INFO:root:[06:23:28] Memory useage | Base: 3 MB Agents: 597 MB Steps: 1411 MB Total: 6930 MB
+INFO:root:[06:23:28] Cars that would run flat: None
+INFO:root:[06:23:28] Route (min / avg / max) = 2.0 km / 17.6 km / 90.2 km
+INFO:root:[06:23:28] Average Consumption 36.8 kWh
+INFO:root:[06:23:28] Apartments: 721, Houses wo PV: 4225, Houses w PV: 1054
+INFO:root:[06:23:28] COMMENCING DATA EVALUATION
+INFO:root:[06:23:30] charge_received_work: 18315.8 kWh
+INFO:root:[06:23:30] charge_received_pv: 6805.1 kWh
+INFO:root:[06:23:30] charge_received_grid: 195636.6 kWh
+INFO:root:[06:23:30] charge_received_public: 56.0 kWh
+INFO:root:[06:23:30] charge_held_back: 0.0 kWh
+INFO:root:[06:23:30] Company Charger Utilisation: 12.59%
+INFO:root:[06:23:30] Total Company Total Revenue: $5494.73
+INFO:root:[06:23:30] Total Company Revenue per Charger: $1602.88
+INFO:root:[06:23:30] Average Electricity Cost Apartments: $/km 0.0571
+INFO:root:[06:23:30] Average Electricity Cost House wo PV: $/km 0.0514
+INFO:root:[06:23:30] Average Electricity Cost House w PV: $/km 0.0455
+INFO:root:[06:23:30] Average Electricity Cost: $/km 0.0511
+INFO:root:[06:23:30] DATA EVALUATION COMPLETE
+INFO:root:[06:25:03] INITIALISING CHARGING MODEL
+INFO:root:[06:25:05] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[06:25:05] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[06:25:05] Selected work charge price: 0.31 $/kWh, employees per charger: 61
+INFO:root:[06:25:05] Start to create agents
+INFO:root:[06:25:07] Agent creation complete
+INFO:root:[06:25:07] Create agent's work schedule
+INFO:root:[06:25:23] Completed agent's work schedule
+INFO:root:[06:25:23] Agent creation complete
+INFO:root:[06:25:23] INITIALISATION COMPLETE
+INFO:root:[06:25:23] 
+INFO:root:[06:25:23] COMMENCING STEP CALCULATION
+INFO:root:[06:54:11] STEP CALCULATION COMPLETE
+INFO:root:[06:54:11] 
+INFO:root:[06:54:11] Summary
+INFO:root:[06:54:11] Memory useage | Base: 2 MB Agents: 595 MB Steps: 1411 MB Total: 6930 MB
+INFO:root:[06:54:11] Cars that would run flat: None
+INFO:root:[06:54:12] Route (min / avg / max) = 2.0 km / 17.6 km / 90.2 km
+INFO:root:[06:54:12] Average Consumption 36.5 kWh
+INFO:root:[06:54:12] Apartments: 695, Houses wo PV: 4230, Houses w PV: 1075
+INFO:root:[06:54:12] COMMENCING DATA EVALUATION
+INFO:root:[06:54:14] charge_received_work: 17930.7 kWh
+INFO:root:[06:54:14] charge_received_pv: 7221.8 kWh
+INFO:root:[06:54:14] charge_received_grid: 194003.6 kWh
+INFO:root:[06:54:14] charge_received_public: 52.6 kWh
+INFO:root:[06:54:14] charge_held_back: 0.0 kWh
+INFO:root:[06:54:14] Company Charger Utilisation: 12.38%
+INFO:root:[06:54:14] Total Company Total Revenue: $5558.50
+INFO:root:[06:54:14] Total Company Revenue per Charger: $1640.51
+INFO:root:[06:54:14] Average Electricity Cost Apartments: $/km 0.0586
+INFO:root:[06:54:14] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[06:54:14] Average Electricity Cost House w PV: $/km 0.0456
+INFO:root:[06:54:14] Average Electricity Cost: $/km 0.0511
+INFO:root:[06:54:14] DATA EVALUATION COMPLETE
+INFO:root:[06:55:48] INITIALISING CHARGING MODEL
+INFO:root:[06:55:50] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[06:55:50] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[06:55:50] Selected work charge price: 0.32 $/kWh, employees per charger: 61
+INFO:root:[06:55:50] Start to create agents
+INFO:root:[06:55:51] Agent creation complete
+INFO:root:[06:55:51] Create agent's work schedule
+INFO:root:[06:56:07] Completed agent's work schedule
+INFO:root:[06:56:07] Agent creation complete
+INFO:root:[06:56:07] INITIALISATION COMPLETE
+INFO:root:[06:56:07] 
+INFO:root:[06:56:07] COMMENCING STEP CALCULATION
+INFO:root:[07:24:47] STEP CALCULATION COMPLETE
+INFO:root:[07:24:47] 
+INFO:root:[07:24:47] Summary
+INFO:root:[07:24:47] Memory useage | Base: 3 MB Agents: 591 MB Steps: 1410 MB Total: 6924 MB
+INFO:root:[07:24:47] Cars that would run flat: None
+INFO:root:[07:24:48] Route (min / avg / max) = 2.0 km / 17.2 km / 92.3 km
+INFO:root:[07:24:48] Average Consumption 35.8 kWh
+INFO:root:[07:24:48] Apartments: 659, Houses wo PV: 4309, Houses w PV: 1032
+INFO:root:[07:24:48] COMMENCING DATA EVALUATION
+INFO:root:[07:24:50] charge_received_work: 17711.9 kWh
+INFO:root:[07:24:50] charge_received_pv: 6678.0 kWh
+INFO:root:[07:24:50] charge_received_grid: 190695.1 kWh
+INFO:root:[07:24:50] charge_received_public: 24.8 kWh
+INFO:root:[07:24:50] charge_held_back: 0.0 kWh
+INFO:root:[07:24:50] Company Charger Utilisation: 13.19%
+INFO:root:[07:24:50] Total Company Total Revenue: $5667.80
+INFO:root:[07:24:50] Total Company Revenue per Charger: $1809.71
+INFO:root:[07:24:50] Average Electricity Cost Apartments: $/km 0.0604
+INFO:root:[07:24:50] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[07:24:50] Average Electricity Cost House w PV: $/km 0.0449
+INFO:root:[07:24:50] Average Electricity Cost: $/km 0.0511
+INFO:root:[07:24:50] DATA EVALUATION COMPLETE
+INFO:root:[07:26:22] INITIALISING CHARGING MODEL
+INFO:root:[07:26:24] Selected number of agents: 6000, season: autumn, time step: 5 min
+INFO:root:[07:26:24] Selected charging strategy: Advanced Overhauled - no risk
+INFO:root:[07:26:24] Selected work charge price: 0.33 $/kWh, employees per charger: 61
+INFO:root:[07:26:24] Start to create agents
+INFO:root:[07:26:26] Agent creation complete
+INFO:root:[07:26:26] Create agent's work schedule
+INFO:root:[07:26:41] Completed agent's work schedule
+INFO:root:[07:26:41] Agent creation complete
+INFO:root:[07:26:41] INITIALISATION COMPLETE
+INFO:root:[07:26:41] 
+INFO:root:[07:26:41] COMMENCING STEP CALCULATION
+INFO:root:[07:55:05] STEP CALCULATION COMPLETE
+INFO:root:[07:55:06] 
+INFO:root:[07:55:06] Summary
+INFO:root:[07:55:06] Memory useage | Base: 2 MB Agents: 591 MB Steps: 1413 MB Total: 6932 MB
+INFO:root:[07:55:06] Cars that would run flat: None
+INFO:root:[07:55:07] Route (min / avg / max) = 2.0 km / 17.7 km / 93.7 km
+INFO:root:[07:55:07] Average Consumption 37.1 kWh
+INFO:root:[07:55:07] Apartments: 713, Houses wo PV: 4167, Houses w PV: 1120
+INFO:root:[07:55:07] COMMENCING DATA EVALUATION
+INFO:root:[07:55:09] charge_received_work: 20380.7 kWh
+INFO:root:[07:55:09] charge_received_pv: 7688.7 kWh
+INFO:root:[07:55:09] charge_received_grid: 194270.8 kWh
+INFO:root:[07:55:09] charge_received_public: 92.1 kWh
+INFO:root:[07:55:09] charge_held_back: 0.0 kWh
+INFO:root:[07:55:09] Company Charger Utilisation: 14.10%
+INFO:root:[07:55:09] Total Company Total Revenue: $6725.64
+INFO:root:[07:55:09] Total Company Revenue per Charger: $2045.37
+INFO:root:[07:55:09] Average Electricity Cost Apartments: $/km 0.0632
+INFO:root:[07:55:09] Average Electricity Cost House wo PV: $/km 0.0513
+INFO:root:[07:55:09] Average Electricity Cost House w PV: $/km 0.0455
+INFO:root:[07:55:09] Average Electricity Cost: $/km 0.0512
+INFO:root:[07:55:09] DATA EVALUATION COMPLETE

@@ -34,9 +34,9 @@ PATH = "results"
 MY_DPI = 96
 
 #model 4
-file_m4 = "model_4_nbr_agents_6000_season_avg_sweep_data.csv"
+file_m4 = "model_9_nbr_agents_6000_season_avg_sweep_data.csv"
 #model 6
-file_m6 = "model_6_nbr_agents_6000_season_avg_sweep_data.csv"
+file_m6 = "model_8_nbr_agents_6000_season_avg_sweep_data.csv"
 #model 6 PV only
 file_m6_PV = "model_6_PV_only_nbr_agents_6000_season_avg_sweep_data.csv"
 
@@ -151,14 +151,14 @@ ax_charge.legend([line1, line2, line3, line4],
                  fontsize=fontsize, loc=6) # , bbox_to_anchor=(1, .55))
 format_subplot(ax_charge, (.9, .95), "a)",
                ticks=(None, [0, 1, 2]),
-               lims=(None, [-0.1, 2.1]),
+               lims=(None, [-0.1, 2.35]),
                ax_lbls=(None, y_label_charge))
 
 ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_grid"], label="m6 Grid", linewidth=linewidth, color="k")
 ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_pv"], label="m6 PV", linewidth=linewidth, color="g")
 ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_work"], label="m6 Work", linewidth=linewidth, color="r")
 ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_held_back"], label="m6 HeldB", linewidth=linewidth, color="orange")
-ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_emergency"], label="m6 public", linewidth=linewidth, color="orange")
+#ax_charge_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["charge_emergency"], label="m6 public", linewidth=linewidth, color="orange")
 ax_charge_PV.legend([line1, line1b], ['adv', 'bsc'], fontsize=fontsize, loc=7)
 format_subplot(ax_charge_PV, (.9, .95), "b)",
                ticks=get_ticks(ax_charge),
@@ -170,7 +170,8 @@ ax_rev.plot(data["m6"]["x_value"], data["m6"]["total_revenue"], label="m6 Rev",
 ax_rev.plot(data["m4"]["x_value"], data["m4"]["total_revenue"], label="m4 Rev",
             linewidth=linewidth, color="k", linestyle='--')
 format_subplot(ax_rev, (.9, .9), "c)",
-               lims=(None, [-0.2, 5.4]),
+               ticks=(None, [0,2,4,6]),
+               lims=(None, [-0.2, 6.5]),
                ax_lbls=(None, y_label_revenue))
 
 ax_rev_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["total_revenue"],
@@ -186,7 +187,7 @@ ax_ut.plot(data["m4"]["x_value"], data["m4"]["utilisation"], label="m4 Ut",
            linewidth=linewidth, color="k", linestyle='--')
 format_subplot(ax_ut, (.9, .9), "e)",
                ticks=(None, [0, 1, 2]),
-               lims=(None, [-0.1, 2.4]),
+               lims=(None, [-0.1, 2.6]),
                ax_lbls=(x_label, y_label_utilisation))
 
 ax_ut_PV.plot(data["m6PV"]["x_value"], data["m6PV"]["utilisation"],

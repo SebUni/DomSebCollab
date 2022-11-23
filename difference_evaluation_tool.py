@@ -33,7 +33,7 @@ MY_DPI = 96
 
 # ### comparison parameters
 # general
-nbr_of_agents = 2400
+nbr_of_agents = "6k"
 # run A
 season_a = "avg"
 model_a = 9
@@ -468,9 +468,10 @@ def analyse_2d_sweep_diff(identifiers, first_row, front_col, data_diff):
     cast = Cast("Analysis")
     cmap = mpl.cm.viridis
     for identifier in identifiers:
-        print(identifier)
-        x_label = first_row[identifier][0].split('\\')[1]
-        y_label = first_row[identifier][0].split('\\')[0]
+        x_label = first_row[identifier][0].split('\\')[1] \
+            if "\\" in first_row[identifier][0] else ""
+        y_label = first_row[identifier][0].split('\\')[0] \
+            if "\\" in first_row[identifier][0] else ""
         x_ticks = [cast.to_float(i, "first_row_cell")\
                    for i in first_row[identifier][1:]]
         y_ticks = [cast.to_int(i, "front_col_cell")\
