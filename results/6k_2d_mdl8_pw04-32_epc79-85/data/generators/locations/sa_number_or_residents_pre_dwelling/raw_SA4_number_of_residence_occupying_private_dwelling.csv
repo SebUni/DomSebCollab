@@ -1,0 +1,29 @@
+Australian Bureau of Statistics,,,,,,,,,
+,,,,,,,,,
+2016 Census - Selected Dwelling Characteristics,,,,,,,,,
+SA4 by NPRD Number of Persons Usually Resident in Dwelling,,,,,,,,,
+Counting: Dwellings Location on Census Night,,,,,,,,,
+,,,,,,,,,
+Filters:,,,,,,,,,
+Default Summation,Dwellings Location on Census Night,,,,,,,,
+,,,,,,,,,
+NPRD Number of Persons Usually Resident in Dwelling,One person,Two persons,Three persons,Four persons,Five persons,Six persons,Seven persons,Eight or more persons,Total
+SA4,,,,,,,,,
+206,84197,92587,35265,24673,7529,1942,433,283,246906
+207,29641,39816,22046,24125,9486,2389,581,259,128335
+208,39145,47030,24027,26953,9796,2129,429,223,149733
+209,34268,51272,30833,33039,13268,4207,1049,724,168671
+210,23318,34310,21198,22638,10614,4360,1272,910,118615
+211,37471,55678,30398,33195,13284,3827,929,499,175296
+212,43902,69246,46029,49311,21209,8371,2728,2211,243015
+213,45193,66656,45562,46827,19870,7820,2470,2034,236430
+214,28868,37066,16264,16257,6542,1846,430,205,107484
+Total,366009,493659,271620,277013,111607,36901,10322,7347,1574476
+,,,,,,,,,
+"Data Source: Census of Population and Housing, 2016, TableBuilder",,,,,,,,,
+,,,,,,,,,
+INFO,Cells in this table have been randomly adjusted to avoid the release of confidential data. No reliance should be placed on small cells.,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+"Copyright Commonwealth of Australia, 2018, see abs.gov.au/copyright",,,,,,,,,
+"ABS data licensed under Creative Commons, see abs.gov.au/ccby",,,,,,,,,
