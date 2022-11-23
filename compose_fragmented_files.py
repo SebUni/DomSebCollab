@@ -13,7 +13,7 @@ mdl = 9
 agents = "6k"
 agents_n = 6000
 pws = [(4,33)]
-epcs = [(1,), (7,13), (19,25), (31,37), (43,49), (55,61), (67,73)]
+epcs = [(1,), (7,13), (19,25), (31,37), (43,49), (55,61), (67,73), (79,85)]
 s = lambda pw, epc: 1 if len(pw) + len(epc) < 4 else 2
 D2_SWEEP = ["avg_cost", "avg_cost_apartment", "avg_cost_house_no_pv",
             "avg_cost_house_pv", "charge_emergency", "charge_grid",

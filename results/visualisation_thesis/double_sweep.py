@@ -246,6 +246,8 @@ for k in plots_2d:
     ax_l[k].minorticks_on()
     ax_l[k].tick_params(labelsize=fontsize)
     ax_l[k].xaxis.set_minor_locator(AutoMinorLocator())
+    ax_l[k].yaxis.set_minor_locator(AutoMinorLocator())
+    ax_l[k].set_yticks([2,4,6,8])
     if plots_2d[-1] != k:
         ax_l[k].xaxis.set_ticks_position('none')
         ax_l[k].set_xticklabels([])

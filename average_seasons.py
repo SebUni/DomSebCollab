@@ -250,6 +250,6 @@ AS_PATH = "results"
 AS_SEASONS = [0,1,2,3]
 
 if __name__ == "__main__":
-    model = 8
+    model = 9
     nbr_of_agents = 6000
     exec_avg(model, nbr_of_agents)
