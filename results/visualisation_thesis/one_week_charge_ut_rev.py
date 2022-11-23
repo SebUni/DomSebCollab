@@ -38,7 +38,7 @@ file_m4 = "model_9_nbr_agents_6000_season_avg_sweep_data.csv"
 #model 6
 file_m6 = "model_8_nbr_agents_6000_season_avg_sweep_data.csv"
 #model 6 PV only
-file_m6_PV = "model_6_PV_only_nbr_agents_6000_season_avg_sweep_data.csv"
+file_m6_PV = "model_8_nbr_agents_6000_season_avg_sweep_data_PVonly.csv"
 
 names = ["m4","m6","m6PV"]
 files = [file_m4, file_m6, file_m6_PV]
